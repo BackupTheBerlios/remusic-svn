@@ -1,0 +1,408 @@
+<?xml version="1.0"?>
+
+<sql:database xmlns:sql="http://sqlml.sourceforge.net/xml/sql/1.0"
+              xmlns:doc="http://sqlml.sourceforge.net/xml/doc/1.0">
+  <sql:name>remus</sql:name>
+
+  <sql:table>
+    <sql:name>remus_artists</sql:name>
+
+    <doc:short>
+      Table of artists in the database.
+    </doc:short>
+
+    <sql:columns>
+      <sql:column name="art_id">
+	<doc:description>
+	  Unique identity for artists.
+	</doc:description>
+	<sql:type primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="art_name">
+	<doc:description>
+	  This artist's name.
+	</doc:description>
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="art_sortname">
+	<doc:description>
+	  Sort key for this artist.  If the artist's name is "The
+	  Beatles", setting this field to "Beatles, The" will sort it
+	  under "B" instead of "T".
+	</doc:description>
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="art_mb_artist_id">
+        <doc:description>
+	  Musicbrainz artist identity.
+        </doc:description>
+	<sql:type>
+	  CHAR(36)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="art_url">
+        <doc:description>
+	  Optional URL to artist
+        </doc:description>
+	<sql:type>
+	  VARCHAR(128)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="art_modified">
+	<doc:description>
+	  When this entry was last modified.
+	</doc:description>
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="art_created">
+	<doc:description>
+	  When this entry was created.
+	</doc:description>
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <sql:name>remus_albums</sql:name>
+
+    <doc:short>
+      Table of albums in the database.
+    </doc:short>
+
+    <sql:columns>
+
+      <sql:column name="alb_id">
+	<doc:description>
+	  Unique identity for this album.
+	</doc:description>
+	<sql:type primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="alb_name">
+	<doc:description>
+	  Name of album.
+	</doc:description>
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="alb_mb_album_id">
+	<doc:description>
+	  Musicbrainz album id.
+	</doc:description>
+	<sql:type>
+	  CHAR(36)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="alb_nr_of_tracks">
+	<doc:description>
+	  Number of tracks on this album.
+	</doc:description>
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="alb_duration">
+	<doc:description>
+	  Total playing time of album.
+	</doc:description>
+	<sql:type>
+	  TIME
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="alb_modified">
+	<doc:description>
+	  When this entry was modified last.
+	</doc:description>
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="alb_created">
+	<doc:description>
+	  When this entry was created.
+	</doc:description>
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="alb_cover">
+	<doc:description>
+	  File system path where the cover illustration is stored.
+	</doc:description>
+	<sql:type>
+	  VARCHAR(128)
+	</sql:type>
+      </sql:column>
+
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <sql:name>remus_genres</sql:name>
+
+    <doc:short>
+      Table of genres
+    </doc:short>
+
+    <sql:columns>
+      <sql:column name="ge_id">
+	<sql:type primary-key="auto">
+	  SMALLINT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="ge_genre">
+	<doc:description>
+	  Genre name.
+	</doc:description>
+	<sql:type>
+	  VARCHAR(30)
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <sql:name>remus_audio_objects</sql:name>
+
+    <doc:short>
+      Table of audio files
+    </doc:short>
+
+    <sql:columns>
+      <sql:column name="au_id">
+	<sql:type primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_title">
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_artist">
+	<doc:description>
+	  This song's artist
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_artists" column="art_id"/>
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_album">
+	<doc:description>
+	  This song's album
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_albums" column="alb_id"/>
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_genre">
+	<doc:description>
+	  What genre this song is classified as.
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_genres" column="ge_id"/>
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_content_type">
+	<doc:description>
+	  MIME string identifying the format of this audio clip
+	  (e.g. audio/mpeg).
+	</doc:description>
+	<sql:type>
+	  VARCHAR(40)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_year">
+	<sql:type>
+	  YEAR
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_length">
+	<sql:type>
+	  TIME
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_track_number">
+	<sql:type>
+	  SMALLINT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_modified">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_created">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_bitrate">
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_sample_freq">
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_audio_mode">
+	<sql:type>
+	  VARCHAR(20)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_subtype">
+	<sql:type>
+	  VARCHAR(40)
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="au_audio_clip">
+	<doc:description>
+	  File system path where the audio clip is stored.
+	</doc:description>
+	<sql:type>
+	  VARCHAR(128) NOT NULL
+	</sql:type>
+      </sql:column>
+
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <sql:name>remus_playlists</sql:name>
+
+    <doc:short>
+      Stores user created playlists.
+    </doc:short>
+
+    <sql:columns>
+      <sql:column name="pl_id">
+	<sql:type primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="pl_name">
+	<doc:description>
+	  Name given to this playlist by the user.
+	</doc:description>
+	<sql:type>
+	  VARCHAR(128) NOT NULL
+	</sql:type>
+      </sql:column>      
+
+      <sql:column name="pl_modified">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="pl_created">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <sql:name>remus_plmapping</sql:name>
+
+    <doc:short>
+      Maps a playlist entry to a song / nested playlist
+    </doc:short>
+
+    <doc:description>
+      Each row in this table is an entry in a playlist.  The
+      <doc:column name="plm_songnr"/> column is the position of this
+      item in the playlist identified by <doc:column
+      name="plm_parent"/>.  (<doc:column name="plm_parent"/>,
+      <doc:column name="plm_songnr"/>) must be unique.  One of
+      <doc:column name="plm_song"/> and <doc:column
+      name="plm_playlist"/> must be non-NULL, and both cannot be,
+      i.e. either this entry refers to a song, or it refers to a
+      playlist.
+    </doc:description>
+
+    <sql:columns>
+      <sql:column name="plm_songnr">
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="plm_parent">
+	<doc:description>
+	  The playlist I'm a member of.
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_playlists" column="pl_id"/>
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="plm_playlist">
+	<doc:description>
+	  A nested playlist.
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_playlists" column="pl_id"/>
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="plm_song">
+	<doc:description>
+	  The song at this position in the playlist.
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_audio_objects" column="au_id"/>
+	</sql:type>
+      </sql:column>
+
+    </sql:columns>
+  </sql:table>
+
+</sql:database>
