@@ -1,0 +1,307 @@
+2004-02-11  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore/as_collection.py: Removed references to
+	remus_art_alb_map.
+
+	* remus/audiostore/audiostore.py: Removed references to
+	remus_art_alb_map.
+
+	* db/audiostore.xml: Removed the remus_art_alb_map table.
+
+	* styles/index.html.xsl: Set encoding to UTF-8.
+
+	* setup.py.in (dist): Added docbook.css.
+
+	* remus/audiostore/as_collection.py (Collection.select): Switched
+	around type test when filtering 'order_by'.
+	(IndexXMLBase.content_type): Strip the contents of the '.mime'
+	file of surrounding whitespace.
+	(RootColl.stat): The root collection should always return valid
+	data, i.e. indicate it exists, regardless if any songs are present
+	or not.
+
+	* remus/webserver/audiostore.py (ASWrapper.getChild): Don't return
+	404 error on PUT requests, breaks WebDAV uploading.
+
+	* styles/index.html.xsl: Added XHTML, CSS and 'anybrowser'
+	icon/links.
+
+2004-02-09  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* MANIFEST.in: Added lots of files (complete development fileset).
+
+	* remus/audiostore/as_collection.py (Collection.select): Filter
+	out 'order_by' columns, if those columns' tables aren't part of
+	the query (which can happen if the selected fields are
+	overridden).
+	(IndexXMLBase.create_file): Use libxslt's python module, instead
+	of the xsltproc command line tool.  This avoids creating a
+	temporary file as well.
+
+	Insert remus menu code into the XSLT stylesheet, if it contains
+	the "<menu/>" placeholder tag.
+
+	Remove the xml header line, if the results of the XSLT
+	transformation is XHTML, since IE6 chokes on this header.
+
+	* remus/audiostore/audiostore.py: Use sqlquery to perform queries,
+	rather than SQL directly.
+
+	* styles/index.html.xsl: Added menu code; including the menu
+	javascript file, and added the "<menu/>" placeholder, which
+	audiostore will replace with the HTML code of the standard menu.
+
+2004-02-04  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* MANIFEST.in: Added missing files.
+
+	* setup.py.in (gettext_install.run): Don't generate .mo files on
+	installation, assume this is done at release build.
+	(dist): Make sure some python modules are present, and warn if
+	not. Also, print message about the mmpython patch.
+
+	* remus/audiostore/as_collection.py (Collection.select): Remove
+	'order_by' fields, if they don't appear in the 'fields' list.
+
+	* remus/audiostore/audiostore.py: Didn't define HAVE_MUSICBRAINZ
+	if it wasn't found.  Also, due to reordering of fields in the
+	database some time ago, uploading of songs didn't work in a fresh
+	install.  The remus_genre table was renamed to remus_genres some
+	time ago, but this wasn't updated everywhere.
+
+2004-02-03  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* Makefile.am (SUBDIRS): Added 'styles', we need to build
+	translation files!
+
+	* setup.py.in (dist): Added l10n.dtd.
+
+	* remus/audiostore/as_collection.py (SongList): Removed class,
+	noone seemed to use it.
+	(IndexXMLBase.create_file): Pass language info to the XSLT
+	process.
+	(IndexXMLBase.open): Reset self.file on return, else previously
+	generated pages will be cached and delivered, regardless of
+	language.
+	(IndexXMLAudioList.order_by, ArtistsColl.order_by)
+	(RootColl.__init__): Added/fixed order_by, to make listings a bit
+	more sane.
+
+	* styles/locale/en.xml, styles/locale/sv.xml: Added 'Album',
+	'Artist', 'Song', 'Time' and 'NumberOfSongs' translations.
+
+	* styles/index.html.xsl: Added some localization code for missing
+	strings.
+
+	* po/*: Localized strings for the 'static' pages.
+	
+	* configure.ac, devsetup.sh: Added localization support.
+
+	* setup.py.in (gettext_install): Added installation of gettext
+	locale catalogs.
+	(dist): Added remus.i18n package, for native language support.
+
+	* remus/audiostore/as_collection.py (IndexXMLDirList.column_map):
+	Added au_title -> 'Song' mapping to column headings.
+
+	* remus/i18n/remus_audiostore.py: Install gettext catalogs for the
+	audiostore.
+
+	* www/playlists.rpy: List/manage playlists. For now, just lists
+	available playlists.
+
+	* styles/Makefile.am: Build locale files.
+
+	* styles/xsl/xsl.xsl: Verbatim copy from docbook-xsl. Transforms
+	language source files into runtime files.
+
+	* styles/locale/sv.xml: Swedish text strings for index.html
+	generation.
+
+	* styles/locale/en.xml: English text strings for index.html
+	generation.
+
+	* styles/l10n.dtd: Verbatim copy from docbook-xsl.
+
+	* styles/l10n.xml: Imports the language files (currently en.xml
+	and sv.xml).
+	
+	* styles/l10n.xsl: Verbatim copy (apart from a change of a path)
+	from docbook-xsl.
+
+	* styles/index.html.xsl: l10n/i18n support added, using Norman
+	Walsh's DocBook stylesheets dealing with this.
+
+2004-02-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore/as_collection.py (Collection.select): Made
+	'order_by' and 'group_by' overridable.
+	(SearchColl.parse_query): Support more comparison operators than
+	just '=' in queries.
+	(Song.__init__): Bug: Still used the obsolete and removed
+	'TITLE_EQ'.
+	(SongList): Replaced 'order_by' strings with database column
+	references.
+	(DirlistColl): New collection class for directory listings.
+	(IndexXMLBase): New base class for XSLT transforming
+	collections. Support for setting MIME type on results
+	(<transform>.mime file).
+	(IndexXMLAudioList): Rewrite of the old IndexXML class, for
+	producing 'audiolist' XML documents.
+	(IndexXMLDirList.__init__): New class for producing 'dirlisting'
+	XML documents.
+	(AlbumsColl.order_by): Added ordering by album name.
+
+	* remus/audiostore/audiostore.py (Interface.add_artist): Set the
+	sortname of artists from the tags (not quite done yet), with
+	reasonable default values.
+
+	* remus/webserver/audiostore.py (ASWrapper.get_directory): List
+	directory contents as a "directory listing" instead of a complete
+	song list.
+	(ASWrapper.open): The http request object is now passed along, to
+	enable the collection to get information from it, such as the URL
+	used to access it.
+	(ASWrapper.stat): Same as open, above.
+	(get_cached_collection): Enable caching of collections again.
+
+	* styles/index.html.xsl: Added support for <dirlisting> documents
+	which are used to describe directory listings as opposed to
+	complete song listings.  For bigger audiostores, getting thousands
+	of songs on the initial page isn't particularly helpful.  The old
+	list is available in the menu now.
+
+	* TODO: New file. Added some things still lacking.
+
+2004-01-28  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* doc/manual/C/manual.xml: Replaced the manually written
+	database.xml with the sqlml generated db-audiostore.xml.
+
+	* setup.py.in (dist): Added styles/remus.xsl.
+
+	* remus/audiostore/as_collection.py (Collection.open): Reenabled
+	saving of audio clips.
+	(AudioSaver.__init__): New class for saving an incomming stream as
+	a song.
+
+	* remus/audiostore/audiostore.py (Interface.add) 
+	(Interface.add_artist): Corrected SQL column names.
+
+	* db/audiostore.xml: Added documentation tags.
+
+	* db/Makefile.am: Adapted to new sqlml version.
+
+	* styles/remus.xsl: Custom playlist format, used by the remus
+	player.
+
+2004-01-17  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore/as_collection.py: Now using sqlml.
+	(IndexXML.create_file): Replace %20 with ' '
+
+	* db/audiostore.xml: Now using sqlml. Added playlist tables.
+
+	* db/Makefile.am: Now using sqlml.
+
+	* www/music.rpy: Don't reconnect to mysql, we run out of
+	connections!
+
+	* styles/audiostore.css: Moved .generated to remus.css.
+
+	* styles/index.html.xsl: Added remus stylesheet, and remus logo.
+
+2003-12-14  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore/as_collection.py (Collection.stat): stat() on a
+	directory collection won't return 'None' anymore, to allow
+	e.g. artists without any albums in the database.
+
+2003-12-13  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* doc/: Added document generation tools, and first embryo of
+	documentation.
+
+	* configure.ac: Using automake/autoconf for building now.
+	
+	* remus/database.py: Added primary key tracking on tables.
+
+	* remus/webserver/audiostore.py, remus/audiostore/as_collection.py:
+	Support for renaming through WebDAV.
+
+2003-11-27  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore: Removed obsolete files as part of the switch
+	from medusa to twisted.
+	
+	* remus/audiostore/as_collection.py (mk_filename, mk_sqlname):
+	Translate from SQL names to "filesystem" names, and vice versa.
+	(Collection.select): Support order_by and group_by queries.
+	(SearchColl.parse_query): Change semantics of URL queries without
+	field specifier to match songs with either title, album name or
+	artist name, rather than having to match all three, which is
+	rather dumb. Also, it had a syntax error to top it off...
+
+	* remus/audiostore/sidinfo.py: Embryo to supporting SID files in
+	the store.
+
+	* remus/database.py (Select.select): Pass along the query to the
+	self.tables function, to correctly compute the set of tables
+	needed to consult for the given query.
+
+	* remus/webserver/audiostore.py: New file. Wraps an audiostore
+	collection as a twisted resource.
+
+	* README: medusa -> twisted
+
+2003-10-21  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore/as_collection.py: Numerous changes to
+	accomodate the changes below.
+
+	(IndexXML, PlaylistColl): New classes which abstracts the creation
+	of index.html, playlists, and other similar type of files.
+	IndexXML generates an XML file based on the query, and
+	PlaylistColl feeds it with an XSLT file to transform to
+	appropriate output.  Currently, index.html.xsl and m3u.xsl are
+	implemented, but the mechanism is extensible, all that is needed
+	is an XSLT file stored in /usr/local/libdata/remus/styles (though,
+	there needs to be a way to control the MIME type of the resulting
+	file, right now it's hard coded to "text/xml").
+
+	* db/audiostore.xml, db/makepython.xsl, db/makesql.xsl: Building
+	SQL and python file from an XML file describing the SQL database
+	now.  The generated python file uses the classes introduced below
+	to describe the tables.
+
+	* remus/database.py: New file. A set of classes which knows about
+	tables, fields and relations. This avoids the adhoc and somewhat
+	complex code which tried to make sure only those tables needed
+	were used in SELECT statements. The set of tables are calculated
+	based on what fields are used, and correct WHERE-clauses are
+	inserted based on table relations.
+
+2003-10-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* setup.py: Added custom distutil command, so I can create the SQL
+	tables on installation. distutils is a fairly complex system, I
+	noticed...
+
+	* remus/audiostore/as_collection.py: Added generation of HTML
+	pages when "directory" nodes are accessed with a GET request (what
+	browsers typically do).  WebDAV clients find out about directories
+	and their contents differently, so they aren't affected by this
+	(other than if you try to 'cat' a directory, or similar).
+
+	When generating HTML pages, first an XML file is generated from
+	the database, which is fed through xsltproc with an XSLT style
+	sheet, and the resulting HTML page is sent back.
+
+2003-09-22  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* setup.py: distutils installation / distribution building.
+
+	* audiostore_resync: New tool which regenerates the SQL
+	information from the audio files. Mostly useful when changing the
+	database structure, or fixing tag parsing.
+

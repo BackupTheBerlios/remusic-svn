@@ -1,0 +1,40 @@
+* Release 0.4.1
+
+  2004-02-11
+
+** Changes
+
+   Database change, reinserting the songs needed.
+
+   Common menu on all pages.
+
+   Validation links on all pages.
+   
+
+** Bugfixes
+
+*** Improved browser support
+
+    IE6 is a bit more picky about XHTML files, doesn't support XML
+    header, etc.
+
+*** Character encoding problems
+
+    Fixed various character encoding problems, think I'm beginning to
+    understand this i18n mess.
+    
+
+* Release 0.4.0 - Localization
+
+  2004-02-03
+
+** Changes
+
+  Added localization support, for twisted based pages using gettext,
+  and for XSLT generated pages, using Norman Walsh's l10n package,
+  part of the docbook-xsl package.
+
+
+# Local Variables:
+# mode: outline
+# End:
