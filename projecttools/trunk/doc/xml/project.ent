@@ -1,0 +1,49 @@
+<!-- 
+     Project wide entities for use in documentation.
+-->
+
+<!ENTITY project.name "Remus">
+<!ENTITY project.nametag "<application>&project.name;</application>">
+<!ENTITY project.release "0.1">
+<!ENTITY project.website "<ulink url='http://&project.name;.foobar.net'>&project.nametag; website</ulink>">
+<!ENTITY project.people "<authorgroup>
+<author>
+  <firstname>Daniel</firstname><surname>Larsson</surname>
+  <affiliation><address>
+    <email>Daniel.Larsson@servicefactory.se</email>
+  </address></affiliation>
+</author>
+</authorgroup>">
+
+
+<!-- Subprojects -->
+<!ENTITY project.audiostore.name "Remus audiostore">
+
+<!-- Miscellany entities -->
+<!ENTITY prompt.root "#">
+<!ENTITY prompt.user "$">
+
+<!ENTITY % quot '"'>
+
+
+<!-- Applications -->
+<!ENTITY app.mysql "<application>MySQL</application>">
+<!ENTITY app.mysql.url "http://www.mysql.com/">
+<!ENTITY app.mysql.link '<ulink url="&app.mysql.url;">&app.mysql;</ulink>'>
+<!ENTITY app.windows '<trademark class="registered">Microsoft Windows</trademark>'>
+<!ENTITY app.python "<application>Python</application>">
+<!ENTITY app.python.url "http://www.python.org/">
+<!ENTITY app.python.link '<ulink url="&app.python.url;">&app.python;</ulink>'>
+<!ENTITY app.pydav "***py-dav***">
+<!ENTITY app.mp3play "mpg123">
+<!ENTITY app.oggplay "vorbis-tools (ogg123)">
+<!ENTITY app.realplay "realplayer">
+<!ENTITY app.sidplay "sidplay">
+<!ENTITY app.cadaver "cadaver">
+
+
+<!-- Standards -->
+<!ENTITY std.webdav "WebDAV">
+<!ENTITY std.webdav.url "http://www.webdav.org/">
+<!ENTITY std.webdav.link '<ulink url="&std.webdav.url;">&std.webdav;</ulink>'>
+<!ENTITY std.webdav.url.link '<ulink url="&std.webdav.url;">&std.webdav.url;</ulink>'>
