@@ -1,5 +1,8 @@
 2004-02-03  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
+	* remus/i18n/Init.py (current_lang): 'lang' isn't accessible
+	directly from remus.i18n, so added this function to access it.
+
 	* www/lang.rpy: Language switching resource.
 
 	* remus/i18n/Init.py: Initialize localization support, and support

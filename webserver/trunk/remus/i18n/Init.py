@@ -94,6 +94,9 @@ def get_locale():
     else:
         return 'C'
 
+def current_lang():
+    return lang
+
 def installed_languages():
     # Returns the union of all domains' installed languages
     languages = {}
