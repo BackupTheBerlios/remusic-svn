@@ -10,10 +10,8 @@ extern "C" {
 }
 
 
-std::string url_base("http://localhost/music/");
 int song_nr = 0;
 std::vector<std::string> playlist;
-
 
 static gchar*
 get_time_string(time_t seconds)
@@ -59,26 +57,54 @@ remus_player_stream_length (GstPlay * play,
   gint seconds;
   gchar *time_str = NULL;
 
-  seconds = (gint) (length_nanos / GST_SECOND);
-  time_str = get_time_string (seconds);
-  // printf("%s\n", time_str);
-  std::cout << time_str << std::endl;
-  g_free (time_str);
+  if (length_nanos) {
+    seconds = (gint) (length_nanos / GST_SECOND);
+    time_str = get_time_string (seconds);
+    // printf("%s\n", time_str);
+    std::cout << "Total length: " << time_str << std::endl;
+    g_free (time_str);
+  }
 }
 
-int state = 3;
 
 static void
 remus_player_stream_end (GstPlay * play, gpointer data)
 {
+  std::cout << "end of stream called (" << data << ")\n";
+  std::cout << gst_play_get_state(play) << std::endl;
   gst_play_set_state (play, GST_STATE_READY);
-  if (--state == 0 && song_nr < playlist.size()) {
-    std::cout << "Song finished!\n";
-    std::string song = url_base + playlist[song_nr++];
-    gst_play_set_location(play, song.c_str());
-    gst_play_set_state (play, GST_STATE_PLAYING);
-    state = 3;
-  }
+}
+
+static void
+remus_player_error(GstPlay * play, GstElement * element, char *error)
+{
+  std::cerr << "Pipeline error in " << GST_ELEMENT_NAME(element) << ": "
+	    << error << std::endl;
+  
+}
+
+static void
+remus_player_information(GstPlay * play, GstObject * element, GParamSpec * param)
+{
+  //std::cout << GST_ELEMENT_NAME(element) << "." << g_param_spec_get_name(param)
+  //<< " = " << G_PARAM_SPEC_TYPE_NAME(param) << std::endl;
+}
+
+
+static void
+remus_player_state_change(GstPlay * play,
+			  GstElementState oldstate,
+			  GstElementState newstate)
+{
+  std::cout << "State change: " << gst_element_state_get_name (oldstate)
+	    << " -> " << gst_element_state_get_name (newstate) << std::endl;
+  if (oldstate == GST_STATE_PAUSED && newstate == GST_STATE_READY)
+    if (song_nr < playlist.size()) {
+      std::cout << "Song finished!\n";
+      std::string song = playlist[song_nr++];
+      gst_play_set_location(play, song.c_str());
+      gst_play_set_state (play, GST_STATE_PLAYING);
+    }
 }
 
 int
@@ -116,14 +142,13 @@ main(int argc, char* argv[])
 		    G_CALLBACK(remus_player_time_tick), NULL);
   g_signal_connect (G_OBJECT(play), "stream_end",
 		    G_CALLBACK(remus_player_stream_end), NULL);
-  /*
   g_signal_connect (G_OBJECT(play), "information",
 		    G_CALLBACK(remus_player_information), NULL);
   g_signal_connect (G_OBJECT(play), "state_change",
 		    G_CALLBACK(remus_player_state_change), NULL);
   g_signal_connect (G_OBJECT(play), "pipeline_error",
 		    G_CALLBACK(remus_player_error), NULL);
-  */
+
 
   /* Is this a playlist? */
   GnomeVFSHandle *filehandle = NULL;
@@ -201,8 +226,7 @@ main(int argc, char* argv[])
       while (pos + endofline < len && filebuffer[pos+endofline] != '\n')
 	endofline++;
       std::string song(filebuffer+pos, endofline);
-      std::cout << "Found song " << song << std::endl;
-      playlist.push_back(song);
+      playlist.push_back("http://127.0.0.1/music/" + song);
       pos += endofline + 1;
     }
   } else {
@@ -211,7 +235,7 @@ main(int argc, char* argv[])
   
 
   /* FIXME: If input is a sid, set up the pipeline explicitly */
-  std::string song = url_base + playlist[song_nr++];
+  std::string song = playlist[song_nr++];
   gst_play_set_location(play, song.c_str());
 
   /* start playing */
@@ -220,6 +244,7 @@ main(int argc, char* argv[])
   gst_main();
   /*  while (gst_bin_iterate (GST_BIN (play->pipeline))); */
 
+  std::cout << "Stop playing...\n";
   /* stop the pipeline */
   gst_play_set_state (play, GST_STATE_NULL);
 

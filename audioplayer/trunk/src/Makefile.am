@@ -6,4 +6,4 @@ remus_player_SOURCES = remus-player.cc
 
 LDADD		= ${GST_LIBS} ${GNOME_VFS_LIBS}
 LDFLAGS		= -g
-CXXFLAGS	= -g ${GST_CFLAGS} ${GNOME_VFS_CFLAGS} $(shell pkg-config --cflags gconf-2.0)
+AM_CXXFLAGS	= -g ${GST_CFLAGS} ${GNOME_VFS_CFLAGS} $(shell pkg-config --cflags gconf-2.0)
