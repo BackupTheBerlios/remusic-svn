@@ -1,6 +1,0 @@
-prune .svn
-include ChangeLog
-include GPL
-include remus.conf.default
-include remus_server
-include remus_server.sh
