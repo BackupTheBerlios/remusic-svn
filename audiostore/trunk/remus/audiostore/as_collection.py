@@ -310,7 +310,6 @@ class SearchColl(Collection):
         db_audiostore.remus_albums.alb_name,
         db_audiostore.remus_artists.art_name,
         db_audiostore.remus_audio_objects.au_length,
-        db_audiostore.remus_art_alb_map.artalb_id,
         )
 
     op_map = {
@@ -581,13 +580,6 @@ class IndexXMLBase(Collection):
 
             xsltfile = xsltfile.replace("<menu/>", menu)
 
-            # Update the encoding to the appropriate one, since the menu
-            # contains translated text.
-            charset = remus.i18n.translation("remus-server").charset()
-            if charset:
-                xsltfile = xsltfile.replace('encoding="US-ASCII"',
-                                            'encoding="%s"' % charset)
-
         style = libxml2.readDoc(xsltfile, self.xsltfile, None, 0)
         stylesheet = libxslt.parseStylesheetDoc(style)
         if stylesheet == None:
@@ -679,7 +671,6 @@ class IndexXMLAudioList(IndexXMLBase):
         db_audiostore.remus_audio_objects.au_id,
         db_audiostore.remus_artists.art_name,
         db_audiostore.remus_albums.alb_name,
-        db_audiostore.remus_art_alb_map.artalb_id,        
         db_audiostore.remus_audio_objects.au_title,
         db_audiostore.remus_audio_objects.au_length,
         db_audiostore.remus_audio_objects.au_track_number,
@@ -836,7 +827,6 @@ class ArtistColl(Collection):
 
     fields = (
         db_audiostore.remus_albums.alb_name,
-        db_audiostore.remus_art_alb_map.artalb_id,
         )
 
     group_by = (
@@ -845,7 +835,10 @@ class ArtistColl(Collection):
 
     def __init__(self, parent, artist, query=None):
         self.artist = artist
-        my_query = EQUAL(db_audiostore.remus_artists_art_name, artist)
+        my_query = AND(
+            EQUAL(db_audiostore.remus_audio_objects.au_artist,
+                  db_audiostore.remus_artists.art_id),
+            EQUAL(db_audiostore.remus_artists.art_name, artist))
         if query:
             my_query = AND(query, my_query)
             
@@ -862,14 +855,18 @@ class ArtistColl(Collection):
         if coll:
             return coll
         else:
-            return AlbumColl(self, name)
+            # Need constraint to remus_audio_object table added, since
+            # the relation between artists and albums are stored there
+            query = AND(self.query,
+                        EQUAL(db_audiostore.remus_audio_objects.au_album,
+                              db_audiostore.remus_albums.alb_id))
+            return AlbumColl(self, name, query=query)
 
 
 class AlbumsColl(Collection):
 
     fields = (
         db_audiostore.remus_albums.alb_name,
-        db_audiostore.remus_art_alb_map.artalb_id,
         )
 
     order_by = (
@@ -903,11 +900,11 @@ class AlbumColl(Collection):
         db_audiostore.remus_audio_objects_au_track_number,
         )
 
-    def __init__(self, parent, album):
+    def __init__(self, parent, album, query=None):
         self.album = album
         my_query = EQUAL(db_audiostore.remus_albums_alb_name, album)
-        if parent.query:
-            my_query = AND(parent.query, my_query)
+        if query:
+            my_query = AND(query, my_query)
         Collection.__init__(self, parent, my_query)
 
     def name(self):
@@ -930,7 +927,7 @@ class AlbumColl(Collection):
 class GenreColl(Collection):
 
     fields = (
-        db_audiostore.remus_artists_art_name,
+        db_audiostore.remus_artists.art_name,
         )
 
     group_by = (
@@ -940,9 +937,9 @@ class GenreColl(Collection):
     def __init__(self, parent, genre):
         self.genre = genre
         query = AND(
-            EQUAL(db_audiostore.remus_genres_ge_genre, genre),
-            EQUAL(db_audiostore.remus_audio_objects_au_artalb,
-                  db_audiostore.remus_art_alb_map.artalb_id))
+            EQUAL(db_audiostore.remus_audio_objects.au_artist,
+                  db_audiostore.remus_artists.art_id),
+            EQUAL(db_audiostore.remus_genres.ge_genre, genre))
         Collection.__init__(self, parent, query)
 
     def isdir(self):

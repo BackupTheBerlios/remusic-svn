@@ -1,5 +1,7 @@
 2004-02-11  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
+	* styles/index.html.xsl: Set encoding to UTF-8.
+
 	* setup.py.in (dist): Added docbook.css.
 
 	* remus/audiostore/as_collection.py (Collection.select): Switched

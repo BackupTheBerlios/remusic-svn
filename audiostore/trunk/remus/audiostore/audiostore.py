@@ -85,8 +85,6 @@ class Interface:
                 select = Select()
                 select.addcolumn(remus_audio_objects.au_id)
                 query = AND(
-                    EQUAL(remus_audio_objects.au_artalb,
-                          remus_art_alb_map.artalb_id),
                     EQUAL(remus_artists.art_name, metafields['artist']),
                     EQUAL(remus_albums.alb_name, metafields['album']),
                     EQUAL(remus_audio_objects.au_title,
@@ -97,14 +95,14 @@ class Interface:
                 if count == 0:
                     metafields["art_id"] = self.add_artist(metafields)
                     metafields["alb_id"] = self.add_album(metafields)
-                    metafields["artalb_id"] = self.add_artalb_map(metafields)
                     metafields["ge_id"] = self.add_genre(metafields)
                     cursor.execute(
                         """INSERT INTO remus_audio_objects
                         VALUES (
                           NULL,
                           %(title)s,
-                          %(artalb_id)s,
+                          %(art_id)s,
+                          %(alb_id)s,
                           %(ge_id)s,
                           %(mimetype)s,
                           %(year)s,
@@ -205,31 +203,6 @@ class Interface:
         else:
             return cursor.fetchone()[0]
 
-    def add_artalb_map(self, metafields):
-
-        select = Select()
-        select.addcolumn(remus_art_alb_map.artalb_id)
-
-        cursor = self.db.cursor()
-        query = AND(
-            EQUAL(remus_art_alb_map.artalb_artist, metafields["art_id"]),
-            EQUAL(remus_art_alb_map.artalb_album,  metafields["alb_id"]))
-        
-        count = cursor.execute(select.select(query=query))
-
-        if count == 0:
-            cursor.execute(
-                """INSERT INTO remus_art_alb_map
-                   VALUES (
-                     NULL,
-                     %(art_id)s,
-                     %(alb_id)s)
-                """, metafields)
-            return cursor.lastrowid
-        else:
-            return cursor.fetchone()[0]
-
-        
     def add_genre(self, metafields):
         cursor = self.db.cursor()
 
@@ -291,7 +264,6 @@ class Interface:
 
             metafields["art_id"] = self.add_artist(metafields)
             metafields["alb_id"] = self.add_album(metafields)
-            metafields["artalb_id"] = self.add_artalb_map(metafields)
             metafields["ge_id"] = self.add_genre(metafields)
             update_cur = cursor.connection.cursor()
             sql = """
@@ -299,7 +271,8 @@ class Interface:
                     remus_audio_objects
                 SET
                     au_title=%(title)s,
-                    au_artalb=%(artalb_id)s,
+                    au_artist=%(artist_id)s,
+                    au_album=%(album_id)s,
                     au_genre=%(ge_id)s,
                     au_content_type=%(mimetype)s,
                     au_length=%(length)s,

@@ -20,6 +20,7 @@
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="art_name">
 	<doc:description>
 	  This artist's name.
@@ -28,6 +29,7 @@
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
+
       <sql:column name="art_sortname">
 	<doc:description>
 	  Sort key for this artist.  If the artist's name is "The
@@ -38,6 +40,7 @@
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
+
       <sql:column name="art_mb_artist_id">
         <doc:description>
 	  Musicbrainz artist identity.
@@ -46,6 +49,7 @@
 	  CHAR(36)
 	</sql:type>
       </sql:column>
+
       <sql:column name="art_url">
         <doc:description>
 	  Optional URL to artist
@@ -54,6 +58,7 @@
 	  VARCHAR(128)
 	</sql:type>
       </sql:column>
+
       <sql:column name="art_modified">
 	<doc:description>
 	  When this entry was last modified.
@@ -62,6 +67,7 @@
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
+
       <sql:column name="art_created">
 	<doc:description>
 	  When this entry was created.
@@ -158,37 +164,6 @@
   </sql:table>
 
   <sql:table>
-    <sql:name>remus_art_alb_map</sql:name>
-    <doc:short>Identifies which albums a particular artist appears in</doc:short>
-    <sql:columns>
-      <sql:column name="artalb_id">
-	<sql:type primary-key="auto">
-	  SMALLINT UNSIGNED
-	</sql:type>
-      </sql:column>
-
-      <sql:column name="artalb_artist">
-	<doc:description>
-	  Key to artist table.
-	</doc:description>
-	<sql:type>
-	  <sql:key table="remus_artists" column="art_id"/>
-	</sql:type>
-      </sql:column>
-
-      <sql:column name="artalb_album">
-	<doc:description>
-	  Key to album table.
-	</doc:description>
-	<sql:type>
-	  <sql:key table="remus_albums" column="alb_id"/>
-	</sql:type>
-      </sql:column>
-
-    </sql:columns>
-  </sql:table>
-
-  <sql:table>
     <sql:name>remus_genres</sql:name>
 
     <doc:short>
@@ -201,6 +176,7 @@
 	  SMALLINT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="ge_genre">
 	<doc:description>
 	  Genre name.
@@ -225,19 +201,31 @@
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_title">
 	<sql:type>
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
-      <sql:column name="au_artalb">
+
+      <sql:column name="au_artist">
 	<doc:description>
-	  This song's artist and album.
+	  This song's artist
 	</doc:description>
 	<sql:type>
-	  <sql:key table="remus_art_alb_map" column="artalb_id"/>
+	  <sql:key table="remus_artists" column="art_id"/>
 	</sql:type>
       </sql:column>
+
+      <sql:column name="au_album">
+	<doc:description>
+	  This song's album
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_albums" column="alb_id"/>
+	</sql:type>
+      </sql:column>
+
       <sql:column name="au_genre">
 	<doc:description>
 	  What genre this song is classified as.
@@ -246,6 +234,7 @@
 	  <sql:key table="remus_genres" column="ge_id"/>
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_content_type">
 	<doc:description>
 	  MIME string identifying the format of this audio clip
@@ -255,51 +244,61 @@
 	  VARCHAR(40)
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_year">
 	<sql:type>
 	  YEAR
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_length">
 	<sql:type>
 	  TIME
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_track_number">
 	<sql:type>
 	  SMALLINT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_modified">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_created">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_bitrate">
 	<sql:type>
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_sample_freq">
 	<sql:type>
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_audio_mode">
 	<sql:type>
 	  VARCHAR(20)
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_subtype">
 	<sql:type>
 	  VARCHAR(40)
 	</sql:type>
       </sql:column>
+
       <sql:column name="au_audio_clip">
 	<doc:description>
 	  File system path where the audio clip is stored.
@@ -308,6 +307,7 @@
 	  VARCHAR(128) NOT NULL
 	</sql:type>
       </sql:column>
+
     </sql:columns>
   </sql:table>
 
@@ -324,6 +324,7 @@
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="pl_name">
 	<doc:description>
 	  Name given to this playlist by the user.
@@ -332,16 +333,19 @@
 	  VARCHAR(128) NOT NULL
 	</sql:type>
       </sql:column>      
+
       <sql:column name="pl_modified">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
+
       <sql:column name="pl_created">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
+
     </sql:columns>
   </sql:table>
 
