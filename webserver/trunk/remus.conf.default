@@ -2,39 +2,64 @@
 serverport:	80
 
 [loggers]
-keys:		root,remus,webdav,audiostore,mysql,audiowebdav
+keys:		root,remus,webserver,audiostore,webdav,mysql,audiowebdav
 
 [logger_root]
 handlers:	syslog
-level:		WARNING
-
-[logger_webdav]
-qualname:	medusa.webdav
-handlers:	syslog
-propagate:	0
+level:		INFO
 
 [logger_remus]
 qualname:	remus
-handlers:	syslog
+handlers:	stream
+propagate:	0
+
+[logger_webserver]
+qualname:	remus.webserver
+handlers:	webserver
 propagate:	0
 
 [logger_audiostore]
-qualname:	audiostore
-handlers:	syslog
+qualname:	remus.audiostore
+handlers:	audiostore
 propagate:	0
 
 [logger_audiowebdav]
-qualname:	audiostore.webdav
-handlers:	syslog
+qualname:	remus.audiostore.webdav
+handlers:	stream
+propagate:	0
+
+[logger_webdav]
+qualname:	remus.webserver.webdav
+handlers:	webdav
 propagate:	0
 
 [logger_mysql]
-qualname:	audiostore.mysql
-handlers:	syslog
+qualname:	remus.audiostore.mysql
+handlers:	mysql
 propagate:	0
 
 [handlers]
-keys:		stream,syslog
+keys:		stream,webserver,audiostore,webdav,mysql,syslog
+
+[handler_webserver]
+class:		StreamHandler
+args:		(sys.stderr,)
+formatter:	webserver
+
+[handler_audiostore]
+class:		StreamHandler
+args:		(sys.stderr,)
+formatter:	audiostore
+
+[handler_webdav]
+class:		StreamHandler
+args:		(sys.stderr,)
+formatter:	audiostore
+
+[handler_mysql]
+class:		StreamHandler
+args:		(sys.stderr,)
+formatter:	mysql
 
 [handler_stream]
 class:		StreamHandler
@@ -42,12 +67,25 @@ args:		(sys.stderr,)
 formatter:	std
 
 [handler_syslog]
-class:		SysLogHandler
-args:		(('localhost', handlers.SYSLOG_UDP_PORT), handlers.SysLogHandler.LOG_USER)
+class:		handlers.SysLogHandler
+args:		('/var/run/log', handlers.SysLogHandler.LOG_USER)
 formatter:	std
 
 [formatters]
-keys:		std
+keys:		std,webserver,audiostore,webdav,mysql
 
 [formatter_std]
 format:		[%(asctime)s] %(name)s: %(message)s
+
+[formatter_webserver]
+format:		[%(asctime)s] [31m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
+
+[formatter_audiostore]
+format:		[%(asctime)s] [32m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
+
+[formatter_webdav]
+format:		[%(asctime)s] [33m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
+
+[formatter_mysql]
+format:		[%(asctime)s] [34m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
+

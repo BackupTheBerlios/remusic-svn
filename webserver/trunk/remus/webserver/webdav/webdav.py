@@ -17,6 +17,7 @@ import time
 import types
 import urllib
 import urlparse
+import logging
 
 try:
     from cStringIO import StringIO
@@ -25,6 +26,7 @@ except ImportErrot:
 
 # twisted modules
 import twisted.protocols.http
+import twisted.web.error
 import twisted.web.microdom
 import twisted.web.resource
 import twisted.web.server
@@ -35,6 +37,8 @@ import errors
 import utils
 
 unquote = urllib.unquote
+
+logger = logging.getLogger("remus.webserver.webdav")
 
 
 # definition for resourcetype
@@ -62,11 +66,93 @@ RT_PROPNAME=2
 RT_PROP=3
 
 
+class MOVE:
+    def __init__(self, resource, request, src, dst, overwrite):
+        self.__resource = resource
+        self.__request = request
+	self.__src = src
+	self.__dst = dst
+	self.__overwrite = overwrite
+
+    def single_action(self):
+        """ move a normal resource.
+
+	We try to move it and return the result code.
+	This is for Depth==0
+	"""
+
+        # Create a fake request to locate the destination
+        class _empty:
+            pass
+        fake_channel = _empty()
+        fake_channel.transport = None
+        dst_req = twisted.web.server.Request(fake_channel, None)
+        dst_req.path = self.__dst
+        dst_req.prepath = []
+        dst_req.postpath = string.split(dst_req.path[1:], '/')
+
+        # Find resource
+        dst_rsc = self.__request.site.getResourceFor(dst_req)
+
+	# test if dest exists and overwrite is false
+	if not isinstance(dst_rsc, twisted.web.error.NoResource) and \
+               not self.__overwrite:
+            raise errors.DAV_Error, twisted.protocols.http.PRECONDITION_FAILED
+        
+	# test if src and dst are the same
+	if self.__src == self.__dst:
+            raise errors.DAV_Error, twisted.protocols.http.FORBIDDEN
+
+	return self.__resource.moveone(self.__dst,self.__overwrite)
+
+
+    def tree_action(self):
+        """ move a tree of resources (a collection)
+
+	Here we return a multistatus xml element.
+
+	"""
+
+        # Create a fake request to locate the destination
+        class _empty:
+            pass
+        fake_channel = _empty()
+        fake_channel.transport = None
+        dst_req = twisted.web.server.Request(fake_channel, None)
+        dst_req.path = self.__dst
+        dst_req.prepath = []
+        dst_req.postpath = string.split(dst_req.path[1:], '/')
+
+        # Find resource
+        dst_rsc = self.__request.site.getResourceFor(dst_req)
+
+	# test if dest exists and overwrite is false
+	if not isinstance(dst_rsc, twisted.web.error.NoResource) and \
+               not self.__overwrite:
+            logger.info("File found and no overwrite flag set")
+            raise errors.DAV_Error, twisted.protocols.http.PRECONDITION_FAILED
+        
+	# test if src and dst are the same
+	if self.__src == self.__dst:
+            raise errors.DAV_Error, twisted.protocols.http.FORBIDDEN
+
+	result = self.__resource.movetree(
+            self.__src,
+            self.__dst,
+            self.__overwrite)
+
+	if not result:
+            return None
+
+	# create the multistatus XML element
+	return make_xmlresponse(result)
+
 
 class WebDAV(twisted.web.resource.Resource):
 
     valid_commands = ['GET', 'HEAD', 'PUT', 'OPTIONS',
-                      'PROPFIND', 'PROPPATCH', 'MKCOL']
+                      'PROPFIND', 'PROPPATCH', 'MKCOL',
+                      'MOVE']
 
     # Properties
 
@@ -89,10 +175,9 @@ class WebDAV(twisted.web.resource.Resource):
             ]
 
     def render(self, request):
+        logger.info("Incomming %s request for %s", request.method, request.path)
         if request.method not in self.valid_commands:
-            raise twisted.web.server.UnsupportedMethod(valid_commands)
-
-        print "Incomming %s request for %s" % (request.method, request.path)
+            raise twisted.web.server.UnsupportedMethod(self.valid_commands)
 
         mname = 'render' + request.method
         if not hasattr(self, mname):
@@ -124,7 +209,7 @@ class WebDAV(twisted.web.resource.Resource):
             request.setResponseCode(twisted.protocols.http.NOT_FOUND)
             return
 
-        print "PROPFIND request: depth = %s" % depth
+        #print "PROPFIND request: depth = %s" % depth
         propf = PropFind(self, depth)
 
         if request.content:
@@ -132,7 +217,7 @@ class WebDAV(twisted.web.resource.Resource):
 
         try:
             data = propf.createResponse() + '\n'
-            print "PROPFIND response: %s" % data
+            #print "PROPFIND response: %s" % data
         except errors.DAV_Error, (errorcode, dd):
             request.setResponseCode(errorcode)
             return
@@ -200,28 +285,27 @@ class WebDAV(twisted.web.resource.Resource):
         # test if file already exists
         try:
             self.stat(path)
-            request.error(405)
+            request.setResponseCode(twisted.protocols.http.NOT_ALLOWED)
             return
         except:
             pass
 
         # test if parent exists
-        h,t=os.path.split(path[:-1])
+        h, t = os.path.split(path[:-1])
         try:
             self.stat(h)
         except:
-            request.error(409)
+            request.setResponseCode(twisted.protocols.http.CONFLICT)
             return
 
         try:
             self.mkdir(path)
-            request.reply_now(200)
         except:
-            request.error(403)
+            request.setResponseCode(twisted.protocols.http.FORBIDDEN)
 
 
     def renderDELETE(self, request):
-        request.error(403)
+        request.setResponseCode(twisted.protocols.http.FORBIDDEN)
 
 
     def renderPUT(self, request):
@@ -247,9 +331,82 @@ class WebDAV(twisted.web.resource.Resource):
                 # no terminator while receiving PUT data
                 request.channel.set_terminator (None)
             except:
-                request.error(424)
+                request.setResponseCode(424)
         except:
-            request.error(411)
+            request.setResponseCode(twisted.protocols.http.LENGTH_REQUIRED)
+
+
+    def renderMOVE(self, request):
+        "Move resource"
+
+	try:
+	    self.copymove(request, MOVE)
+	except errors.DAV_Error, (ec,dd):
+	    request.setResponseCode(ec)
+        
+
+    def copymove(self, request, CLASS):
+	""" common method for copying or moving objects """
+
+	# get the source URI
+	source_uri = urllib.unquote(request.path)
+
+	# get the destination URI
+	dest_uri = request.getHeader("Destination")
+	dest_uri = urllib.unquote(dest_uri)
+
+        import urlparse
+        scheme, netloc, path, query, frag = urlparse.urlsplit(dest_uri)
+
+        # Assume we're moving within this host. Ignore query and frag
+        # parts.
+        dest_uri = path
+
+	# Overwrite?
+	overwrite = 1
+	result_code = twisted.protocols.http.NO_CONTENT
+	if request.getAllHeaders().get("Overwrite", 'T'):
+            overwrite = None
+            result_code = twisted.protocols.http.CREATED
+
+	# instanciate ACTION class
+    	cp = CLASS(self, request, source_uri, dest_uri, overwrite)
+
+	# Depth?
+	d = "infinity"
+	if request.getAllHeaders().has_key("Depth"):
+	    d = request.getHeader('Depth')
+	    if d != "0" and d != "infinity": 
+    		request.setResponseCode(twisted.protocols.http.BAD_REQUEST)
+		return
+	    if d == "0":	
+		res = cp.single_action()
+                request.setResponseCode(res)
+		return
+
+	# now it only can be "infinity" but we nevertheless check
+        # for a collection
+        if self.isdir():
+	    try:
+		res = cp.tree_action()
+	    except errors.DAV_Error, (ec, dd):
+                print "ERROR!!!"
+		request.setResponseCode(ec, dd)
+		return
+	else:
+	    try:
+		res = cp.single_action()
+	    except errors.DAV_Error, (ec, dd):
+		request.setResponseCode(ec)
+		return
+
+        print "MOVE/COPY response: %s" % res
+	if res:
+            request.setHeader('content-type', 'text/xml; charset="utf-8"')
+            request.setResponseCode(twisted.protocols.http.MULTI_STATUS)
+            request.write(res)
+	else:
+            request.setResponseCode(result_code)
 
 
     def get_directory(self, request):
@@ -271,7 +428,7 @@ class WebDAV(twisted.web.resource.Resource):
                 found = 1
                 break
         if not found:
-            request.error (404) # Not Found
+            request.setResponseCode(twisted.protocols.http.NOT_FOUND)
 
         return path
         
@@ -318,8 +475,10 @@ class WebDAV(twisted.web.resource.Resource):
             raise errors.DAV_NotFound
         mname=prefix+"_"+propname.replace("-", "_")
         try:
-            m=getattr(self,mname)
-            r=m()
+            m = getattr(self,mname)
+            r = m()
+            print "%s (%s):%s is %s" % (self.collection.cwd(),
+                                        self.collection, mname, r)
             return r
         except AttributeError:
             #logger.exception("Couldn't find method %s", mname)
@@ -330,7 +489,7 @@ class WebDAV(twisted.web.resource.Resource):
 
     COPY/MOVE HANDLER
 
-    These handler are called when a COPY or MOVE method is invoked by
+    These handlers are called when a COPY or MOVE method is invoked by
     a client. In the default implementation it works as follows:
 
     - the davserver receives a COPY/MOVE method
@@ -375,7 +534,7 @@ class WebDAV(twisted.web.resource.Resource):
 
     ### MOVE handlers
 
-    def moveone(self,src,dst,overwrite):
+    def moveone(self, src, dst, overwrite):
         """ move one resource with Depth=0 """
         return moveone(self,src,dst,overwrite)
 
@@ -443,6 +602,9 @@ class WebDAV(twisted.web.resource.Resource):
             return str(self.stat()[stat.ST_SIZE])
         else:
             return "0"
+
+    def _get_dav_getcontenttype(self):
+        return self.content_type()
 
 
 
@@ -570,7 +732,6 @@ class PropFind:
                                     good_props, bad_props, ms)
 	    
 	if self.__depth == "1":
-            print "subresources are", resource.listEntities()
             for name in resource.listNames():
                 child = resource.getChild(name, resource.request)
                 good_props, bad_props = self.getPropvalues(child)

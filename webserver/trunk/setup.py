@@ -83,6 +83,8 @@ dist = setup(
                    ('www/index.rpy','www/RemusPage.html')),
                   ('libdata/remus/styles',
                    ('styles/remus.css',)),
+                  (config_files_path,
+                   ('remus.conf.default',)),
                   ],
     classifiers = [
         "Development Status :: 0 - Alpha",

@@ -37,6 +37,8 @@ logging.config.fileConfig(configfile, {
 
 logger = logging.getLogger("remus.webserver")
 
+logger.info("Starting remus server")
+
 # The audiostore must know the docroot to find the XSL stylesheets
 remus.audiostore.audiostore_file_root(docroot)
 
