@@ -24,22 +24,24 @@ import remus.db_connect
 import remus.webserver.remuspage
 from remus.audiostore.db_audiostore import *
 import remus.i18n
-_ = remus.i18n.dgettext('remus-audiostore')
+
+_ = lambda a: a
 
 
 class Playlist(remus.webserver.remuspage.RemusPage):
 
-    title = _("Playlist administration")
-
-    emptyList = _("No playlists defined")
-    template = '<div class="text">' + \
+    def getSubtemplate(self, request):
+        _ = request.getSession(remus.i18n.ITranslator).gettext('remus-audiostore')
+        self.title = _("Playlist administration")
+        self.emptyList = _("No playlists defined")
+        
+        return '<div class="text">' + \
                _("Defined playlists:") + \
                '''<ul model="playlists" view="List">
                <li pattern="emptyList">%s</li>
                <li pattern="listItem" view="Text"></li>
                </ul>
-               ''' % emptyList + \
-    '</div>'
+               ''' % self.emptyList + '</div>'
 
 
     def wmfactory_playlists(self, request):

@@ -430,12 +430,19 @@ class Song(Collection):
 class SongId(Song):
 
     def __init__(self, parent, songid):
-        self.id = songid[8:]
+        # Cut off "--song--"
+        id = songid[8:]
+
+        # Cut off extension, and make integer of id
+        self.id = int(id[:id.index('.')])
+
         query = EQUAL(db_audiostore.remus_audio_objects_au_id, self.id)
         Collection.__init__(self, parent, query)
 
     def name(self):
-        return "--song--%s" % self.id
+        import mimetypes
+        ext = mimetypes.guess_extension(self.content_type())
+        return "--song--%s%s" % (self.id, ext)
 
 
 class SearchResultSong(Song):
@@ -561,10 +568,12 @@ class IndexXMLBase(Collection):
         import libxslt
         import libxml2
 
+        sess = request.getSession(remus.i18n.ITranslator)
+
         params = {
             'audiostore.root':      "'%s'"   % urlroot,
             'audiostore.url':       "'%s%s'" % (server, urlroot),
-            'l10n.gentext.language':"'%s'"   % remus.i18n.current_lang(),
+            'l10n.gentext.language':"'%s'"   % sess.lang,
             }
 
         xsltfile = open(self.xsltfile).read()
@@ -576,7 +585,8 @@ class IndexXMLBase(Collection):
 
             menu = remus.webserver.menu.create_basemenu()
             widget = remus.webserver.menu.Menu(menu)
-            menu = widget.generate(None, remus.webserver.menu.document).toxml()
+            menu = widget.generate(request,
+                                   remus.webserver.menu.document).toxml()
 
             xsltfile = xsltfile.replace("<menu/>", menu)
 
@@ -692,11 +702,13 @@ class IndexXMLAudioList(IndexXMLBase):
     document_type = "audiolist"
 
     def write_body(self, file):
+        import mimetypes
         for dict in self.cursor:
+            ext = mimetypes.guess_extension(dict["au_content_type"])
             dict["art_name"] = xml_fix_string(dict["art_name"])
             dict["au_title"] = xml_fix_string(dict["au_title"])
             dict["alb_name"] = xml_fix_string(dict["alb_name"])
-            dict["songid"] = "--song--%s" % dict["au_id"]
+            dict["songid"] = "--song--%s%s" % (dict["au_id"], ext)
 
             filename = mk_filename(dict["songid"])
             dict["filename"] = xml_fix_string(filename)
@@ -761,12 +773,15 @@ class IndexXMLDirList(IndexXMLBase):
 
             cnt = coll.select()
 
+            import mimetypes
+
             for key in dict.keys():
                 if key[:11] == 'TIME_TO_SEC':
                     dict["au_length"] = dict[key]
                     del dict[key]
                 elif key == "au_id":
-                    dict["songid"] = "--song--%s" % dict["au_id"]
+                    ext = mimetypes.guess_extension(dict["au_content_type"])
+                    dict["songid"] = "--song--%s%s" % (dict["au_id"], ext)
                     filename = mk_filename(dict["songid"])
                     dict["filename"] = xml_fix_string(filename)
                     del dict[key]

@@ -1,3 +1,20 @@
+2004-02-13  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* Makefile.am: Build the db directory before doc, since db
+	generates parts of the documentation.
+
+	* configure.ac: Added hardcoded path to docbook-xsl for
+	now. Bumped version number to 0.4.2.
+
+	* remus/audiostore/as_collection.py (SongId.name): Song names now
+	contain an appropriate file extension, not all external
+	applications bother, or will see the content-type field.
+	(IndexXMLBase.create_file): Use language information from the
+	session object.
+
+	* www/playlists.rpy (getSubtemplate): Do localization using the
+	session object.
+
 2004-02-11  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/audiostore/as_collection.py: Removed references to

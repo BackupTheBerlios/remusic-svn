@@ -1,1 +1,1 @@
-SUBDIRS = doc db po styles
+SUBDIRS = db doc po styles

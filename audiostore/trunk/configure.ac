@@ -2,10 +2,10 @@
 
 dnl Process this file with autoconf to produce a configure script.
  
-AC_INIT(remus-audiostore, 0.4.1)
+AC_INIT(remus-audiostore, 0.4.2)
 AM_INIT_AUTOMAKE
 
-RELEASE_DATE=2004-02-10
+RELEASE_DATE=2004-02-13
 AC_SUBST(RELEASE_DATE)
 
 # FreeBSD needs these
@@ -41,6 +41,10 @@ fi
 dnl
 dnl Check for docbook-xsl
 dnl
+
+dnl Hardcoded for now...
+DOCBOOK_XSL=/usr/local/share/xsl/docbook
+AC_SUBST(DOCBOOK_XSL)
 
 dnl
 dnl Check for xsltproc
