@@ -1,15 +1,42 @@
 
 import os, sys
-import gettext
+import logging
 
 from twisted.web.woven import page, widgets
 from twisted.web import microdom
 
-t = gettext.translation(
-    'remusserver', '/usr/local/share/locale', fallback=True)
-_ = t.gettext
+import remus.i18n
 
-document = microdom.parseString("<xml />", caseInsensitive=0, preserveCase=0)
+logger = logging.getLogger("remus.webserver")
+
+
+def parse(s):
+    return microdom.parseString(s, caseInsensitive=0, preserveCase=0)
+
+document = parse("<xml />")
+
+# Create logo
+_link = document.createElement("a")
+_link.attributes.update({'href': "http://www.remus.org/"})
+_link.appendChild(document.createTextNode("&"))
+_span = document.createElement("span")
+_span.attributes.update({'style': 'color:red'})
+_span.appendChild(document.createTextNode("re:"))
+_link.appendChild(_span)
+del _span
+_i = document.createElement("i")
+_i.appendChild(document.createTextNode("MUS"))
+_link.appendChild(_i)
+del _i
+_span = document.createElement("span")
+_span.attributes.update({'style': 'color:blue'})
+_span.appendChild(document.createTextNode("ic"))
+_link.appendChild(_span)
+del _span
+_link.appendChild(document.createTextNode(";"))
+
+LOGO = _link
+del _link
 
 
 class Stylesheet(widgets.Widget):
@@ -32,12 +59,16 @@ class Menu(widgets.Widget):
     tagName = 'div'
     
     def setUp(self, request, node, data):
+        _ = remus.i18n.dgettext('remus-server')
         for menuitem in self.model:
             link = document.createElement("a")
             link.attributes.update({
                 'href':  menuitem.orig["link"],
-                'title': menuitem.orig["tooltip"]})
-            link.appendChild(document.createTextNode(menuitem.orig["text"]))
+                'title': _(menuitem.orig["tooltip"])})
+            if menuitem.orig.has_key('text'):
+                link.appendChild(document.createTextNode(_(menuitem.orig["text"])))
+            elif menuitem.orig.has_key('element'):
+                link.appendChild(menuitem.orig['element'])
 
             span = document.createElement("span")
             span.attributes.update({
@@ -45,6 +76,22 @@ class Menu(widgets.Widget):
             span.appendChild(link)
             self.appendChild(span)
             self["class"] = "topmenu"
+
+class Generated(widgets.Widget):
+    tagName = 'div'
+
+    def setUp(self, request, node, data):
+        _ = remus.i18n.dgettext('remus-server')
+        self["class"] = 'generated'
+        t = _('Generated at %s by ')
+        t = t % self.model.orig['time']
+        self.appendChild(document.createTextNode(t))
+        self.appendChild(LOGO)
+        self.appendChild(document.createTextNode(_(' server at ')))
+        link = document.createElement('a')
+        link.attributes.update({'href': self.model.orig["baseurl"]})
+        link.appendChild(document.createTextNode(self.model.orig["baseurl"]))
+        self.appendChild(link)
 
 def remus_page_hierarchy(cls, l=None):
     "Returns a list of inherited classes up to RemusPage"
@@ -83,7 +130,11 @@ class RemusPage(page.Page):
 
     templateDirectory = "/usr/local/libdata/remus"
 
-    menu = (
+    # Fake '_' to make gettext add these strings to the .pot
+    # file. Translation is done when actually generating the menu.
+    _ = lambda a: a
+
+    _menu = [
         {
             'text': _('Home'),
             'link': '/',
@@ -103,8 +154,10 @@ class RemusPage(page.Page):
             'text': _('Server statistics'),
             'link': '/stats/',
             'tooltip': _('Various server statistics')
-        }
-        )
+        },
+        ]
+
+    del _
 
     def __init__(self, *args, **kwargs):
         page.Page.__init__(self, *args, **kwargs)
@@ -116,12 +169,28 @@ class RemusPage(page.Page):
         for cls in hier[1:]:
             template = merge_templates(cls, template)
         self.template = template
+        import time
+        self.generated = {
+            'time': time.strftime("%+"),
+            'baseurl': None
+            }
+
+        # Add languages to the menu
+        # FIXME: Change this when I have a better menu code, this
+        # should be a popup menu
+        self.menu = self._menu[:]
+        langinfos = remus.i18n.installed_languages()
+        langs = langinfos.keys()
+        langs.sort()
+        for lang in langs:
+            self.menu.append({
+                'element': parse('<img width="20pt" src="%s"/>' % langinfos[lang]['icon']),
+                'link':    '/lang/?lang=%s' % lang,
+                'tooltip': langinfos[lang]['language']
+                })
 
     def wvfactory_Stylesheet(self, request, node, model):
         return Stylesheet(model)
-
-    def wmfactory_base_url(self, request):
-        return request.prePathURL()
 
     def wmfactory_title(self, request):
         return self.title
@@ -134,3 +203,10 @@ class RemusPage(page.Page):
 
     def wmfactory_menu(self, request):
         return self.menu
+
+    def wmfactory_generated(self, request):
+        self.generated['baseurl'] = request.prePathURL()
+        return self.generated
+
+    def wvfactory_Generated(self, request, node, model):
+        return Generated(model)

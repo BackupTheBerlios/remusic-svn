@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: remus-webserver 0.1\n"
-"POT-Creation-Date: Sun Jan 11 21:58:39 2004\n"
+"POT-Creation-Date: Mon Feb  2 19:19:13 2004\n"
 "PO-Revision-Date: 2004-01-11 22:09+1\n"
 "Last-Translator: Daniel Larsson <daniel.larsson@servicefactory.se>\n"
 "Language-Team: Swedish <daniel.larsson@servicefactory.se>\n"
@@ -14,41 +14,56 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
+#: ../remus/webserver/remuspage.py:79
+msgid "Generated at %s by "
+msgstr "Genererad %s av "
 
-#: www/index.rpy:13
-msgid "Remus music server"
-msgstr "Remus musiktjänst"
+#: ../remus/webserver/remuspage.py:83
+msgid " server at "
+msgstr "-tjänsten på "
 
-#: www/index.rpy:17
+#: ../remus/webserver/remuspage.py:130
+msgid "Home"
+msgstr "Hem"
+
+#: ../remus/webserver/remuspage.py:132
+msgid "To Remus homepage"
+msgstr "Till Remus hemsida"
+
+#: ../remus/webserver/remuspage.py:135
 msgid "Browse"
 msgstr "Bläddra"
 
-#: www/index.rpy:19
+#: ../remus/webserver/remuspage.py:137
 msgid "Browse the music database"
 msgstr "Bläddra i musikdatabasen"
 
-#: www/index.rpy:22
+#: ../remus/webserver/remuspage.py:140
 msgid "Playlists"
 msgstr "Spellistor"
 
-#: www/index.rpy:24
+#: ../remus/webserver/remuspage.py:142
 msgid "Manage playlists"
 msgstr "Skapa/ändra spellistor"
 
-#: www/index.rpy:27
+#: ../remus/webserver/remuspage.py:145
 msgid "Server statistics"
 msgstr "Statistik"
 
-#: www/index.rpy:29
+#: ../remus/webserver/remuspage.py:147
 msgid "Various server statistics"
 msgstr "Diverse statistik från tjänsten"
 
-#: www/index.rpy:35
-msgid ""
-"\n"
-"  Browse the music database to view its contents, and to download songs.\n"
-"  You can upload songs to the database through the web as well."
-msgstr ""
-"\n"
-"  Testing testing"
+#: ../remus/webserver/server.py:45
+msgid "Starting remus server"
+msgstr "Startar remusservern"
 
+#: ../www/index.rpy:12
+msgid "Remus music server"
+msgstr "Remus musiktjänst"
+
+#: ../www/index.rpy:15
+msgid ""
+"Browse the music database to view its contents, and to download songs. You "
+"can upload songs to the database through the web as well."
+msgstr "Testing testing"

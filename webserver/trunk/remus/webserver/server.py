@@ -11,10 +11,6 @@ import ConfigParser
 from twisted.internet import app
 from twisted.web import static, server, script
 
-# remus modules
-import remus.audiostore
-
-
 configfile = ("/usr/local/etc/remus/remus.conf",
               "%s/.remus.conf" % os.environ["HOME"])
 
@@ -37,10 +33,23 @@ logging.config.fileConfig(configfile, {
 
 logger = logging.getLogger("remus.webserver")
 
-logger.info("Starting remus server")
+
+# Set up translation module
+import remus.i18n
+
+# Start out with english
+remus.i18n.install('en')
+_ = remus.i18n.dgettext('remus-server')
+
+
+logger.info(_("Starting remus server"))
 
 # The audiostore must know the docroot to find the XSL stylesheets
-remus.audiostore.audiostore_file_root(docroot)
+try:
+    import remus.audiostore
+    remus.audiostore.audiostore_file_root(docroot)
+except ImportError:
+    pass
 
 root = static.File(docroot)
 root.ignoreExt(".rpy")

@@ -1,3 +1,35 @@
+2004-02-03  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* www/lang.rpy: Language switching resource.
+
+	* remus/i18n/Init.py: Initialize localization support, and support
+	functions.
+
+	* po/POTFILES.in: List of files to search for localized strings.
+
+	* po/sv.po: Added new strings, updated to latest source files.
+
+	* po/Makefile.in: Building of .mo files, etc.
+
+	* po/remus-server.pot: Replaces the old (2 days!) messages.pot
+
+	* remus/webserver/server.py: Added remus.i18n support.
+
+	* remus/webserver/remuspage.py (RemusPage.__init__): Improved
+	localization support.
+
+	* remus/i18n/__init__.py: New package with support routines for
+	i18n (localization).
+
+	* setup.py (dist): Changed name of package from "remusserver" to
+	"remus-server". Added remus.i18n, localization support. Added flag
+	icons for the UI to select language.
+
+	* www/RemusPage.html: Moved the "generated" line out of this
+	static page.
+
+	* www/index.rpy: Complete rewrite of localization support.
+
 2004-02-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* po/messages.pot, po/sv.po: Initial NLS support.
