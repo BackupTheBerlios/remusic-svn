@@ -1,3 +1,21 @@
+2004-02-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/player/song.py: Playlist independent song information
+	class.
+
+	* remus/player/m3u_playlist.py: Renamed from
+	playlist.py. Implements parsing of m3u playlists. Modified for the
+	new song.py module.
+
+	* remus/player/remus_playlist.py: Parse remus playlists (XML
+	format).
+
+	* remus/player/player.py: Audio player framework built around the
+	gstreamer multimedia framework.
+
+	* curses_player.in: Rewritten to use remus.player.player, the
+	gstreamer based player framework.
+
 2003-10-21  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/player/pluginmp3.py (mpg123_plugin.fast_forward)

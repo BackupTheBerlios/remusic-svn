@@ -1,11 +1,8 @@
 AC_INIT(remus-player,0.0.1)
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR(src/remus-player.cc)
+#AC_CONFIG_SRCDIR(src/remus-player.cc)
 
-AC_PROG_CC
-AC_PROG_CXX
-AC_STDC_HEADERS
 
 dnl Now we're ready to ask for gstreamer libs and cflags
 dnl And we can also ask for the right version of gstreamer
@@ -28,7 +25,8 @@ if test "x$HAVE_GSTREAMER" = "xno"; then
 		HAVE_GSTREAMER=yes,HAVE_GSTREAMER=no)
 fi
 
-PKG_CHECK_MODULES(GNOME_VFS, gnome-vfs-2.0)
+PKG_CHECK_MODULES(GNOME_VFSMM, gnome-vfsmm-2.0)
+PKG_CHECK_MODULES(GCONFMM, gconfmm-2.0)
 
 dnl Give error and exit if we don't have gstreamer
 if test "x$HAVE_GSTREAMER" = "xno"; then
@@ -41,6 +39,7 @@ AC_SUBST(GNOME_VFS_LIBS)
 AC_SUBST(GNOME_VFS_CFLAGS)
 
 AC_OUTPUT([
-  Makefile 
-  src/Makefile 
+  Makefile
+  setup.py
+  curses_player
 ])

@@ -3,12 +3,14 @@
 #include <string>
 
 #include <libgnomevfs/gnome-vfs.h>
+#include <libgnomevfsmm.h>
 
 extern "C" {
 #include <gst/gconf/gconf.h>
 #include <gst/play/play.h>
 }
 
+#include "remus-player-playlist.h"
 
 int song_nr = 0;
 std::vector<std::string> playlist;
@@ -20,6 +22,8 @@ get_time_string(time_t seconds)
   gchar *time;
 
   time = static_cast<gchar*>(g_malloc (256));
+
+#if 0
   if (seconds > 3600) {
     /* include the hours here */
     if (strftime (time, 256, "%H:%M:%S", tm) <= 0)
@@ -29,7 +33,9 @@ get_time_string(time_t seconds)
     if (strftime (time, 256, "%M:%S", tm) <= 0)
       strcpy (time, "--:--");
   }
-  
+#else
+  sprintf(time, "%d", seconds);
+#endif
   return time;
 }
 
@@ -43,9 +49,9 @@ remus_player_time_tick (GstPlay * play,
 
   seconds = (gint) (time_nanos / GST_SECOND);
 
-  time_str = get_time_string (seconds);
+  // time_str = get_time_string (seconds);
   // printf("%s\n\033[A", time_str);
-  std::cout << time_str << std::endl << "\033[A";
+  std::cout << time_nanos << std::endl; // << "\033[A";
   g_free(time_str);
 }
 
@@ -107,6 +113,13 @@ remus_player_state_change(GstPlay * play,
     }
 }
 
+static gboolean
+remus_player_idle_func(gpointer data)
+{
+  GstPlay *play = (GstPlay*)data;
+}
+
+
 int
 main(int argc, char* argv[])
 {
@@ -115,6 +128,7 @@ main(int argc, char* argv[])
   GstElement *audio_sink;
 
   gst_init(&argc, &argv);
+  Gnome::Vfs::init();
 
   play = gst_play_new(GST_PLAY_PIPE_AUDIO, &error);
   if (error != NULL) {
@@ -149,6 +163,15 @@ main(int argc, char* argv[])
   g_signal_connect (G_OBJECT(play), "pipeline_error",
 		    G_CALLBACK(remus_player_error), NULL);
 
+
+  // Add idle function
+  play->idle_add_func(remus_player_idle_func, play);
+
+
+  remus::Playlist plist;
+  plist.parse_and_append(argv[1]);
+  return 0;
+  
 
   /* Is this a playlist? */
   GnomeVFSHandle *filehandle = NULL;

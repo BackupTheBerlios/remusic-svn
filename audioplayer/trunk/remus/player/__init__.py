@@ -1,2 +1,2 @@
-from playlist import Playlist
-from audioplugin import *
+from player import Player
+#from audioplugin import *

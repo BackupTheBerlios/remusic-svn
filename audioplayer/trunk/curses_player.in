@@ -6,16 +6,15 @@
 import os
 import sys
 import re
-import asyncore
 import logging
 import curses
 
 from curses import panel
 
-import remus.player.audioplugin
-import remus.player.playlist
-import remus.player.pluginmp3
-
+#import remus.player.audioplugin
+import remus.player.remus_playlist
+#import remus.player.pluginmp3
+from remus.player.player import Player
 
 logger = logging.getLogger("remus.player")
 logger.addHandler(logging.FileHandler("curses_player.log"))
@@ -28,9 +27,8 @@ help = """\
 
 
 
-class keyboard_handler(asyncore.file_dispatcher):
+class keyboard_handler:
     def __init__(self, player):
-        asyncore.file_dispatcher.__init__(self, sys.stdin.fileno())
         self.player = player
         w = curses.newwin(4, 20, 0, 58)
 
@@ -56,11 +54,8 @@ class keyboard_handler(asyncore.file_dispatcher):
         curses.meta(1)
         self.multi = None
 
-    def writable(self):
-        return False
-
     def handle_read(self):
-        cmd = self.socket.read(1)
+        cmd = sys.stdin.read(1)
         if not self.helppanel.hidden():
             self.helppanel.hide()
             panel.update_panels()
@@ -84,7 +79,6 @@ class keyboard_handler(asyncore.file_dispatcher):
             self.player.pause()
         elif cmd == 'q':
             self.player.quit()
-            self.del_channel()
         elif cmd in '0123456789':
             if not self.nr:
                 self.panel.window().erase()
@@ -114,7 +108,7 @@ class keyboard_handler(asyncore.file_dispatcher):
             if self.panel.hidden():
                 self.panel.window().erase()
                 self.panel.window().box()
-                self.panel.window().addstr(1, 1, "REMUS player v1.0")
+                self.panel.window().addstr(1, 1, "REMUS player v@PACKAGE_VERSION@")
                 self.panel.window().addstr(2, 1, "(c) Daniel Larsson")
                 self.panel.show()
                 self.panel.window().refresh()
@@ -134,23 +128,23 @@ class keyboard_handler(asyncore.file_dispatcher):
             logger.warning("Unhandled kbd input: %d" % ord(cmd))
             
 
-class curses_player:
+class curses_player(Player):
 
-    def __init__(self, playlist):
-
+    def __init__(self, url):
+        Player.__init__(self)
         self.keyb_handler = keyboard_handler(self)
-        self.songs = playlist
-        self.songs.shuffle()
-        self.curr_song = 0
+
+        self.playlist.add_url(url)
+        self.playlist.shuffle()
 
         # Create curses windows
         self.w = curses.newwin(4, 80, 0, 0)
-        self.songw = curses.newpad(len(self.songs)+curses.LINES, 70)
+        self.songw = curses.newpad(len(self.playlist)+curses.LINES, 70)
 
-        for song in self.songs:
-            time = song["time"]
-            artist = song["artist"]
-            title = song["song"]
+        for song in self.playlist:
+            time = song.length
+            artist = song.artist
+            title = song.title
             time = "%d:%02d" % (time / 60, time % 60)
             s = "%-30s  %-30s  %5s" % (artist[:30], title[:30], time)
             s = s[:69] + "\n"
@@ -166,9 +160,17 @@ class curses_player:
         self.songnrw = songnrw
 
         self.convert_time = self.time_elapsed
+        self.oldsecs = 0
         self.update_songwin()
-        self.plugin = None
 
+    def idle(self, arg):
+        # Check stdin for input
+        super(curses_player, self).idle()
+        import select
+        s = select.select([sys.stdin.fileno()], [], [], 0.1)
+        if s[0]:
+            self.keyb_handler.handle_read()
+        return True
 
     def refresh(self):
         self.w.redrawwin()
@@ -177,68 +179,33 @@ class curses_player:
         self.songnrw.refresh()
         self.update_songwin()
 
-
-    def quit(self):
-        if self.plugin:
-            self.plugin.close()
-
-
-    def play(self):
-        # FIXME: What we need to do here is lookup the audio plugin for
-        # the current song, create an instance of it, unless we have one
-        # already, and in the case we just created it, wait till it tells
-        # us it's ready to recieve a stream before sending it.
-        #
-        # For now, we're being simplistic, assuming only an mp3 plugin
-        self.plugin = remus.player.audioplugin.get_plugin("audio/mpeg", self)
-
-        # The plugin will call 'ready' on us when it's ready to receive
-        # data
-
-
     def ready(self, plugin):
         "Plugin signaling it's ready to receive streams"
         self.play_song()
-        
 
-    def status(self, plugin, status):
-        "Plugin signalling play status change"
-        if status == remus.player.audioplugin.PLAY_STOPPED:
-            self.curr_song += 1
-            self.play_song()
-    
-
-    def elapsed_time(self, plugin, time):
+    def elapsed_time(self, time):
         "Plugin telling us how long we've been playing current song"
         self.time = time
         self.refresh_playerwin()
 
-
-    def streaminfo(self, plugin, info):
+    def streaminfo(self, attrs):
+        info = "MPEG %s %s, %s kbit/s, %s Hz %s" % \
+               (1, "I" * attrs['layer'], 'unknown', 'unknown', attrs['mode'])
         self.w.addstr(2, 1, info)
         self.w.refresh()
 
-
     def plugin_error(self, plugin, error):
         pass
-    
 
     def next(self, jump=0):
-        self.plugin.stop()
-        self.curr_song += jump
-
-
-    def pause(self):
-        self.plugin.pause()
-
+        self.cursong += jump
+        self.eof(self)
 
     def fast_forward(self):
         self.plugin.fast_forward(32)
 
-
     def fast_backward(self):
         self.plugin.fast_backward(32)
-
 
     def toggle_time_mode(self):
         if self.convert_time == self.time_elapsed:
@@ -246,36 +213,33 @@ class curses_player:
         else:
             self.convert_time = self.time_elapsed
 
-
     def time_elapsed(self, time):
         return "Elapsed", time
-    
 
     def time_remaining(self, time):
-        return "Remains", self.songs[self.curr_song]["time"] - time
-
+        return "Remains", self.playlist[self.cursong].length - time
 
     def refresh_playerwin(self):
         mode, time = self.convert_time(self.time)
         secs = int(time)
-        frac = (time - secs) * 100
         mins, secs = secs / 60, secs % 60
-        self.w.addstr(3, 1, "%s: %2d:%02d:%02d" % (mode, mins, secs, frac))
-        self.w.refresh()
+        if secs != self.oldsecs:
+            self.oldsecs = secs
+            self.w.addstr(3, 1, "%s: %2d:%02d" % (mode, mins, secs))
+            self.w.refresh()
 
-
-    def play_song(self):
+    def play(self):
+        super(curses_player, self).play()
         self.w.erase()
-        if self.curr_song >= len(self.songs):
-            self.keyb_handler.close()
+        if self.cursong >= len(self.playlist):
             self.quit()
             return
 
-        song = self.songs[self.curr_song]
+        song = self.playlist[self.cursong]
             
-        time = song["time"]
-        artist = song["artist"]
-        title = song["song"]
+        time = song.length
+        artist = song.artist
+        title = song.title
         time = "%d:%02d" % (time / 60, time % 60)
         s = "Playing %s - %s (%s)" % (artist, title, time)
         self.w.addstr(1, 1, s.encode("UTF-8"))
@@ -286,12 +250,12 @@ class curses_player:
             t = "\033]0;%s - %s\007" % (artist, title)
             sys.stdout.write(t.encode("UTF-8"))
 
-        self.plugin.play(song["url"])
+#        self.plugin.play(song["url"])
         self.update_songwin()
 
 
     def update_songwin(self):
-        self.songw.refresh(self.curr_song + 1, 0, 5, 5, curses.LINES-2, 75)
+        self.songw.refresh(self.cursong + 1, 0, 5, 5, curses.LINES-2, 75)
 
 
 def main(win):
@@ -304,11 +268,10 @@ def main(win):
         curses.cbreak()
         # Hide cursor
         curses.curs_set(0)
+        
+        mpg_player = curses_player(url)
+        mpg_player.start()
 
-        mpg_player = curses_player(remus.player.playlist.Playlist(url))
-        mpg_player.play()
-
-        asyncore.loop()
     finally:
         curses.endwin()
         if mpg_player:
