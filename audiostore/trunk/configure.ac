@@ -55,8 +55,10 @@ setup.py
 Makefile
 db/Makefile
 doc/Makefile
+doc/xsl/Makefile
 doc/xsl/fo/Makefile
+doc/xml/project.ent
 doc/manual/Makefile
 doc/manual/C/Makefile
-doc/manual/C/remus-audiostore-C.omf.in
+doc/manual/C/remus-audiostore-C.omf
 )

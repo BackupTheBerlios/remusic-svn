@@ -93,11 +93,11 @@ class ASWrapper(webdav.WebDAV):
     def listDynamicNames(self):
 
         # Perform query
-        self.collection.select()
+        self.collection.select(cursorclass=None)
         rows = self.collection.cursor.fetchall()
 
         # Replace None with the string "<none>"
-        rows = [ [ col or "<none>" for col in r.values() ] for r in rows ]
+        rows = [ [ col or "<none>" for col in r ] for r in rows ]
         print rows
         rows = [ filter(lambda c: isinstance(c, types.StringTypes), r)
                  for r in rows ]

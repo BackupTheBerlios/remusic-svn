@@ -22,12 +22,14 @@ try:
 except:
     from StringIO import StringIO
 
+import MySQLdb.cursors
+
 import remus.database
 
 import db_audiostore
 from query import *
 
-logger = logging.getLogger("audiostore.mysql")
+logger = logging.getLogger("remus.audiostore.mysql")
 
 
 _fs_root = None
@@ -39,8 +41,8 @@ def audiostore_file_root(root):
     _fs_root = root
 
 
-db_to_fn = string.maketrans(" ", "_")
-fn_to_db = string.maketrans("_", " ")
+_db_to_fn = string.maketrans(" ", "_")
+_fn_to_db = string.maketrans("_", " ")
 
 #
 # Translate between file names and SQL column values
@@ -51,10 +53,10 @@ def mk_filename(path):
            .replace("&", " and ") \
            .replace("(", " p ") \
            .replace(")", " d ") \
-           .translate(db_to_fn).lower()
+           .translate(_db_to_fn).lower()
 
 def mk_sqlname( path):
-    return path.translate(fn_to_db) \
+    return path.translate(_fn_to_db) \
            .replace(" d ", ")") \
            .replace(" p ", "(") \
            .replace("  and  ", " & ") \
@@ -130,17 +132,18 @@ class Collection(object):
         assert False
 
     def stat(self):
-        if self.select() > 0:
+        if self.isdir() or self.select() > 0:
             stat = (0444, 0, 1, 1, os.getuid(), os.getgid(), 0,
                     time.time(), time.time(), time.time())
         else:
             stat = None
-        self.cursor.close()
-        self.cursor = None
+        if self.cursor:
+            self.cursor.close()
+            self.cursor = None
         return stat
 
     def subcollection(self, name):
-        print "Looking for subcollection", name
+        logger.info("Looking for subcollection %s", name)
         if name == "songs":
             return SongsColl(self)
         elif name == "search":
@@ -149,6 +152,9 @@ class Collection(object):
             return PlaylistColl(self)
         elif name.startswith("--song--"):
             return SongId(self, name)
+        elif name.find('--') != -1:
+            fields = name.split("--")
+            return SearchResultSong(self, fields)
         else:
             return None
 
@@ -168,7 +174,7 @@ class Collection(object):
             coll.fields = fields
         return coll
 
-    def select(self, fields = None):
+    def select(self, fields = None, cursorclass = MySQLdb.cursors.DictCursor):
         if not fields:
             fields = self.fields or self.parent.fields
 
@@ -176,15 +182,14 @@ class Collection(object):
         for field in fields:
             selection.addcolumn(field)
 
-        logger.info(self.query and self.query.expr()[0])
         sql, args = selection.select(
             query=self.query,
             order_by=self.order_by,
             group_by=self.group_by)
+
         logger.info("Performing SQL: %s", sql % self.db.literal(args))
 
-        from MySQLdb.cursors import DictCursor
-        self.cursor = self.db.cursor(DictCursor)
+        self.cursor = self.db.cursor(cursorclass)
         return self.cursor.execute(sql, args)
 
 
@@ -388,6 +393,22 @@ class SongId(Song):
         return "--song--%s" % self.id
 
 
+class SearchResultSong(Song):
+
+    def __init__(self, parent, songtuple):
+        "The 'songtuple' matches the fields in SearchColl.fields"
+        self.songtuple = songtuple
+        query = [ EQUAL(field, value)
+                  for field, value in map(None, SearchColl.fields, songtuple) ]
+        query = reduce(AND, query)
+        if parent.query:
+            query = AND(parent.query, query)
+        Collection.__init__(self, parent, query)
+
+    def name(self):
+        return "--".join(self.songtuple)
+    
+
 class SongList(Collection):
 
     fields = (
@@ -432,11 +453,9 @@ class PlaylistColl(Collection):
         file to apply."""
         subcol = super(PlaylistColl, self).subcollection(name)
         if not subcol:
-            print "Playlist subcoll:", name
             xsl_stylesheet = os.path.join(_fs_root, "styles", "%s.xsl" % name)
             return IndexXML(self, xsl_stylesheet)
         else:
-            print "Playlist subcoll:", name, "returns", subcol
             return subcol
 
 
@@ -613,7 +632,6 @@ class ArtistColl(Collection):
         return self.artist
 
     def subcollection(self, name):
-        print "Artist: subcollection =", name
         coll = Collection.subcollection(self, name)
         if coll:
             return coll
@@ -637,7 +655,6 @@ class AlbumsColl(Collection):
         return "album"
 
     def subcollection(self, name):
-        print "Albums: subcollection =", name
         coll = Collection.subcollection(self, name)
         if coll:
             return coll
@@ -672,7 +689,6 @@ class AlbumColl(Collection):
         return True
 
     def subcollection(self, name):
-        print "Album: subcollection =", name
         coll = Collection.subcollection(self, name)
         if coll:
             return coll
@@ -709,8 +725,6 @@ class GenreColl(Collection):
 #        coll["genre_id"] = newgenre
         
     def subcollection(self, name):
-        print "Genre: subcollection =", name
-        
         subcoll = Collection.subcollection(self, name)
         if subcoll:
             return subcoll

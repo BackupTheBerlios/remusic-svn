@@ -1,3 +1,9 @@
+2003-12-14  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore/as_collection.py (Collection.stat): stat() on a
+	directory collection won't return 'None' anymore, to allow
+	e.g. artists without any albums in the database.
+
 2003-12-13  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* doc/: Added document generation tools, and first embryo of

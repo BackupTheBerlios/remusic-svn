@@ -9,21 +9,37 @@ entities = \
 figures = \
 	$(figdir)/audiostore.png
 
-convert-html: ${entities}
+entity_dir = ../../xml
 
-fdl-appendix.xml: ../../fdl-appendix.xml
-	cp ../../fdl-appendix.xml $@
+convert-html: ${entities} $(figdir)/audiostore.png $(figdir)/.copyparent
 
-legal.xml: ../../legal.xml
-	cp ../../legal.xml $@
+convert-pdf: ${entities} $(figdir)/audiostore.png $(figdir)/.copyparent
 
-project.ent: ../../project.ent
-	cp ../../project.ent $@
+fdl-appendix.xml: ${entity_dir}/fdl-appendix.xml
+	cp ${entity_dir}/fdl-appendix.xml $@
 
-include $(top_srcdir)/doc/xmldocs.make
+legal.xml: ${entity_dir}/legal.xml
+	cp ${entity_dir}/legal.xml $@
+
+project.ent: ${entity_dir}/project.ent
+	cp ${entity_dir}/project.ent $@
+
+${entity_dir}/project.ent: ${entity_dir}/project.ent.in $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status doc/xml/$$(basename $@)
+
+include $(top_srcdir)/doc/mk/xmldocs.make
 
 dist-hook: app-dist-hook
 
-$(figdir)/audiostore.png:
-	cd $(top_src_dir)/db; \
-	${MAKE} DOTGRAPH=$@ $@
+$(figdir)/audiostore.png: $(figdir)
+	cd $(top_srcdir)/db; \
+	${MAKE} DOTGRAPH=$(PWD)/$@ $(PWD)/$@
+
+$(figdir):
+	mkdir $@
+
+$(figdir)/.copyparent: $(figdir)
+	for file in $$(ls ../$(figdir)); do \
+	    [ -f $(figdir)/$$file ] || cp ../$(figdir)/$$file $(figdir); \
+	done
+	touch $@

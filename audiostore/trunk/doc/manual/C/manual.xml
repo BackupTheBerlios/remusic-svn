@@ -12,19 +12,21 @@
 <!ENTITY legal SYSTEM "legal.xml">
 <!ENTITY GFDL SYSTEM "fdl-appendix.xml">
 
-<!ENTITY man.version "0.1.0">
+<!ENTITY preface       SYSTEM "preface.xml">
+<!ENTITY chap.overview SYSTEM "overview.xml">
+<!ENTITY chap.database SYSTEM "database.xml">
 
 ]>
 
 <book id="index" lang="en">
   
   <bookinfo>
-    <title>&project.audiostore.name;</title>
+    <title>&subproject.this.name;</title>
     <subtitle>User's Guide</subtitle>
-    <edition>V&man.version;</edition>
+    <edition>&subproject.this.version;</edition>
     
     <copyright>
-      <year>2003</year>
+      <year>2004</year>
       <holder>Daniel Larsson</holder>
     </copyright>
     
@@ -42,74 +44,90 @@
     </publisher>
     
     &legal;
+
+    &project.people;
     
-    <authorgroup>
-      <author>
-	<firstname>Daniel</firstname><surname>Larsson</surname>
-	<authorblurb>
-	  <para>
-	    <email>Daniel.Larsson@servicefactory.se</email>
-	  </para>
-	</authorblurb>
-      </author>
-    </authorgroup>
-    
-    <releaseinfo>
-      This Guide describes how to use the Remus audiostore, and how it
-      is structured.
-    </releaseinfo>
+    <abstract>
+
+      <para>This manual covers the installation and day to day use of
+      <emphasis>&subproject.this.name; &subproject.this.version;</emphasis>.
+      </para>
+
+      <para>&subproject.this.name; is a storage mechanism for audio
+      files, and is one of the components of &project.nametag;, a
+      complete audio player for home use.</para>
+
+      <para>The latest version of this document is always available
+      from the &project.website;.</para>
+
+    </abstract>
   </bookinfo>
-  
-  <chapter id="chapter1">
-    <title>Overview</title>
-    
-    <section id="oview_intro1">
-      <title>Introduction</title>
-      
-      <para>The Remus audiostore is a structured storage of audio
-      files, providing automated sorting and searching.  It can store
-      files in various formats, including MP3 and Ogg/Vorbis, and
-      perform searches on them provided they have appropriate tags.
+
+  &preface;
+  &chap.overview;
+
+  <chapter>
+    <title>Using the audiostore</title>
+
+      <para> Before you can start using the audiostore, the audiostore
+      server must be running.  [ Installation should be covered
+      somewhere.  Still undefined how the server integrates the
+      audiostore with other parts of Remus.  Likely, starting the
+      server is the same regardless what components are installed. ]
       </para>
-      <para>The storage is implemented as a combination of file system
-      storage (the audio files) and a <ulink
-      url="&app.mysql.url;">&app.mysql;</ulink> database (the
-      metadata, such as title and artist), and provides both a
-      programmatic interface (currently in <ulink
-      url="&app.python.url;">&app.python;</ulink>) and a <ulink
-      url="&std.webdav.url;">&std.webdav;</ulink> interface for
-      browser access.
-      </para>
-    </section>
-    
-    <section id="oview_features1">
-      <title>Features</title>
-      
-      <para>
-      </para>
-    </section>
-    
-  </chapter>
-  
-  <chapter id="chap_database">
-    <title>Database layout</title>
-    
-    <para>The database is divided into the following tables:
+
+    <para> Assuming the audiostore has been populated with some audio
+    files, here's what it could look like using Nautilus:
+
     <figure>
-      <title>Database tables</title>
+      <title>Browsing the audiostore</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata format="PNG" fileref="figures/audiostore.png" />
+	  <imagedata scale="60" format="PNG" fileref="figures/Screenshot-Nautilus.png" />
 	</imageobject>
-	<textobject><literallayout class="monospaced">
-&lt;Insert database tables here>
-	</literallayout></textobject>
       </mediaobject>
     </figure>
+
+    As you can see, the top of the audiostore tree contains
+    <emphasis>genre</emphasis> directories.  Under each genre, you'll
+    find artist directories, which contain album directories.
     </para>
-    
+
+    <para>What differs the audiostore from a conventional file system,
+    is it has alternative directory roots.  One example is typing in
+    <filename>http://<replaceable>url-base</replaceable>/music/artist</filename>
+    which will list all artists regardless of genre.
+
+    <figure>
+      <title>Browsing the audiostore artists</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata scale="60" format="PNG" fileref="figures/Screenshot-Nautilus-artists.png" />
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+    </para>
+
+    <para>Similarily it is possible to list all albums in the
+    audiostore through the URL
+    <filename>http://<replaceable>url-base</replaceable>/music/album</filename>:
+
+    <figure>
+      <title>Browsing the audiostore albums</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata scale="60" format="PNG" fileref="figures/Screenshot-Nautilus-albums.png" />
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+    </para>
+
   </chapter>
-  
+
+  &chap.database;
+
   &GFDL;
 
 </book>

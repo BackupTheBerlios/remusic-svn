@@ -32,7 +32,12 @@ class Column:
         self.name = name
         self.table = None
 
-
+    def __repr__(self):
+        tablename = self.table and self.table.name or "unknown"
+        return "<%s: %s.%s>" % (self.__class__.__name__,
+                                tablename,
+                                self.name)
+    
     def settable(self, table):
         self.table = table
 

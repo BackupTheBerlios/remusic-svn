@@ -27,3 +27,4 @@ $doit svn checkout $PROJTOOLS_URL/doc/mk  doc/mk
 # Create necessary automake files, etc
 ${aclocal:-aclocal}
 ${automake:-automake} --add-missing
+${autoconf:-autoconf}
