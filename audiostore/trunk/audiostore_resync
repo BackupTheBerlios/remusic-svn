@@ -1,0 +1,30 @@
+#!/usr/local/bin/python
+
+import os
+import logging
+import logging.config
+import audiostore
+
+def main():
+    configfile = ("/usr/local/etc/audiostore.conf",
+                  "%s/.audiostore.conf" % os.environ["HOME"])
+
+    logging.config.fileConfig(configfile, {
+        'class':  "StreamHandler",
+        'format': '[%(asctime)s] %(name)s: %(message)s'})
+
+    conn = audiostore.connect(host="localhost", user="root")
+    as = audiostore.AudiostoreInterface(conn)
+
+    import sys
+    print sys.argv
+    if len(sys.argv) > 1:
+        for auid in [ int(x) for x in sys.argv[1:] ]:
+            ao = audiostore.AudiostoreAudioObject(as, auid)
+            ao.resync_from_file()
+    else:
+        as.resync()
+
+
+if __name__ == "__main__":
+    main()

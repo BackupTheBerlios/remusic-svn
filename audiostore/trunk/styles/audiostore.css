@@ -1,0 +1,62 @@
+body {
+	font-family:		monospace;
+}
+
+table.audiolist {
+	font-size:		10pt;
+	border:			1px;
+	border-style:		solid;
+}
+
+table.audiolist th {
+	text-align:		left;
+	padding-left:		10px;
+	padding-right:		10px;
+}
+
+table.audiolist tr.colhead th {
+	font-size:		12pt;
+	background-color:	mediumslateblue;
+	color:			white;
+	border-width:		5px 0 5px 0;
+	border-style:		solid;
+	border-color:		black;
+}
+
+table.audiolist tr.subtitle th {
+	font-size:		10pt;
+	border-width:		1px 0 1px 0;
+	border-style:		solid;
+	border-color:		black;
+	margin-top:		20px;
+}
+
+table.audiolist tr.odd	{
+	background-color:	#d0ffff;
+}
+
+table.audiolist tr.even	{
+}
+
+table.audiolist th a {
+	color:			white;
+}
+
+table.audiolist td {
+	padding-left:		10px;
+	padding-right:		10px;
+}
+
+a {
+	text-decoration:	none;
+	color:			darkslateblue;
+}
+
+.navigation {
+	margin-bottom:		0.5cm;
+}
+
+.generated {
+	font-size:		8pt;
+	font-family:		monospace;
+}

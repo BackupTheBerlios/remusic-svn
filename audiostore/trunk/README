@@ -1,0 +1,58 @@
+# -*- outline -*-
+
+* Prerequisites:
+
+  These are the various software packages used by audiostore.  Other
+  versions of these packages may work, but these are the versions
+  I am using at the moment:
+
+  * Python 2.3
+  * MySQL 3.23.57
+  * medusa 0.5.3
+  * id3lib-3.8.3
+  * mpg123-0.59r_9
+  * vorbis-tools-1.0
+  * cadaver-0.21.0 (*)
+
+  These are the packages audiostore uses directly.  Most of the above
+  packages in turn depend on other packages, which aren't included
+  here.  Refer to respective package's installation instructions.
+
+  (*) cadaver isn't used, but it's a nice command line webdav client,
+  quite handy for browsing the audiostore.
+
+* Installation
+
+  When the above packages are installed, run (as root):
+
+  # python setup.py install
+
+  Edit /usr/local/etc/audiostore.conf if you want to make any local
+  adjustments.
+
+  Eventually this will be configurable from the above file, but right
+  now, to change which CSS file is used to display the HTML pages from
+  the audiostore server is hardcoded into the XSLT stylesheet which is
+  used to generate the HTML pages.  To change the look of these, fiddle
+  with the following files directly:
+
+  /usr/local/libdata/remus/styles/audiostore.xsl
+  /usr/local/libdata/remus/styles/audiostore.css
+
+  The format of the XML file which is processed by the above XSLT code
+  isn't specified anywhere as of yet.  I'll write up a DTD or a schema
+  one day (it's extremely simple though, and should be obvious from
+  reading the XSL file, if you know a bit about XSL.  Not everything
+  from the database is currently exposed in the XML, most noticably
+  genres, but also audio format is missing, and more.  This will
+  likely change in the not too distant future.
+
+
+* Running the server
+
+  Due to some limitations in python's distutils, the daemon program is
+  located in /usr/local/bin (and not in /usr/local/libexec which I
+  would have preferred).  I'll fix this at some point.  Anyhow, to
+  start the server, run '/usr/local/bin/remus_server'. Unless you
+  change the port number from the default 80, you need to run this as
+  root (change this in /usr/local/etc/audiostore.conf).

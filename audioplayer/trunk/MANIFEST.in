@@ -1,0 +1,4 @@
+prune .svn
+include ChangeLog
+include GPL
+include curses_player

@@ -1,0 +1,23 @@
+2003-10-01  Daniel Larsson  <daniel@djllaptop.servicefactory.se>
+
+	* Added custom distutil command, so I can create the SQL tables on
+	installation. distutils is a fairly complex system, I noticed...
+
+	* Added generation of HTML pages when "directory" nodes are
+	accessed with a GET request (what browsers typically do).  WebDAV
+	clients find out about directories and their contents differently,
+	so they aren't affected by this (other than if you try to 'cat' a
+	directory, or similar).
+
+	When generating HTML pages, first an XML file is generated from
+	the database, which is fed through xsltproc with an XSLT style
+	sheet, and the resulting HTML page is sent back.
+
+2003-09-22  Daniel Larsson  <daniel@djllaptop.servicefactory.se>
+
+	* Added setup.py for installation / distribution building.
+
+	* Added audiostore_resync tool which regenerates the SQL
+	information from the audio files. Mostly useful when changing the
+	database structure, or fixing tag parsing.
+
