@@ -97,6 +97,7 @@ dist = setup(
                     'styles/index.html.xsl',
                     'styles/m3u.xsl',
                     'styles/param.xsl')),
+                  ('share/doc/remus'
                   ],
     classifiers = [
         "Development Status :: 0 - Alpha",

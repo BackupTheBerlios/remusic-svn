@@ -29,7 +29,7 @@ class audiostore_build (Command):
     def run (self):
         
         import os
-        cmd = "make all"
+        cmd = "make -k all"
         os.system(cmd)
 
 #        for file in SQL_XML_FILES:

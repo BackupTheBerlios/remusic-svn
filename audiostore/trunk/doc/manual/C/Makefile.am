@@ -5,6 +5,10 @@ omffile = remus-audiostore-C.omf
 entities = \
 	fdl-appendix.xml \
 	legal.xml \
+	preface.xml \
+	overview.xml \
+	using.xml \
+	database.xml \
 	project.ent
 figures = \
 	$(figdir)/audiostore.png

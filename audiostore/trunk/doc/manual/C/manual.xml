@@ -15,6 +15,7 @@
 <!ENTITY preface       SYSTEM "preface.xml">
 <!ENTITY chap.overview SYSTEM "overview.xml">
 <!ENTITY chap.database SYSTEM "database.xml">
+<!ENTITY chap.using    SYSTEM "using.xml">
 
 ]>
 
@@ -65,67 +66,7 @@
 
   &preface;
   &chap.overview;
-
-  <chapter>
-    <title>Using the audiostore</title>
-
-      <para> Before you can start using the audiostore, the audiostore
-      server must be running.  [ Installation should be covered
-      somewhere.  Still undefined how the server integrates the
-      audiostore with other parts of Remus.  Likely, starting the
-      server is the same regardless what components are installed. ]
-      </para>
-
-    <para> Assuming the audiostore has been populated with some audio
-    files, here's what it could look like using Nautilus:
-
-    <figure>
-      <title>Browsing the audiostore</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata scale="60" format="PNG" fileref="figures/Screenshot-Nautilus.png" />
-	</imageobject>
-      </mediaobject>
-    </figure>
-
-    As you can see, the top of the audiostore tree contains
-    <emphasis>genre</emphasis> directories.  Under each genre, you'll
-    find artist directories, which contain album directories.
-    </para>
-
-    <para>What differs the audiostore from a conventional file system,
-    is it has alternative directory roots.  One example is typing in
-    <filename>http://<replaceable>url-base</replaceable>/music/artist</filename>
-    which will list all artists regardless of genre.
-
-    <figure>
-      <title>Browsing the audiostore artists</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata scale="60" format="PNG" fileref="figures/Screenshot-Nautilus-artists.png" />
-	</imageobject>
-      </mediaobject>
-    </figure>
-
-    </para>
-
-    <para>Similarily it is possible to list all albums in the
-    audiostore through the URL
-    <filename>http://<replaceable>url-base</replaceable>/music/album</filename>:
-
-    <figure>
-      <title>Browsing the audiostore albums</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata scale="60" format="PNG" fileref="figures/Screenshot-Nautilus-albums.png" />
-	</imageobject>
-      </mediaobject>
-    </figure>
-
-    </para>
-
-  </chapter>
-
+  &chap.using;
   &chap.database;
 
   &GFDL;

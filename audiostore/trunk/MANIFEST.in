@@ -3,10 +3,11 @@ include ChangeLog
 include GPL
 include sql/audiostore.sql
 include configure
-include configure.in
+include configure.ac
 include missing
 include install-sh
 include mkinstalldirs
 include Makefile.am
 include Makefile.in
 include Makefile
+include setup.py.in
