@@ -1,3 +1,15 @@
+2003-10-21  Daniel Larsson  <daniel@djllaptop.servicefactory.se>
+
+	* remus/player/pluginmp3.py (mpg123_plugin.fast_forward)
+	(mpg123_plugin.fast_backward): New methods implementing fast
+	forward and fast backward play.  Fast backward has limited use,
+	since we're normally not playing from a file, and buffers are
+	likely not big enough to back up very long.
+
+	* curses_player (keyboard_handler.handle_read): Added fast forward
+	and fast backward. The latter doesn't work very well with Remus
+	though, since it isn't playing from files directly.
+
 2003-10-16  Daniel Larsson  <daniel@djllaptop.servicefactory.se>
 
 	* Started implementing the framework.

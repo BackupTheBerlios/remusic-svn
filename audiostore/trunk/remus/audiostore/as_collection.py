@@ -21,6 +21,9 @@ try:
 except:
     from StringIO import StringIO
 
+import remus.database
+
+import db_audiostore
 from query import *
 
 logger = logging.getLogger("audiostore.mysql")
@@ -61,9 +64,9 @@ class Collection(object):
     order_by = None
 
     field_map = {
-        'song'    : Field("au_title"),
-        'artist'  : Field("art_artist"),
-        'album'   : Field("alb_name"),
+        'song'    : db_audiostore.au_title,
+        'artist'  : db_audiostore.art_name,
+        'album'   : db_audiostore.alb_name,
         }
 
     def __init__(self, parent=None, query=None, store=None):
@@ -111,23 +114,11 @@ class Collection(object):
     def filesystem(self):
         return self.fs
 
-    def get_tables(self):
-        tables = self.tables
-        if self.parent:
-            ptables = self.parent.get_tables()
-            for table in ptables:
-                if table not in tables:
-                    tables += (table,)
-        
-        return tables
-
     def subcollection(self, name):
         if name == "songs":
             return SongsColl(self)
         elif name == "search":
             return SearchColl(self)
-        elif name == "playlist":
-            return Playlist(self)
         elif name == "list":
             return PlaylistColl(self)
         elif name.startswith("**song**"):
@@ -138,51 +129,29 @@ class Collection(object):
     def songs(self):
         """Return AudioObjects for all matching songs"""
         songs = Playlist(self)
-        songs.select(fields=['au_id'])
+        songs.select(fields=[db_audiostore.au_id])
         import audiostore
         return [ audiostore.AudioObject(self.store, x['au_id'])
                  for x in songs.cursor ]
 
-    def search(self, query, tables=None, fields=None):
+    def search(self, query, fields=None):
         if self.query:
             query = AND(self.query, query)
         coll = Collection(self, query)
-        if tables:
-            coll.tables = tables
         if fields:
             coll.fields = fields
         return coll
 
     def select(self, fields = None):
-        if self.query:
-            query, args = self.query.expr()
-            where = "WHERE " + query
-        else:
-            where = ''
-            args = ()
-
         if not fields:
             fields = self.fields
 
-        if self.group_by:
-            group_by = "GROUP BY " + ", ".join(self.group_by)
-        else:
-            group_by = ""
+        selection = remus.database.Select()
+        for field in fields:
+            selection.addcolumn(field)
 
-        if self.order_by:
-            order_by = "ORDER BY " + ", ".join(self.order_by)
-        else:
-            order_by = ''
-
-        sql = """
-            SELECT
-                %s
-            FROM
-                %s
-            %s %s %s""" % (", ".join(fields),
-                           ", ".join(self.get_tables()),
-                           where, group_by, order_by)
-
+        logger.info(self.query and self.query.expr()[0])
+        sql, args = selection.select(self.query)
         logger.info("Performing SQL: %s", sql % self.db.literal(args))
 
         from MySQLdb.cursors import DictCursor
@@ -191,38 +160,28 @@ class Collection(object):
 
 
     def update(self):
-        if self.query:
-            query, args = self.query.expr()
-            where = "WHERE " + query
-        else:
-            where = ''
-            args = ()
+
+        selection = remus.database.Select()
+        selection.addcolumn(db_audiostore.au_audio_clip)
+        selection.addcolumn(db_audiostore.au_content_type)
 
         # Get the list of file names, and update the audio file
         # before updating the database
-        db_keys = map(self.field_map.get, self.updates.keys())
-        sql = """
-            SELECT
-                au_audio_clip,
-                au_content_type
-            FROM
-                remus_audio_objects
-            WHERE %s""" % query
-
         cursor = self.db.cursor()
-
+        sql, args = selection.select(query=self.query)
         count = cursor.execute(sql, args)
 
         for filename, mimetype in cursor:
             print "Updating", filename
             mime_map[mimetype].update(filename, self.updates)
 
-
         # Update the database
         set = [ "%s = %s" % (self.field_map[key], self.db.literal(value))
                 for key, value in self.updates.items() ]
         sql = "UPDATE %s SET %s WHERE %s" % \
-              (", ".join(self.get_tables()), ", ".join(set), query)
+              (", ".join(selection.tables(self.query)),
+               ", ".join(set),
+               selection.where(query))
 
         if args:
             count = cursor.execute(sql, args)
@@ -232,15 +191,11 @@ class Collection(object):
         return count
 
     def remove(self, limit="LIMIT 1"):
-        if self.query:
-            query, args = self.query.expr()
-            where = "WHERE " + query
-        else:
-            where = ''
-            args = ()
+        selection = remus.database.Select()
+        selection.addcolumn(db_audiostore.au_id)
 
-        sql = "SELECT au_id FROM %s WHERE %s %s" % \
-              (", ".join(self.get_tables()), query, LIMIT)
+        sql, args = selection.select(query)
+        sql += limit
 
         cursor = self.db.cursor()
 
@@ -254,14 +209,12 @@ class Collection(object):
 
 class SearchColl(Collection):
 
-    fields = ('au_title',
-              'alb_name',
-              'art_artist',
-              'au_length')
-
-    tables = ('remus_albums',
-              'remus_artists',
-              'remus_audio_objects')
+    fields = (
+        db_audiostore.au_title,
+        db_audiostore.alb_name,
+        db_audiostore.art_name,
+        db_audiostore.au_length
+        )
 
     def __init__(self, parent):
         Collection.__init__(self, parent, parent.query)
@@ -271,8 +224,7 @@ class SearchColl(Collection):
 
     def subcollection(self, search):
         return self.search(self.parse_query(search),
-                           fields = self.fields,
-                           tables = self.tables)
+                           fields = self.fields)
 
     def parse_query(self, query):
         "Parse string and build a query object"
@@ -283,24 +235,25 @@ class SearchColl(Collection):
         # a query can be of the form "field=<regexp>"
         # or just <regexp>, which means artist, album and title
         # will be matched against the regexp.
-        my_queries = [EQUAL(Field("au_artist"), Field("art_id")),
-                      EQUAL(Field("au_album"), Field("alb_id")),
-                      EQUAL(Field("au_genre"), Field("ge_id"))]
+        my_queries = []
         for q in queries:
             try:
                 field, regex = q.split('=')
                 my_queries.append(REGEXP(self.field_map[field], regex))
             except ValueError:
                 my_queries.append(
-                    AND(REGEXP(Field("au_title"), regex),
-                        REGEXP(Field("alb_name"), regex),
-                        REGEXP(Field("art_artist"), regex)))
+                    AND(REGEXP(db_audiostore.au_title, regex),
+                        REGEXP(db_audiostore.alb_name, regex),
+                        REGEXP(db_audiostore.art_name, regex)))
         return reduce(AND, my_queries)
 
 
 class SongsColl(Collection):
 
-    fields = ('au_title', 'au_length')
+    fields = (
+        db_audiostore.au_title,
+        db_audiostore.au_length
+        )
 
     def __init__(self, parent):
         Collection.__init__(self, parent, parent.query)
@@ -312,13 +265,16 @@ class SongsColl(Collection):
 class Song(Collection):
 
     # Not really a collection, this is a single song
-    fields = ('au_title', 'au_length')
-
-    tables = ('remus_audio_objects',)
+    fields = (
+        db_audiostore.au_title,
+        db_audiostore.au_length
+        )
 
     def __init__(self, parent, songtitle):
         self.title = songtitle
-        query = AND(parent.query, EQUAL(Field("au_title"), songtitle))
+        query = TITLE_EQ(songtitle)
+        if parent.query:
+            query = AND(parent.query, query)
         Collection.__init__(self, parent, query)
 
     def isdir(self):
@@ -328,14 +284,14 @@ class Song(Collection):
         return self.title
 
     def stat(self):
-        count = self.select(fields=("au_audio_clip",))
+        count = self.select(fields=(db_audiostore.au_audio_clip,))
         if count != 1:
             raise IOError, "file not found"
 
         return os.stat(self.cursor.fetchone()["au_audio_clip"])
 
     def content_type(self):
-        count = self.select(fields=("au_content_type",))
+        count = self.select(fields=(db_audiostore.au_content_type,))
         if count != 1:
             raise IOError, "file not found"
 
@@ -347,7 +303,7 @@ class Song(Collection):
             return AudioSaver(self, self.dbconnection())
         else:
             # Open the audio file, and return file object here
-            count = self.select(fields=("au_audio_clip",))
+            count = self.select(fields=(db_audiostore.au_audio_clip,))
             if count != 1:
                 raise IOError, "file not found"
             
@@ -359,10 +315,7 @@ class SongId(Song):
 
     def __init__(self, parent, songid):
         self.id = songid[8:]
-        query = AND(EQUAL(Field("au_id"), self.id),
-                    EQUAL(Field("au_genre"), Field("ge_id")))
-        if parent.query:
-            query = AND(parent.query, query)
+        query = EQUAL(db_audiostore.au_id, self.id)
         Collection.__init__(self, parent, query)
 
     def name(self):
@@ -371,12 +324,9 @@ class SongId(Song):
 
 class SongList(Collection):
 
-    fields = ('au_id',)
-
-    tables = (
-        'remus_albums',
-        'remus_artists',
-        'remus_audio_objects')
+    fields = (
+        db_audiostore.au_id,
+        )
 
     order_by = (
         "alb_name",
@@ -384,12 +334,7 @@ class SongList(Collection):
         )
 
     def __init__(self, parent):
-        query = AND(AND(EQUAL(Field("au_artist"), Field("art_id")),
-                           EQUAL(Field("au_album"), Field("alb_id"))),
-                       EQUAL(Field("au_genre"), Field("ge_id")))
-        if parent and parent.query:
-            query = AND(query, parent.query)
-        super(SongList, self).__init__(parent, query)
+        super(SongList, self).__init__(parent)
 
     def name(self):
         return "songlist"
@@ -431,42 +376,37 @@ def xml_fix_string(s):
     return enc(dec(s.replace("&", "&amp;"))[0])[0]
 
 
+class TIME_TO_SEC:
+    def __init__(self, field):
+        self.name = "TIME_TO_SEC(%s)" % field.name
+        self.table = field.table
+
 class IndexXML(Collection):
-
-    tables = (
-        'remus_albums',
-        'remus_artists',
-        'remus_audio_objects')
-
+    
     fields = (
-        "au_id",
-        "art_artist",
-        "alb_name",
-        "au_title",
-        "au_length",
-        "au_track_number",
-        "au_content_type",
-        "au_bitrate",
-        "au_sample_freq",
-        "au_audio_mode",
-        "au_subtype",
-        "au_audio_clip",
-        "TIME_TO_SEC(au_length)",
+        db_audiostore.au_id,
+        db_audiostore.art_name,
+        db_audiostore.alb_name,
+        db_audiostore.au_title,
+        db_audiostore.au_length,
+        db_audiostore.au_track_number,
+        db_audiostore.au_content_type,
+        db_audiostore.au_bitrate,
+        db_audiostore.au_sample_freq,
+        db_audiostore.au_audio_mode,
+        db_audiostore.au_subtype,
+        db_audiostore.au_audio_clip,
+        TIME_TO_SEC(db_audiostore.au_length),
         )
     
     order_by = (
-        "au_artist",
+        "au_name",
         "alb_name",
         "au_track_number",
         )
     
     def __init__(self, parent, xsltfile):
-        query = AND(AND(EQUAL(Field("au_artist"), Field("art_id")),
-                           EQUAL(Field("au_album"), Field("alb_id"))),
-                       EQUAL(Field("au_genre"), Field("ge_id")))
-        if parent and parent.query:
-            query = AND(query, parent.query)
-        super(IndexXML, self).__init__(parent, query)
+        super(IndexXML, self).__init__(parent)
         self.urlroot = "/"
         self.file = None
         self.server_name = 'unknown.org'
@@ -484,7 +424,7 @@ class IndexXML(Collection):
 
         for dict in self.cursor:
             
-            dict["art_artist"] = xml_fix_string(dict["art_artist"])
+            dict["art_name"] = xml_fix_string(dict["art_name"])
             dict["au_title"] = xml_fix_string(dict["au_title"])
             dict["alb_name"] = xml_fix_string(dict["alb_name"])
             dict["songid"] = "**song**%s" % dict["au_id"]
@@ -494,7 +434,7 @@ class IndexXML(Collection):
             dict["au_length_sec"] = dict["TIME_TO_SEC(au_length)"]
 
             os.write(fd, '''<audioclip>
-            <artist>%(art_artist)s</artist>
+            <artist>%(art_name)s</artist>
             <title>%(au_title)s</title>
             <album>%(alb_name)s</album>
             <length>%(au_length)s</length>
@@ -548,24 +488,10 @@ class IndexXML(Collection):
 
 
 
-class Index(IndexXML):
- 
-    def __init__(self, parent):
-        xsl_stylesheet = os.path.join(_fs_root, "styles", "audiostore.xsl")
-        super(Index, self).__init__(parent, xsl_stylesheet)
-
-    def content_type(self):
-        return "text/html"
-
-
 class ArtistsColl(Collection):
 
-    tables = (
-        'remus_artists',
-        )
-
     fields = (
-        'art_artist',
+        db_audiostore.art_name,
         )
 
     def __init__(self, parent, query=None):
@@ -587,13 +513,8 @@ class ArtistsColl(Collection):
 
 class ArtistColl(Collection):
 
-    tables = (
-        'remus_artists',
-        'remus_albums',
-        )
-
     fields = (
-        'alb_name',
+        db_audiostore.alb_name,
         )
 
     group_by = (
@@ -602,8 +523,7 @@ class ArtistColl(Collection):
 
     def __init__(self, parent, artist, query=None):
         self.artist = artist
-        my_query = AND(EQUAL(Field("art_artist"), artist),
-                       EQUAL(Field("alb_artist"), Field("art_id")))
+        my_query = EQUAL(db_audiostore.art_name, artist)
         if query:
             my_query = AND(query, my_query)
             
@@ -626,12 +546,8 @@ class ArtistColl(Collection):
 
 class AlbumsColl(Collection):
 
-    tables = (
-        'remus_albums',
-        )
-
     fields = (
-        'alb_name',
+        db_audiostore.alb_name,
         )
 
     def __init__(self, parent, query=None,):
@@ -646,14 +562,8 @@ class AlbumsColl(Collection):
 
 class AlbumColl(Collection):
 
-    tables = (
-        'remus_albums',
-        'remus_artists',
-        'remus_audio_objects',
-        )
-
     fields = (
-        'au_title',
+        db_audiostore.au_title,
         )
 
     order_by = (
@@ -663,7 +573,8 @@ class AlbumColl(Collection):
     def __init__(self, parent, album):
         self.album = album
         Collection.__init__(self, parent, AND(parent.query,
-                                              EQUAL(Field("alb_name"), album)))
+                                              EQUAL(db_audiostore.alb_name,
+                                                    album)))
 
     def name(self):
         return self.album
@@ -682,26 +593,17 @@ class AlbumColl(Collection):
 
 class GenreColl(Collection):
 
-    tables = (
-        'remus_genre',
-        'remus_artists',
-        'remus_audio_objects',
-        )
-
     fields = (
-        'art_artist',
+        db_audiostore.art_name,
         )
 
     group_by = (
-        'art_artist',
+        'art_name',
         )
 
     def __init__(self, parent, genre):
         self.genre = genre
-        query = AND(EQUAL(Field("ge_genre"), genre),
-                    AND(EQUAL(Field("au_genre"), Field("ge_id")),
-                        EQUAL(Field("au_artist"), Field("art_id"))))
-
+        query = EQUAL(db_audiostore.ge_genre, genre)
         Collection.__init__(self, parent, query)
 
     def isdir(self):
@@ -727,12 +629,8 @@ class GenreColl(Collection):
 
 class RootColl(Collection):
 
-    tables = (
-        'remus_genre',
-        )
-
     fields = (
-        'ge_genre',
+        db_audiostore.ge_genre,
         )
 
     def __init__(self, store):

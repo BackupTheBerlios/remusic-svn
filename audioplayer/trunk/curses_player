@@ -67,12 +67,18 @@ class keyboard_handler(asyncore.file_dispatcher):
             self.player.refresh()
 
         if self.multi:
-            logger.warning("Unhandled multikbd input: %d" % ord(cmd))
+            if ord(cmd) == 67:
+                self.player.fast_forward()
+            elif ord(cmd) == 68:
+                self.player.fast_backward()
+            else:
+                logger.warning("Unhandled multikbd input: %d" % ord(cmd))
             self.multi = False
         elif cmd == 't':
             # Toggle time mode
             self.player.toggle_time_mode()
         elif cmd == 'n':
+            logger.warning("Next song")
             self.player.next()
         elif cmd == 'p':
             self.player.pause()
@@ -224,6 +230,14 @@ class curses_player:
 
     def pause(self):
         self.plugin.pause()
+
+
+    def fast_forward(self):
+        self.plugin.fast_forward(32)
+
+
+    def fast_backward(self):
+        self.plugin.fast_backward(32)
 
 
     def toggle_time_mode(self):

@@ -1,6 +1,6 @@
 "Install handler in the webserver for the audiostore"
 
-import remus.database
+import remus.db_connect
 import remus.audiostore
 import remus.audiostore.mysql_filesys
 import remus.audiostore.webdav_handler
@@ -11,7 +11,7 @@ def install(hs, cp):
     as_prefix = cp.get('server', 'audiostore-prefix')
 
     # XXX Change user to something more reasonable!
-    conn = remus.database.connect(host="localhost", user="root", db="remus")
+    conn = remus.db_connect.connect(host="localhost", user="root", db="remus")
     
     as_if = remus.audiostore.Interface(conn)
     

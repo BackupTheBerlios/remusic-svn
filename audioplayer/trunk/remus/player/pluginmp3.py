@@ -64,6 +64,15 @@ class mpg123_plugin(audioplugin.plugin, asyncore.file_dispatcher):
         self.mp3ctrl.write("PAUSE\n")
         self.mp3ctrl.flush()
 
+    def fast_forward(self, nrframes):
+        "Fast forward 'nrframes' number of frames."
+        self.mp3ctrl.write("JUMP +%d\n" % nrframes)
+        self.mp3ctrl.flush()
+
+    def fast_backward(self, nrframes):
+        "Fast backward 'nrframes' number of frames."
+        self.mp3ctrl.write("JUMP -%d\n" % nrframes)
+        self.mp3ctrl.flush()
 
     # Methods inherited from asyncore.file_dispatcher
         

@@ -34,7 +34,6 @@ __all__ = (
     "ARTIST_LIKE",
     "TITLE_EQ",
     "TITLE_LIKE",
-    "Field",
     )
 
 
@@ -50,12 +49,16 @@ class AudiostoreQueryBinaryOp:
         if type(self.left) in types.StringTypes:
             left = self.left
             left_arg = ()
+        elif hasattr(self.left, "name"):
+            left, left_arg = self.left.name, ()
         else:
             left, left_arg = self.left.expr()
-            
+
         if type(self.right) in types.StringTypes:
             right = "%s"
             right_arg = (self.right,)
+        elif hasattr(self.right, "name"):
+            right, right_arg = self.right.name, ()
         else:
             right, right_arg = self.right.expr()
 
@@ -103,15 +106,11 @@ def EQUAL(left, right):
 #  Field constants
 # ------------------------------------------------------------
 
-class Field:
-    def __init__(self, field):
-        self.field = field
-    def expr(self):
-        return self.field, ()
+import db_audiostore
     
-ALBUM  = Field("au_album")
-ARTIST = Field("au_artist")
-TITLE  = Field("au_title")
+ALBUM  = db_audiostore.alb_name
+ARTIST = db_audiostore.art_name
+TITLE  = db_audiostore.au_title
 
 
 # Convenience functions

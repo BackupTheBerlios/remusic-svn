@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+
+<sql:database xmlns:sql="http://remus.sourceforge.net/xml/sql/1.0"
+              xmlns:doc="http://remus.sourceforge.net/xml/doc/1.0">
+  <sql:name>remus</sql:name>
+
+  <sql:table>
+    <doc:description>
+      Table of artists in the database.
+    </doc:description>
+    <sql:name>remus_artists</sql:name>
+    <sql:columns>
+      <sql:column sql:name="art_id">
+	<sql:type sql:primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="art_name">
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="art_sortname">
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="art_mb_artist_id">
+        <doc:description>
+	  Musicbrainz artist identity
+        </doc:description>
+	<sql:type>
+	  CHAR(36)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="art_url">
+        <doc:description>
+	  Optional URL to artist
+        </doc:description>
+	<sql:type>
+	  VARCHAR(128)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="art_modified">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="art_created">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <doc:description>
+      Table of albums in the database.
+    </doc:description>
+    <sql:name>remus_albums</sql:name>
+    <sql:columns>
+      <sql:column sql:name="alb_id">
+	<sql:type sql:primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="alb_name">
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="alb_artist">
+	<sql:type>
+	  <sql:key sql:table="remus_artists" sql:column="art_id"/>
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="alb_mb_album_id">
+	<sql:type>
+	  CHAR(36)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="alb_nr_of_tracks">
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="alb_duration">
+	<sql:type>
+	  TIME
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="alb_modified">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="alb_created">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <doc:description>
+      Table of genres
+    </doc:description>
+    <sql:name>remus_genres</sql:name>
+    <sql:columns>
+      <sql:column sql:name="ge_id">
+	<sql:type sql:primary-key="auto">
+	  SMALLINT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="ge_genre">
+	<sql:type>
+	  VARCHAR(30)
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <doc:description>
+      Table of audio files
+    </doc:description>
+    <sql:name>remus_audio_objects</sql:name>
+    <sql:columns>
+      <sql:column sql:name="au_id">
+	<sql:type sql:primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_title">
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_artist">
+	<sql:type>
+	  <sql:key sql:table="remus_artists" sql:column="art_id"/>
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_album">
+	<sql:type>
+	  <sql:key sql:table="remus_albums" sql:column="alb_id"/>
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_genre">
+	<sql:type>
+	  <sql:key sql:table="remus_genres" sql:column="ge_id"/>
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_content_type">
+	<sql:type>
+	  VARCHAR(40)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_year">
+	<sql:type>
+	  YEAR
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_length">
+	<sql:type>
+	  TIME
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_track_number">
+	<sql:type>
+	  SMALLINT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_modified">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_created">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_bitrate">
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_sample_freq">
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_audio_mode">
+	<sql:type>
+	  VARCHAR(20)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_subtype">
+	<sql:type>
+	  VARCHAR(40)
+	</sql:type>
+      </sql:column>
+      <sql:column sql:name="au_audio_clip">
+	<sql:type>
+	  VARCHAR(128) NOT NULL
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+</sql:database>

@@ -9,8 +9,35 @@ import os
 import distutils
 from distutils.core import setup
 from distutils.command import install
+from distutils.command import build
 from distutils.core import Command
 from distutils import log
+
+
+SQL_XML_FILES = (
+    'db/audiostore.xml',
+    )
+
+class audiostore_build (Command):
+
+    description = "Builds additional files"
+
+    user_options = []
+
+    def initialize_options (self):
+        pass
+
+    def finalize_options (self):
+        pass
+        
+    def run (self):
+        # Generate the sql files
+        import os
+        for file in SQL_XML_FILES:
+            fname = os.path.splitext(os.path.basename(file))[0]
+            cmd = "xsltproc -o remus/audiostore/db_%s.py db/makepython.xsl %s " % (fname, file)
+            os.system(cmd)
+            os.system("xsltproc -o db/%s.sql db/makesql.xsl %s" % (fname, file))
 
 
 class audiostore_setup (Command):
@@ -45,10 +72,11 @@ class audiostore_setup (Command):
 
     # run()
 
-# class x
+# class audiostore_setup
 
 
 install.install.sub_commands.append(('audiostore_setup', None))
+build.build.sub_commands.insert(0, ('audiostore_build', None))
 
 dist = setup(
     name="audiostore",
@@ -78,5 +106,6 @@ dist = setup(
         "Topic :: Multimedia :: Audio",
     ],
     verbose=1,
-    cmdclass={'audiostore_setup': audiostore_setup}
+    cmdclass={'audiostore_setup': audiostore_setup,
+              'audiostore_build': audiostore_build}
     )
