@@ -72,7 +72,7 @@ CLEANFILES = omf_timestamp $(docname).html/*.html $(docname).fo $(docname).pdf
 # If the following file is in a subdir (like help/) you need to add that to the path
 include $(top_srcdir)/doc/mk/omf.make
 
-all: omf convert-html convert-pdf
+all: omf convert-html #convert-pdf
 
 #$(docname).xml: $(entities)
 #	-ourdir=`pwd`;  \
