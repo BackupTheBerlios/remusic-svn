@@ -1,0 +1,27 @@
+The audiostore provides a generic mechanism to deliver song
+information in custom formats, based on XSLT.  These stylesheets are
+invoked for URLs ending in "/list/<type>",
+e.g. "http://remusserver/music/artist/The%20Hives/list/m3u".
+
+Adding a new format is a matter of writing an XSLT stylesheet, and
+placing it in /usr/local/libdata/remus/styles.  The source XML format
+isn't yet formalized in a DTD/Schema/RelaxNG model, but looking at
+these existing stylesheets should give you enough details.  Look in
+remus/audiostore/as_collection.py (IndexXML.create_file) for the exact
+structure for now.
+
+This directory contains 3 different XSLT stylesheets:
+
+- index.html.xsl, which generates an HTML page listing information
+  about songs. param.xsl contains parameters to this stylesheet, some
+  of which are adjustable by the user. audiostore.css defines the
+  visual appearance of the elements produced by index.html.xsl
+
+- m3u.xsl, which generates an extended M3U playlist. The accompanying
+  file m3u.mime defines the mime type of the result of the
+  transformation (audio/x-mpegurl).  In general, <type>.mime contains
+  the mime type of the results from applying stylesheet <type>.xsl. If
+  no <type>.mime file is found, the mime type is set to text/xml.
+
+- remus.xsl, which is an XML based playlist, used by the remus audio
+  player.
