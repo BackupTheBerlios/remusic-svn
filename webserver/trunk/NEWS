@@ -1,3 +1,17 @@
+* Release 0.3.1
+
+  2004-02-13
+
+** Bugfixes
+
+*** Localization
+
+    Localization was rather braindead in previous versions, since the
+    "current language" information was server wide, thus all clients
+    were affected by language switches (duh...).  Now this information
+    is kept in the session object, which is unique per browser session.
+
+
 * Release 0.3.0
 
 ** Changes
@@ -5,7 +19,7 @@
    New menu widget and model, with associated DHTML menu implemented
    in javascript.
 
-** Bugs fixed
+** Bugfixes
 
    XML header in XHTML pages aren't liked by IE6, so I've removed
    those.
