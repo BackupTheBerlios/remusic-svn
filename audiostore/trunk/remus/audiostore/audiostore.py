@@ -42,6 +42,7 @@ class Interface:
 
     default_fields = {
         'artist':      'Unknown',
+        'artist_sort': 'Unknown',
         'artist_id':   None,
         'album':       'Unknown',
         'album_id':    None,
@@ -134,10 +135,23 @@ class Interface:
     def add_artist(self, metafields):
         cursor = self.db.cursor()
 
+        if metafields["artist_sort"] == "Unknown":
+            a = metafields["artist"]
+            if a[:4].lower() == "the ":
+                a = a[4:] + ", " + a[:3]
+            metafields["artist_sort"] = a
+
+
         if metafields["artist_id"]:
             match = "art_mb_artist_id=%(artist_id)s"
         else:
             match = "art_name=%(artist)s"
+        logger.info("""SELECT
+                   art_id
+               FROM
+                   remus_artists
+               WHERE
+            """ + match % metafields)
         count = cursor.execute(
             """SELECT
                    art_id
@@ -152,6 +166,7 @@ class Interface:
                    VALUES (
                      NULL,
                      %(artist)s,
+                     %(artist_sort)s,
                      %(artist_id)s,
                      NULL,
                      NOW(),
@@ -178,8 +193,10 @@ class Interface:
             """SELECT
                    alb_id
                FROM
-                   remus_albums
+                   remus_albums,
+                   remus_artists
                WHERE
+                   art_id = alb_artist AND 
             """ + match, metafields)
 
         if count == 0:

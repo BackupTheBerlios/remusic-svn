@@ -81,6 +81,7 @@
     </doc:short>
 
     <sql:columns>
+
       <sql:column name="alb_id">
 	<doc:description>
 	  Unique identity for this album.
@@ -89,6 +90,7 @@
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="alb_name">
 	<doc:description>
 	  Name of album.
@@ -97,6 +99,7 @@
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
+
       <sql:column name="alb_artist">
 	<doc:description>
 	  Reference to the artist of this album.
@@ -105,6 +108,7 @@
 	  <sql:key table="remus_artists" column="art_id"/>
 	</sql:type>
       </sql:column>
+
       <sql:column name="alb_mb_album_id">
 	<doc:description>
 	  Musicbrainz album id.
@@ -113,6 +117,7 @@
 	  CHAR(36)
 	</sql:type>
       </sql:column>
+
       <sql:column name="alb_nr_of_tracks">
 	<doc:description>
 	  Number of tracks on this album.
@@ -121,6 +126,7 @@
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="alb_duration">
 	<doc:description>
 	  Total playing time of album.
@@ -129,6 +135,7 @@
 	  TIME
 	</sql:type>
       </sql:column>
+
       <sql:column name="alb_modified">
 	<doc:description>
 	  When this entry was modified last.
@@ -137,6 +144,7 @@
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
+
       <sql:column name="alb_created">
 	<doc:description>
 	  When this entry was created.
@@ -145,6 +153,16 @@
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
+
+      <sql:column name="alb_cover">
+	<doc:description>
+	  File system path where the cover illustration is stored.
+	</doc:description>
+	<sql:type>
+	  VARCHAR(128)
+	</sql:type>
+      </sql:column>
+
     </sql:columns>
   </sql:table>
 

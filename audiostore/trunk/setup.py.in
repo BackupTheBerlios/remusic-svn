@@ -98,6 +98,7 @@ dist = setup(
                    ('styles/audiostore.css',
                     'styles/index.html.xsl',
                     'styles/m3u.xsl',
+                    'styles/m3u.mime',
                     'styles/remus.xsl',
                     'styles/param.xsl')),
 #                  ('share/doc/remus',

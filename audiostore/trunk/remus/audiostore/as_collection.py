@@ -11,6 +11,7 @@ subsets, such as:
 """
 
 import os
+import re
 import logging
 import stat
 import time
@@ -28,7 +29,7 @@ import sqlquery
 import db_audiostore
 #from query import *
 
-from sqlquery import AND, OR, REGEXP, EQUAL
+from sqlquery import AND, OR, REGEXP, EQUAL, COUNT
 
 logger = logging.getLogger("remus.audiostore.mysql")
 
@@ -78,6 +79,7 @@ class Collection(object):
         'album'   : db_audiostore.remus_albums_alb_name,
         'album_id': db_audiostore.remus_audio_objects_au_album,
         'artist_id':db_audiostore.remus_albums_alb_artist,
+        'length'  : db_audiostore.remus_audio_objects_au_length,
         }
 
     def __init__(self, parent=None, query=None, store=None):
@@ -89,7 +91,7 @@ class Collection(object):
         self.updates = {}
         self.is_updated = False
         self.old_values = {}
-            
+
     def __setitem__(self, item, value):
         assert item in self.field_map.keys()
         self.updates[item] = value
@@ -129,14 +131,14 @@ class Collection(object):
     def content_type(self):
         return "text/html"
 
-    def open(self, mode):
+    def open(self, mode, request=None):
         logger.info("Trying to open %s", self.cwd())
         if mode and mode[0] == 'w':
             # Someone is saving a file!
             return AudioSaver(self)
         assert False
 
-    def stat(self):
+    def stat(self, request=None):
         if self.isdir() or self.select() > 0:
             stat = (0444, 0, 1, 1, os.getuid(), os.getgid(), 0,
                     time.time(), time.time(), time.time())
@@ -155,6 +157,8 @@ class Collection(object):
             return SearchColl(self)
         elif name == "list":
             return PlaylistColl(self)
+        elif name == "dirlist":
+            return DirlistColl(self)
         elif name.startswith("--song--"):
             return SongId(self, name)
         elif name.find('--') != -1:
@@ -179,9 +183,21 @@ class Collection(object):
             coll.fields = fields
         return coll
 
-    def select(self, fields = None, cursorclass = MySQLdb.cursors.DictCursor):
-        if not fields:
+    def select(self, cursorclass=MySQLdb.cursors.DictCursor, **kw):
+        if kw.has_key('fields'):
+            fields = kw['fields']
+        else:
             fields = self.fields or self.parent.fields
+
+        if kw.has_key('order_by'):
+            order_by = kw['order_by']
+        else:
+            order_by = self.order_by
+
+        if kw.has_key('group_by'):
+            group_by = kw['group_by']
+        else:
+            group_by = self.group_by
 
         selection = sqlquery.Select()
         for field in fields:
@@ -189,8 +205,8 @@ class Collection(object):
 
         sql, args = selection.select(
             query=self.query,
-            order_by=self.order_by,
-            group_by=self.group_by)
+            order_by=order_by,
+            group_by=group_by)
 
         logger.info("Performing SQL: %s", sql % self.db.literal(args))
 
@@ -284,6 +300,16 @@ class SearchColl(Collection):
         db_audiostore.remus_audio_objects_au_length
         )
 
+    op_map = {
+        '=' : sqlquery.REGEXP,
+        '<' : sqlquery.LESS_THAN,
+        '>' : sqlquery.GREATER_THAN,
+        '<=': sqlquery.LESS_EQUAL,
+        '>=': sqlquery.GREATER_EQUAL,
+        }
+
+    op_regex = '(%s)' % '|'.join(op_map.keys())
+        
     def __init__(self, parent):
         Collection.__init__(self, parent, parent.query)
 
@@ -306,8 +332,9 @@ class SearchColl(Collection):
         my_queries = []
         for q in queries:
             try:
-                field, regex = q.split('=')
-                my_queries.append(sqlquery.REGEXP(self.field_map[field], regex))
+                field, comp, regex = re.split(self.op_regex, q)
+                my_queries.append(self.op_map[comp](self.field_map[field],
+                                                    regex))
             except ValueError:
                 my_queries.append(
                     OR(OR(REGEXP(db_audiostore.remus_audio_objects_au_title, q),
@@ -340,7 +367,8 @@ class Song(Collection):
 
     def __init__(self, parent, songtitle):
         self.title = songtitle
-        query = TITLE_EQ(songtitle)
+        query = EQUAL(db_audiostore.remus_audio_objects_au_title,
+                      songtitle)
         if parent.query:
             query = AND(parent.query, query)
         Collection.__init__(self, parent, query)
@@ -351,7 +379,7 @@ class Song(Collection):
     def name(self):
         return self.title
 
-    def stat(self):
+    def stat(self, request=None):
         count = self.select(fields=(db_audiostore.remus_audio_objects_au_audio_clip,))
         if count != 1:
             raise IOError, "file not found"
@@ -371,7 +399,7 @@ class Song(Collection):
         self.cursor = None
         return content_type
 
-    def open(self, mode):
+    def open(self, mode, request=None):
         if mode and mode[0] == 'w':
             # Someone is saving a file!
             return AudioSaver(self)
@@ -421,8 +449,8 @@ class SongList(Collection):
         )
 
     order_by = (
-        "alb_name",
-        "au_track_number",
+        db_audiostore.remus_albums_alb_name,
+        db_audiostore.remus_audio_objects_au_track_number,
         )
 
     def __init__(self, parent):
@@ -442,11 +470,6 @@ class PlaylistColl(Collection):
     styles catalog, and applying them to a standard XML file produced
     from the query"""
 
-    def __init__(self, parent):
-        # This collection doesn't modify the parent's collection
-        # in any way
-        super(PlaylistColl, self).__init__(parent)
-
     def name(self):
         return "list"
     
@@ -459,10 +482,141 @@ class PlaylistColl(Collection):
         subcol = super(PlaylistColl, self).subcollection(name)
         if not subcol:
             xsl_stylesheet = os.path.join(_fs_root, "styles", "%s.xsl" % name)
-            return IndexXML(self, xsl_stylesheet)
+            return IndexXMLAudioList(self, xsl_stylesheet)
         else:
             return subcol
 
+class DirlistColl(Collection):
+
+    def name(self):
+        return "dirlist"
+
+    def isdir(self):
+        return True
+
+    def subcollection(self, name):
+        """The name of the subcollection is used to look up an XSLT
+        file to apply."""
+        subcol = super(DirlistColl, self).subcollection(name)
+        if not subcol:
+            xsl_stylesheet = os.path.join(_fs_root, "styles", "%s.xsl" % name)
+            return IndexXMLDirList(self, xsl_stylesheet)
+        else:
+            return subcol
+
+
+class IndexXMLBase(Collection):
+
+    def __init__(self, parent, xsltfile):
+        if parent.parent.order_by:
+            self.order_by = parent.parent.order_by
+        super(IndexXMLBase, self).__init__(parent)
+        self.file = None
+        self.xsltfile = xsltfile
+
+    def create_file(self, request=None):
+        # Build an index page
+        import tempfile
+        fd, tempname = tempfile.mkstemp()
+
+        # FIXME: Shouldn't hardcode this
+        urlroot = "/music/"
+
+        if request:
+            inet, addr, port = request.getHost()
+            if port == 80:
+                hostport = ''
+            else:
+                hostport = ':%d' % port
+
+            import urllib
+
+            server =  urllib.quote('http%s://%s%s' % (
+                request.isSecure() and 's' or '',
+                request.getRequestHostname(),
+                hostport), "/:")
+            path = request.path[len(urlroot):]
+
+        else:
+            server = "http://unknown.org"
+            path = self.cwd()
+
+        os.write(fd, '<?xml version="1.0" encoding="utf-8"?>\n')
+
+        cnt = self.select()
+        os.write(fd, '<%s length="%s">\n' % (self.document_type, cnt))
+
+        # Strip away "list/<stylesheet>", if present
+        if posixpath.basename(posixpath.dirname(path)) == "list":
+            path = posixpath.dirname(posixpath.dirname(path)) + "/"
+        path = xml_fix_string(path).replace("%20", ' ') or '/'
+        if path != '/':
+            path = "".join([ (elem and "<d>%s</d>" % elem)
+                             for elem in path.split("/") ])
+
+        os.write(fd, '  <path>%s</path>\n' % path)
+
+        self.write_body(fd)
+
+        os.write(fd, "</%s>\n" % self.document_type)
+        os.close(fd)
+        self.cursor.close()
+        self.cursor = None
+
+        # Perform xslt transformation on the file
+        from commands import getstatusoutput
+        params = "--stringparam audiostore.root %s" % urlroot
+        params += " --stringparam audiostore.url %s%s" % (server, urlroot)
+        logger.info("xsltproc %s %s %s" % \
+                    (params, self.xsltfile, tempname))
+        st, output = getstatusoutput("xsltproc %s %s %s" % \
+                                     (params, self.xsltfile, tempname))
+
+        self.file = StringIO(output)
+        #os.unlink(tempname)
+
+    def content_type(self):
+        try:
+            mime_file = os.path.splitext(self.xsltfile)[0] + '.mime'
+            return file(mime_file).read()
+        except IOError:
+            return "text/xml"
+
+    def isdir(self):
+        return False
+
+    def open(self, mode, request=None):
+        # Check query parameters for custom ordering
+        if request.args.has_key('order'):
+            # Find out what order parameters we had before, which
+            # doesn't have a DESC modifier on them. For those, we
+            # reverse the search order (i.e. apply the DESC modifier).
+            coll_order = self.order_by or ()
+            old_order = [ x.strip() for x in coll_order \
+                          if x.find("DESC") == -1 ]
+            
+            self.order_by = [ key in old_order and key+" DESC" or key \
+                              for key in request.args['order'] ]
+            self.file = None
+
+        if not self.file or self.file.closed:
+            self.create_file(request)
+        self.file.seek(0)
+        return self.file
+        
+    def stat(self, request=None):
+        if not self.file or self.file.closed:
+            self.create_file(request)
+        st = super(IndexXMLBase, self).stat()
+        if st:
+            st = list(st)
+            pos = self.file.tell()
+            self.file.seek(0, 2)
+            st[stat.ST_SIZE] = self.file.tell()
+            self.file.seek(pos)
+            st = tuple(st)
+
+        return st
 
 def xml_fix_string(s):
     import codecs
@@ -474,7 +628,8 @@ def xml_fix_string(s):
 def TIME_TO_SEC(*args):
     return sqlquery.Function("TIME_TO_SEC", *args)
 
-class IndexXML(Collection):
+
+class IndexXMLAudioList(IndexXMLBase):
     
     fields = (
         db_audiostore.remus_audio_objects_au_id,
@@ -493,32 +648,14 @@ class IndexXML(Collection):
         )
     
     order_by = (
-        "au_title",
-        "alb_name",
-        "au_track_number",
+        db_audiostore.remus_audio_objects_au_title,
+        db_audiostore.remus_albums_alb_name,
+        db_audiostore.remus_audio_objects_au_track_number,
         )
-    
-    def __init__(self, parent, xsltfile):
-        super(IndexXML, self).__init__(parent)
-        self.urlroot = "/"
-        self.file = None
-        self.server_name = 'unknown.org'
-        self.xsltfile = xsltfile
 
-    def create_file(self, request=None):
-        # Build an index page
-        import tempfile
-        fd, tempname = tempfile.mkstemp()
-        cnt = self.select()
-        os.write(fd, '<?xml version="1.0" encoding="utf-8"?>\n')
-        os.write(fd, '<audiolist length="%s">\n' % cnt)
+    document_type = "audiolist"
 
-        if request:
-            path = request.path[len(self.urlroot):]
-        else:
-            path = self.parent.cwd()
-        os.write(fd, '\t<path>%s</path>\n' % xml_fix_string(path).replace("%20", ' '))
-
+    def write_body(self, fd):
         for dict in self.cursor:
             dict["art_name"] = xml_fix_string(dict["art_name"])
             dict["au_title"] = xml_fix_string(dict["au_title"])
@@ -544,46 +681,84 @@ class IndexXML(Collection):
             <subtype>%(au_subtype)s</subtype>
             </audioclip>\n''' % dict)
             
-        os.write(fd, "</audiolist>\n")
-        os.close(fd)
-        self.cursor.close()
-        self.cursor = None
 
-        # Perform xslt transformation on the file
-        from commands import getstatusoutput
-        params = "--stringparam audiostore.root %s/" % self.urlroot
-        params += " --stringparam audiostore.url %s%s" % (self.server_name,
-                                                          self.urlroot)
-        logger.info("xsltproc %s %s %s" % \
-                    (params, self.xsltfile, tempname))
-        st, output = getstatusoutput("xsltproc %s %s %s" % \
-                                     (params, self.xsltfile, tempname))
+class IndexXMLDirList(IndexXMLBase):
 
-        self.file = StringIO(output)
-        os.unlink(tempname)
+    column_map = {
+        'art_name' : 'Artist',
+        'alb_name' : 'Album',
+        'ge_genre' : 'Genre',
+        }
 
-    def content_type(self):
-        return "text/xml"
+    link_cols = {
+        'ge_genre' : "val + '/'",
+        'art_name' : "val + '/'",
+        'alb_name' : "val + '/list/' + " \
+                     "os.path.splitext(os.path.basename(self.xsltfile))[0]",
+        }
 
-    def isdir(self):
-        return False
+    document_type = "dirlisting"
 
-    def open(self, mode, request=None):
-        if not self.file or self.file.closed:
-            self.create_file(request)
-        self.file.seek(0)
-        return self.file
+    def __init__(self, parent, xsltfile):
+        super(IndexXMLDirList, self).__init__(parent, xsltfile)
+
+        # Inherit fields from the last constraining parent (my
+        # immediate parent is the DirlistColl, which does not contain
+        # any fields).
         
-    def stat(self):
-        if not self.file or self.file.closed:
-            self.create_file()
-        st = list(super(IndexXML, self).stat())
-        pos = self.file.tell()
-        self.file.seek(0, 2)
-        st[stat.ST_SIZE] = self.file.tell()
-        self.file.seek(pos)
-        return tuple(st)
+        self.fields = parent.parent.fields
+        self.group_by = parent.parent.group_by
 
+    def write_body(self, fd):
+
+        first_item = True
+        for dict in self.cursor:
+
+            # FIXME: This makes the assumption, dict only contains one
+            # item, and this item is a valid subcollection.  This is
+            # pretty much always true, but...
+            coll = self.parent.parent.subcollection(dict.values()[0])
+
+            # FIXME: This is worse... we're counting the first 'field'
+            # item, but this may result in a different query
+            # altogether, i.e. not counting what we want to
+            # count... (since we're reducing the number of fields in
+            # the query, we might also reduce the number of tables in
+            # the query, thus producing the wrong results).
+            coll.select(fields=[COUNT(coll.fields[0])], group_by=None)
+            cnt = coll.cursor.fetchone().values()[0]
+
+            for key in dict.keys():
+                if key[:11] == 'TIME_TO_SEC':
+                    dict["au_length"] = dict[key]
+                    del dict[key]
+                elif key == "au_id":
+                    dict["songid"] = "--song--%s" % dict["au_id"]
+                    filename = mk_filename(dict["songid"])
+                    dict["filename"] = xml_fix_string(filename)
+                    del dict[key]
+                else:
+                    dict[key] = xml_fix_string(dict[key])
+
+            # Write a list of columns first
+            if first_item:
+                os.write(fd, '  <columns cols="%s">\n' % len(dict))
+                for key in dict.keys():
+                    col = self.column_map.get(key, key)
+                    os.write(fd, '    <column key="%s">%s</column>\n' % (key, col))
+                os.write(fd, "  </columns>\n")
+                first_item = False
+
+            os.write(fd, '  <item length="%s">\n' % cnt)
+            for key, val in dict.items():
+                if key in self.link_cols.keys():
+                    linkattr = ' link="%s"' % eval(self.link_cols[key])
+                else:
+                    linkattr = ''
+                attrs = linkattr
+                os.write(fd, "    <%s%s>%s</%s>\n" % (key, attrs, val, key))
+            
+            os.write(fd, "  </item>\n")
 
 
 class ArtistsColl(Collection):
@@ -616,7 +791,7 @@ class ArtistColl(Collection):
         )
 
     group_by = (
-        'alb_name',
+        db_audiostore.remus_albums_alb_name,
         )
 
     def __init__(self, parent, artist, query=None):
@@ -647,6 +822,10 @@ class AlbumsColl(Collection):
         db_audiostore.remus_albums_alb_name,
         )
 
+    order_by = (
+        db_audiostore.remus_albums_alb_name,
+        )
+
     def __init__(self, parent, query=None):
         Collection.__init__(self, parent, query)
 
@@ -671,7 +850,7 @@ class AlbumColl(Collection):
         )
 
     order_by = (
-        'au_track_number',
+        db_audiostore.remus_audio_objects_au_track_number,
         )
 
     def __init__(self, parent, album):

@@ -1,3 +1,44 @@
+2004-02-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore/as_collection.py (Collection.select): Made
+	'order_by' and 'group_by' overridable.
+	(SearchColl.parse_query): Support more comparison operators than
+	just '=' in queries.
+	(Song.__init__): Bug: Still used the obsolete and removed
+	'TITLE_EQ'.
+	(SongList): Replaced 'order_by' strings with database column
+	references.
+	(DirlistColl): New collection class for directory listings.
+	(IndexXMLBase): New base class for XSLT transforming
+	collections. Support for setting MIME type on results
+	(<transform>.mime file).
+	(IndexXMLAudioList): Rewrite of the old IndexXML class, for
+	producing 'audiolist' XML documents.
+	(IndexXMLDirList.__init__): New class for producing 'dirlisting'
+	XML documents.
+	(AlbumsColl.order_by): Added ordering by album name.
+
+	* remus/audiostore/audiostore.py (Interface.add_artist): Set the
+	sortname of artists from the tags (not quite done yet), with
+	reasonable default values.
+
+	* remus/webserver/audiostore.py (ASWrapper.get_directory): List
+	directory contents as a "directory listing" instead of a complete
+	song list.
+	(ASWrapper.open): The http request object is now passed along, to
+	enable the collection to get information from it, such as the URL
+	used to access it.
+	(ASWrapper.stat): Same as open, above.
+	(get_cached_collection): Enable caching of collections again.
+
+	* styles/index.html.xsl: Added support for <dirlisting> documents
+	which are used to describe directory listings as opposed to
+	complete song listings.  For bigger audiostores, getting thousands
+	of songs on the initial page isn't particularly helpful.  The old
+	list is available in the menu now.
+
+	* TODO: New file. Added some things still lacking.
+
 2004-01-28  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* doc/manual/C/manual.xml: Replaced the manually written

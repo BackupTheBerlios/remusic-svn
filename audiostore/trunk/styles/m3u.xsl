@@ -32,6 +32,7 @@
     encoding="UTF-8"
     indent="yes"/>
 
+  <xsl:include href="param.xsl"/>
 
   <xsl:template match="/">
     <xsl:apply-templates select="audiolist"/>
@@ -48,7 +49,7 @@
   <xsl:template match="audioclip">
     <xsl:text>#EXTINF:</xsl:text> <xsl:value-of select="length-in-sec"/>,<xsl:value-of select="artist"/> - <xsl:value-of select="title"/><xsl:text>
 </xsl:text>
-<xsl:value-of select="filename"/><xsl:text>
+<xsl:value-of select="$audiostore.url"/><xsl:value-of select="filename"/><xsl:text>
 </xsl:text>
   </xsl:template>
 

@@ -39,6 +39,41 @@
   
   <xsl:include href="param.xsl"/>
 
+  <xsl:template match="d">
+    <xsl:param name="path"/>
+    
+    <a xmlns="http://www.w3.org/1999/xhtml">
+      <xsl:attribute name="href">
+	<xsl:value-of select="$path"/><xsl:value-of select="."/>/
+      </xsl:attribute>
+      <xsl:value-of select="."/>
+    </a>
+    <xsl:if test="following-sibling::d">
+      <xsl:text>/</xsl:text>
+      <xsl:apply-templates select="following-sibling::d[position()=1]">
+	<xsl:with-param name="path">
+	  <xsl:value-of select="$path"/><xsl:value-of select="."/>/
+	</xsl:with-param>
+      </xsl:apply-templates>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="path">
+    <xsl:variable name="path" select="$audiostore.root"/>
+
+    <xsl:choose>
+      <xsl:when test="d">
+	<xsl:apply-templates select="d[position()=1]">
+	  <xsl:with-param name="path">
+	    <xsl:value-of select="$path"/>
+	  </xsl:with-param>
+	</xsl:apply-templates>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:text>/</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
 
   <xsl:template match="/">
     <html xmlns="http://www.w3.org/1999/xhtml">
@@ -53,10 +88,18 @@
           &amp;<span style="color:red">re:</span><i>MUS</i><span style="color:blue">ic</span>;
         </div>
         <hr/>
-        <h2>Music from <xsl:value-of select="audiolist/path"/></h2>
+        <h2>Music from <xsl:apply-templates select=".//path"/></h2>
+
+	<xsl:variable name="relurl">
+	  <xsl:choose>
+	    <xsl:when test="audiolist">
+	      <xsl:text>../</xsl:text>
+	    </xsl:when>
+	  </xsl:choose>
+	</xsl:variable>
 
         <div class="navigation">
-          <a href="{$audiostore.root}">
+          <a title="Top of the music tree" href="{$audiostore.root}">
             <xsl:choose>
               <xsl:when test="$home.image != ''">
                 <img>
@@ -65,15 +108,101 @@
                   </xsl:attribute>
                 </img>
               </xsl:when>
-              <xsl:when test="$home.image = ''">
+              <xsl:otherwise>
                 <xsl:text>Home</xsl:text>
-              </xsl:when>
+              </xsl:otherwise>
             </xsl:choose>
           </a>
           <xsl:text>|</xsl:text>
-          <a>
+          <a title="List of all artists" href="{$audiostore.root}artist/">
+            <xsl:choose>
+              <xsl:when test="$artists.image != ''">
+                <img>
+                  <xsl:attribute name="src">
+                    <xsl:value-of select="$artists.image"/>
+                  </xsl:attribute>
+                </img>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text>Artists</xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
+          </a>
+          <xsl:text>|</xsl:text>
+          <a title="List of all albums" href="{$audiostore.root}album/">
+            <xsl:choose>
+              <xsl:when test="$albums.image != ''">
+                <img>
+                  <xsl:attribute name="src">
+                    <xsl:value-of select="$albums.image"/>
+                  </xsl:attribute>
+                </img>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text>Albums</xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
+          </a>
+          <xsl:text>|</xsl:text>
+	  <xsl:variable name="url">
+	    <xsl:choose>
+	      <xsl:when test="audiolist">
+		..
+	      </xsl:when>
+	      <xsl:when test="dirlisting">
+		list/index.html
+	      </xsl:when>
+	    </xsl:choose>
+	  </xsl:variable>
+	  <xsl:variable name="linktext">
+	    <xsl:choose>
+	      <xsl:when test="audiolist">
+		<xsl:choose>
+		  <xsl:when test="$playlist.dirlist.image != ''">
+		    <img>
+		      <xsl:attribute name="src">
+			<xsl:value-of select="$playlist.dirlist.image"/>
+		      </xsl:attribute>
+		    </img>
+		  </xsl:when>
+		  <xsl:otherwise>
+		    <xsl:text>Directory list</xsl:text>
+		  </xsl:otherwise>
+		</xsl:choose>
+	      </xsl:when>
+	      <xsl:when test="dirlisting">
+		<xsl:choose>
+		  <xsl:when test="$playlist.songlist.image != ''">
+		    <img>
+		      <xsl:attribute name="src">
+			<xsl:value-of select="$playlist.songlist.image"/>
+		      </xsl:attribute>
+		    </img>
+		  </xsl:when>
+		  <xsl:otherwise>
+		    <xsl:text>Song list</xsl:text>
+		  </xsl:otherwise>
+		</xsl:choose> 
+	      </xsl:when>
+	    </xsl:choose>
+	  </xsl:variable>
+	  <xsl:variable name="linktitle">
+	    <xsl:choose>
+	      <xsl:when test="audiolist">
+		<xsl:text>List the contents in this directory</xsl:text>
+	      </xsl:when>
+	      <xsl:when test="dirlisting">
+		<xsl:text>List all songs in this scope (potentially a long list)</xsl:text>
+	      </xsl:when>
+	    </xsl:choose>
+	  </xsl:variable>
+          <a title="{$linktitle}" href="{$url}">
+	    <xsl:value-of select="$linktext"/>
+          </a>
+          <xsl:text>|</xsl:text>
+          <a title="Playlist in extended M3U format (most players support this)">
             <xsl:attribute name="href">
-              <xsl:text>list/m3u</xsl:text>
+	      <xsl:value-of select="$relurl"/><xsl:text>list/list.m3u</xsl:text>
             </xsl:attribute>
             <xsl:choose>
               <xsl:when test="$playlist.m3u.image != ''">
@@ -89,9 +218,9 @@
             </xsl:choose>
           </a>
           <xsl:text>|</xsl:text>
-          <a>
+          <a title="Playlist in remus format (internal format, used by the remus player)">
             <xsl:attribute name="href">
-              <xsl:text>list/remus</xsl:text>
+	      <xsl:value-of select="$relurl"/><xsl:text>list/remus</xsl:text>
             </xsl:attribute>
             <xsl:choose>
               <xsl:when test="$playlist.remus.image != ''">
@@ -108,7 +237,7 @@
           </a>
         </div>
         
-        <xsl:apply-templates select="audiolist"/>
+        <xsl:apply-templates/>
         
         <hr/>
         
@@ -134,7 +263,7 @@
       <thead>
         <tr class="colhead">
           <th>
-            <a href="?order=art_name&amp;order=alb_name&amp;order=au_track_number">
+            <a href="?order=art_sortname&amp;order=alb_name&amp;order=au_track_number">
 	      Artist:
 	    </a>
           </th>
@@ -207,4 +336,79 @@
     </tr>
   </xsl:template>
 
+
+  <xsl:template match="dirlisting">
+    <table xmlns="http://www.w3.org/1999/xhtml"
+	   class="audiolist"
+	   cellspacing="0">
+      <xsl:apply-templates select="columns"/>
+      <tbody>
+        <xsl:apply-templates select="item"/>
+      </tbody>
+    </table>
+  </xsl:template>
+
+  <xsl:template match="columns">
+    <thead xmlns="http://www.w3.org/1999/xhtml">
+      <tr class="colhead">
+	<xsl:apply-templates/>
+	<th>Count</th>
+      </tr>
+      <tr class="subtitle">
+	<th>
+	  <xsl:attribute name="colspan">
+	    <xsl:value-of select="@cols+1"/>
+	  </xsl:attribute>
+	  Number of items: <xsl:value-of select="../@length"/>
+	</th>
+      </tr>
+    </thead>
+  </xsl:template>
+
+  <xsl:template match="column">
+    <th xmlns="http://www.w3.org/1999/xhtml">
+      <a>
+	<xsl:attribute name="href">
+	  <xsl:text>?order=</xsl:text><xsl:value-of select="@key"/>
+	</xsl:attribute>
+	<xsl:value-of select="."/>
+      </a>
+    </th>
+  </xsl:template>
+
+  <xsl:template match="item">
+    <tr xmlns="http://www.w3.org/1999/xhtml">
+      <xsl:attribute name="class">
+        <xsl:choose>
+          <xsl:when test="position() mod 2 = 0">
+            <xsl:text>even</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>odd</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:attribute>
+
+      <xsl:apply-templates/>
+      <td style="text-align:right"><xsl:value-of select="@length"/></td>
+    </tr>
+  </xsl:template>
+
+  <xsl:template match="*">
+    <td xmlns="http://www.w3.org/1999/xhtml">
+      <xsl:choose>
+	<xsl:when test="@link">
+	  <a>
+	    <xsl:attribute name="href">
+	      <xsl:value-of select="@link"/>
+	    </xsl:attribute>
+	    <xsl:value-of select="."/>
+	  </a>
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:value-of select="."/>
+	</xsl:otherwise>
+      </xsl:choose>
+    </td>
+  </xsl:template>
 </xsl:stylesheet>

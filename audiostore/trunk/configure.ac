@@ -61,4 +61,5 @@ doc/xml/project.ent
 doc/manual/Makefile
 doc/manual/C/Makefile
 doc/manual/C/remus-audiostore-C.omf
+styles/param.xsl
 )

@@ -28,11 +28,14 @@
 
 
 <xsl:param name="remus.url" select="'http://www.remus.org/'"/>
-<xsl:param name="remus.version" select="'0.1'"/>
+<xsl:param name="remus.version" select="'0.3.0'"/>
 <xsl:param name="audiostore.url" select="'unknown'"/>
 <xsl:param name="audiostore.root" select="'/'"/>
-<xsl:param name="up.image" select="''"/>
 <xsl:param name="home.image" select="''"/>
+<xsl:param name="albums.image" select="''"/>
+<xsl:param name="artists.image" select="''"/>
+<xsl:param name="playlist.songlist.image" select="''"/>
+<xsl:param name="playlist.dirlist.image" select="''"/>
 <xsl:param name="playlist.m3u.image" select="''"/>
 <xsl:param name="playlist.remus.image" select="''"/>
 

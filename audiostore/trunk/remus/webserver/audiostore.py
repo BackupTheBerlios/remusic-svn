@@ -3,7 +3,6 @@
 
 import time
 import types
-import urllib
 
 import twisted.web.resource
 
@@ -51,7 +50,7 @@ def get_cached_collection(path, parent, child):
         return _path_to_query[path]
 
     coll = parent.subcollection(child)
- #   _path_to_query[path] = coll
+    _path_to_query[path] = coll
     return coll
 
 
@@ -82,7 +81,7 @@ class ASWrapper(webdav.WebDAV):
             ch = get_cached_collection(prepath,
                                        self.collection,
                                        child)
-            if ch.stat():
+            if ch.stat(request):
                 return ASWrapper(ch)
             else:
                 print "Failed to stat", ch, ch.cwd()
@@ -116,8 +115,8 @@ class ASWrapper(webdav.WebDAV):
     def isfile(self):
         return not self.isdir()
     
-    def stat(self):
-        return self.collection.stat()
+    def stat(self, request=None):
+        return self.collection.stat(request)
 
     def moveone(self, src, dst, overwrite):
         print "Renaming %s to %s" % (src, dst)
@@ -133,51 +132,24 @@ class ASWrapper(webdav.WebDAV):
         self.collection.rename(src_path, dst_path)
         self.collection.update()
 
-    def open(self, mode):
-        return self.collection.open(mode)
+    def open(self, mode, request):
+        return self.collection.open(mode, request)
 
     def content_type(self):
         return self.collection.content_type()
 
     def get_directory(self, request):
-        inet, addr, port = request.getHost()
-        if port == 80:
-            hostport = ''
-        else:
-            hostport = ':%d' % port
-
-        server =  urllib.quote('http%s://%s%s/' % (
-            request.isSecure() and 's' or '',
-            request.getRequestHostname(),
-            hostport), "/:")
-
         # Generate an index.html page of this directory, by requesting
         # the generic "list" child, which generates an XML document from
         # the SQL query, then the "index.html" child, which performs
         # the XML -> html XSLT transformation. This requires the
         # index.html.xsl file to be installed, which is part of the
         # standard distribution.
-        list = self.collection.subcollection("list")
-        prepath = tuple(request.prepath) + ("list", "index.html")
+        list = self.collection.subcollection("dirlist")
+        prepath = tuple(request.prepath) + ("dirlist", "index.html")
         coll = get_cached_collection(prepath, list, "index.html")
-
-
-        # Check query parameters for custom ordering
-        if request.args.has_key('order'):
-            # Find out what order parameters we had before, which
-            # doesn't have a DESC modifier on them. For those, we
-            # reverse the search order (i.e. apply the DESC modifier).
-            old_order = [ x.strip() for x in coll.order_by \
-                          if x.find("DESC") == -1 ]
-            
-            coll.order_by = [ key in old_order and key+" DESC" or key \
-                              for key in request.args['order'] ]
-            
         
         # Set up some information for the HTML generation
-        coll.server_name = server
-        coll.urlroot = "/music"
-
         file = coll.open("r", request)
         request.write(file.read())
         file.close()
