@@ -1,0 +1,33 @@
+2004-02-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* po/messages.pot, po/sv.po: Initial NLS support.
+
+	* www/index.html, www/index.css: Top page for the remus webserver.
+	
+	* remus/webserver/webdav/webdav.py (WebDAV.renderPROPFIND): Pass
+	http request object along to 'stat'.
+	(WebDAV.renderGET): Pass http request object along to 'open'.
+	(WebDAV.renderPUT): Fixed handling PUT request, code still used
+	medusa constructs.
+	(FileStore): New class to support storing of audio files into the
+	audiostore.
+
+2004-01-17  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/webserver/remuspage.py: Localization support.
+	(Menu): Support for menues.
+
+	* setup.py (gettext_install): Install gettext files.
+
+	* www/RemusPage.html: Logo.
+
+	* www/index.rpy: Localization support.
+
+	* styles/remus.css: Added .logo, .generated a, menu item styles.
+
+2003-11-27  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* all: Webserver framework based on Twisted. Remus specific
+	resources, and a fairly generic WebDAV resource. The WebDAV
+	resource if somewhat kludgy, being a currently half hearted
+	retrofit into twisted from a BasicHTTPServer based implementation.
