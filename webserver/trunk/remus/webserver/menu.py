@@ -129,7 +129,7 @@ class Menu(widgets.Widget):
     
     def setUp(self, request, node, data):
 
-        _ = remus.i18n.dgettext('remus-server')
+        _ = request.getSession(remus.i18n.ITranslator).gettext('remus-server')
 
         self["id"] = self.model.name
         self["class"] = "topmenu"

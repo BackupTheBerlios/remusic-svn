@@ -84,7 +84,8 @@ class Generated(widgets.Widget):
     tagName = 'div'
 
     def setUp(self, request, node, data):
-        _ = remus.i18n.dgettext('remus-server')
+        sess = request.getSession(remus.i18n.ITranslator)
+        _ = sess.gettext('remus-server')
         self["class"] = 'generated'
         t = _('Generated at %s by ')
         t = t % self.model.orig['time']
@@ -101,7 +102,7 @@ def remus_page_hierarchy(cls, l=None):
     if l == None:
         l = []
     if issubclass(cls, RemusPage):
-        l.append(cls)
+        l.insert(0, cls)
         for base in cls.__bases__:
             remus_page_hierarchy(base, l)
     return l
@@ -133,16 +134,26 @@ class RemusPage(page.Page):
 
     templateDirectory = "/usr/local/libdata/remus"
 
-    def __init__(self, *args, **kwargs):
-        page.Page.__init__(self, *args, **kwargs)
+    def getSubtemplate(self, request):
+        if self.template:
+            template = self.template
+        elif cls.templateFile:
+            if not self.templateDirectory:
+                mod = sys.modules[cls.__module__]
+                if hasattr(mod, '__file__'):
+                    self.templateDirectory = os.path.split(mod.__file__)[0]
 
-        hier = remus_page_hierarchy(self.__class__)
+            template = open(os.path.join(
+                self.templateDirectory, self.templateFile)).read()
+        return template
 
-        template = get_template(self)
+    def getTemplate(self, request):
+        template = open(os.path.join(
+            self.templateDirectory, self.templateFile)).read()
+        
+        subtemplate = self.getSubtemplate(request)
+        template = template.replace("<child/>", subtemplate)
 
-        for cls in hier[1:]:
-            template = merge_templates(cls, template)
-        self.template = template
         import time
         self.generated = {
             'time': time.strftime("%+"),
@@ -150,12 +161,14 @@ class RemusPage(page.Page):
             }
 
         self.menu = menu.create_basemenu()
+        return template
 
     def wvfactory_Stylesheet(self, request, node, model):
         return Stylesheet(model)
 
     def wmfactory_title(self, request):
-        return self.title
+        _ = request.getSession(remus.i18n.ITranslator).gettext('remus-server')
+        return _(self.title)
 
     def wmfactory_stylesheet(self, request):
         return "/styles/toppages.css"

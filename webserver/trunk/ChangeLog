@@ -1,3 +1,23 @@
+2004-02-13  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/webserver/menu.py (Menu.setUp): Get language information
+	from the session.
+
+	* remus/webserver/remuspage.py (Generated.setUp): Get language
+	information from the session.
+	(RemusPage.getSubtemplate): Changed slightly how remus pages are
+	generated to ease localizing them.
+
+	* remus/i18n/Init.py: Replaced the global current language
+	variables with a translator session object, so language is an
+	attribute of each session rather than global for the server.
+
+	* www/lang.rpy (LangSwitch.render): Keep language information in
+	the session object, not globally!!
+
+	* www/index.rpy (Index.getSubtemplate): New method, do proper
+	localization of page.
+
 2004-02-11  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/i18n/Init.py (dgettext): Encode strings in UTF-8 format.

@@ -31,9 +31,6 @@ import logging
 logger = logging.getLogger("remus.webserver")
 
 _languages = {}
-_curtranslations = {}
-_curlanguage = None
-lang = None
 
 def add_translation(domain, lang, language, locale, icon):
     l = gettext.translation(domain, languages=[lang], fallback=True)
@@ -47,68 +44,6 @@ def add_translation(domain, lang, language, locale, icon):
         }
     return l
 
-def install(language):
-    global lang
-    global _curlanguage
-
-    # Update every domain
-    found_translation = False
-    for domain in _languages.keys():
-        if _languages[domain].has_key(language):
-            lang = language
-            _curlanguage = _languages[domain][lang] 
-            translation = _curlanguage['translation']
-            found_translation = True
-        else:
-            logger.warning("Domain %s has no '%s' translation",
-                           (domain, language))
-            translation = gettext.translation(domain, languages=[language],
-                                              fallback=True)
-
-        _curtranslations[domain] = translation
-
-    import locale
-    locale.setlocale(locale.LC_ALL, get_locale())
-    if not found_translation:
-        logger.warning("No translations for %s was found", language)
-
-
-def translation(domain):
-    return _curtranslations[domain]
-
-def dgettext(domain):
-    trans = translation(domain)
-    _gettext = trans.gettext
-
-    def gettext(s):
-        "Encode the string as UTF8"
-        charset = trans.charset()
-        if charset:
-            import codecs
-            return codecs.getencoder("UTF8")(
-                unicode(_gettext(s), charset))[0]
-        else:
-            return s
-    return gettext
-
-def get_langinfo():
-    return _curlanguage
-
-def get_icon():
-    if _curlanguage:
-        return _curlanguage["icon"]
-    else:
-        return None
-
-def get_locale():
-    if _curlanguage:
-        return _curlanguage["locale"]
-    else:
-        return 'C'
-
-def current_lang():
-    return lang
-
 
 def installed_languages():
     # Returns the union of all domains' installed languages
@@ -118,3 +53,80 @@ def installed_languages():
             languages[lang] = d
 
     return languages
+
+
+from twisted.python import components
+
+class ITranslator(components.Interface):
+    def setLanguage(self, lang):
+        pass
+
+    def langinfo(self):
+        pass
+
+    def gettext(self, domain):
+        pass
+
+
+class Translator:
+
+    __implements__ = ITranslator
+
+    def __init__(self, session):
+        self.session = session
+        self.lang = "en"
+
+    def setLanguage(self, lang):
+        self.lang = lang
+
+    def icon(self):
+        info = self.languageinfo()
+        return info.values()[0]['icon']
+
+    def locale(self):
+        info = self.languageinfo()
+        return info.values()[0]['locale']        
+
+    def langinfo(self):
+        return _languages['remus_server'][self.lang]
+    
+    def gettext(self, domain):
+        info = self.languageinfo()
+        trans = info[domain]['translation']
+
+        def _gettext(s):
+            "Encode the string as UTF8"
+            charset = trans.charset()
+            if charset:
+                import codecs
+                return codecs.getencoder("UTF8")(
+                    unicode(trans.gettext(s), charset))[0]
+            else:
+                return s
+        return _gettext
+
+    def languageinfo(self):
+        found_translation = False
+        info = {}
+        for domain in _languages.keys():
+            if _languages[domain].has_key(self.lang):
+                info[domain] = _languages[domain][self.lang] 
+                found_translation = True
+            else:
+                logger.warning("Domain %s has no '%s' translation",
+                               (domain, language))
+                info[domain] = {}
+                info[domain]["translation"] = gettext.translation(
+                    domain, languages=[language],
+                    fallback=True)
+                
+        #import locale
+        #locale.setlocale(locale.LC_ALL, get_locale())
+
+        if not found_translation:
+            logger.warning("No translations for %s was found", language)
+    
+        return info
+
+from twisted.web import server
+components.registerAdapter(Translator, server.Session, ITranslator)

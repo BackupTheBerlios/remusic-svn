@@ -9,9 +9,10 @@ class LangSwitch(twisted.web.util.Redirect):
         
     def render(self, request):
         import remus.i18n
+        sess = request.getSession(remus.i18n.ITranslator)
         # Check if user want to change language
         if request.args.has_key("lang"):
-            remus.i18n.install(request.args["lang"][0])
+            sess.setLanguage(request.args["lang"][0])
 
         self.url = request.getHeader("referer") or self.url
         return twisted.web.util.Redirect.render(self, request)

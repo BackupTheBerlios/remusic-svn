@@ -38,11 +38,11 @@ logger = logging.getLogger("remus.webserver")
 import remus.i18n
 
 # Start out with english
-remus.i18n.install('en')
-_ = remus.i18n.dgettext('remus-server')
+#remus.i18n.install('en')
+#_ = remus.i18n.dgettext('remus-server')
 
 
-logger.info(_("Starting remus server"))
+logger.info("Starting remus server")
 
 # The audiostore must know the docroot to find the XSL stylesheets
 try:
