@@ -1,0 +1,102 @@
+* Introduction:
+
+  sqlml is a simple markup language for describing SQL databases, and
+  is shipped with four different XSLT files for transforming the
+  database description into SQL, a python module, a DocBook
+  "fragment", and optionally a graphviz graph.
+
+* Prerequisites:
+
+  sqlml is using xsltproc to transform the XML.  To generate the
+  graphical representation of the tables, graphviz must be installed.
+  This is optional though.  At the moment, the DocBook documentation
+  generated assumes graphviz is available, since it imports the figure
+  generated.
+
+  The generated SQL file might contain MySQL specific constructs, this
+  is the only database I've used so far.  It *may* work with other SQL
+  database implementations though, I've not intentionally used non
+  standard things.  If you are using a different database and are
+  getting errors when trying to create the tables, take a look at
+  'makesql.xsl'.  I would appreciate patches which makes it work with
+  other databases (or alternatively, a 'make<dbname>.xsl' tailored for
+  a particular database implementation).
+  
+* Installation
+
+  First, run
+
+  $ ./configure
+
+  and then (assuming no errors)
+
+  # python setup.py install
+
+  This installs a python module (sqlml), a makefile for inclusion (see
+  below) and a couple of XSLT files for transforming the XML file into
+  the various formats.  All files except the python module is
+  installed in <prefix>/share/sqlml (the python module is of course
+  installed in the standard python lib tree).
+  
+* Using sqlml
+
+  Lets assume you are implementing a simple order database.  For
+  simplicity's sake, we're just defining three tables, one containing
+  the orderable items, another containing orders, and a third
+  containing information about each order.
+
+** The items table
+
+   Fields:
+
+   - item identity
+
+   - price
+  
+** The orders table
+
+   Fields:
+
+   - order identity
+
+   - name of the person who ordered
+  
+** The itemorders table
+
+   Fields:
+
+   - order id (which order this belongs to)
+   - item id (which item is being ordered)
+   - quantity (how many of this item is being ordered)
+  
+** Writing the sqlml file
+
+   The file example/orderdb.xml contains the sqlml definition of the
+   above tables.  If you are familiar with XML syntax and SQL, it
+   should be fairly straightforward to grasp the idea.  
+    
+** Generating SQL and python files
+
+   The following Makefile shows how to transform the above sqlml file
+   into the various supported formats:
+
+   ---
+   include /usr/local/share/sqlml/sqlml.make
+
+   # This assumes the above sqml file is named orderdb.xml
+   DB	   = orderdb
+
+   all: ${DB}.py ${DB}.sql ${DB}.png ${DB}-doc.xml
+   ---
+
+   See the example directory, and type make (need GNU make) to see the
+   results.
+   
+** Using the python module
+
+   TBA
+
+
+# Local Variables:
+# mode: outline
+# End:

@@ -1,0 +1,44 @@
+#!/usr/local/bin/python
+
+"""sqlml is a simple XML language and a set of tools for converting
+the XML file into a number of formats.
+
+The XML file describes a set of MySQL tables, and this file can be
+converted into:
+
+- an SQL file for creating a database and the tables.
+
+- a python module for constructing SQL queries, automatically handling
+  table relations.
+
+- a graphviz graph, drawing the table layout graphically (need
+  graphviz installed).
+"""
+
+from distutils.core import setup
+
+dist = setup(
+    name="@PACKAGE_NAME@",
+    version="@PACKAGE_VERSION@",
+    description="Simple XML based SQL table description.",
+    author="Daniel Larsson",
+    author_email="Daniel.Larsson@servicefactory.se",
+    long_description=__doc__,
+
+    py_modules = ['sqlquery'],
+    data_files = [('share/sqlml',
+                   ('sqlml.make',
+                    'makesql.xsl',
+                    'makepython.xsl',
+                    'makedoc.xsl',
+                    'makedot.xsl')),
+                  ],
+    classifiers = [
+        "Development Status :: 0 - Alpha",
+        "Environment :: ",
+        "Intended Audience :: Developers",
+        "Programming Language :: Python",
+        "Topic :: Database :: MySQL",
+    ],
+    verbose=1
+    )

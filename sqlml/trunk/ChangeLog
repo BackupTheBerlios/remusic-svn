@@ -1,0 +1,38 @@
+2004-02-09  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* sqlquery.py: Added 'literal', to convert literal values to valid
+	  SQL literals.
+	  (Table.reachable): Calculate if a table is reachable from this
+	  table, directly or recursively.
+	  (QueryBinaryOp.__init__): Allow multiple operands, not only two.
+	  (QueryBinaryOp.__str__): Renamed from 'expr'. Literals are now
+	  inserted into the calculated expression rather than returned
+	  separately, forcing the user to handle them explicitly.
+	  (Select.__where): Try include more tables if not all tables in
+	  the query are connected.  If a table is found which connects the
+	  tables, it is included in the query, and relational constraint
+	  expressions are added to avoid the cartesian product which would
+	  otherwise result.
+
+2004-02-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* makedoc.xsl: Removed copy&paste code which wasn't used.
+
+	* sqlquery.py (__all__): Added GREATER_* and LESS_* as exported
+	symbols. Those are functions for creating queries.
+
+2004-01-28  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* makesql.xsl: Ignore all <doc:...> tags in output.
+
+	* makedoc.xsl: New file, convert an sqlml file into a DocBook
+	fragment.
+
+	* example/Makefile (doc): Added rule to build a DocBook fragment
+	from the SQL description file.
+
+	* example/orderdb.xml: Added some documentation tags.
+
+	* sqlquery.py (Select.select): 'group_by' can be a single field,
+	and not only a sequence.
+
