@@ -16,6 +16,38 @@ from distutils import log
 import os
 config_files_path = os.path.join("etc", "remus")
 
+class gettext_install(Command):
+    description = "Install gettext catalog files"
+
+    user_options = []
+    
+    def initialize_options(self):
+        self.install_dir = None
+        self.outfiles = []
+
+    def finalize_options (self):
+        self.set_undefined_options(
+            'install',
+            ('install_data', 'install_dir'),
+            )
+
+    def run(self):
+        import os
+        dir = os.path.join(self.install_dir, 'share/locale')
+        for file in os.listdir('po'):
+            if file[-3:] == '.po':
+                lang = os.path.splitext(file)[0]
+                os.system("msgfmt -o po/%s.mo po/%s.po" % (lang, lang))
+                outfile = self.distribution.metadata.name + '.mo'
+                (out, _) = self.copy_file(
+                    os.path.join("po", lang+'.mo'),
+                    os.path.join(dir, lang, "LC_MESSAGES", outfile))
+                self.outfiles.append(out)
+
+    def get_outputs (self):
+        return self.outfiles
+
+
 class webserver_setup (Command):
 
     # Brief (40-50 characters) description of the command
@@ -28,9 +60,6 @@ class webserver_setup (Command):
 
     def initialize_options (self):
         self.install_dir = None
-
-    # initialize_options()
-
 
     def finalize_options (self):
         self.set_undefined_options('install',
@@ -64,6 +93,7 @@ class webserver_setup (Command):
 
 
 install.install.sub_commands.append(('webserver_setup', None))
+install.install.sub_commands.append(('gettext_install', None))
 
 
 dist = setup(
@@ -80,7 +110,9 @@ dist = setup(
                 'remus.webserver.webdav'],
     scripts = ['remus_server'],
     data_files = [('libdata/remus',
-                   ('www/index.rpy','www/RemusPage.html')),
+                   ('www/index.rpy',
+                    'www/index.css',
+                    'www/RemusPage.html')),
                   ('libdata/remus/styles',
                    ('styles/remus.css',)),
                   (config_files_path,
@@ -94,6 +126,8 @@ dist = setup(
         "Programming Language :: Python",
         "Topic :: Multimedia :: Audio",
     ],
-    cmdclass={'webserver_setup': webserver_setup},
+    cmdclass={'webserver_setup': webserver_setup,
+              'gettext_install': gettext_install},
     verbose=1
     )
+

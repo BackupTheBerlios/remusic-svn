@@ -1,3 +1,16 @@
+2004-01-17  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/webserver/remuspage.py: Localization support.
+	(Menu): Support for menues.
+
+	* setup.py (gettext_install): Install gettext files.
+
+	* www/RemusPage.html: Logo.
+
+	* www/index.rpy: Localization support.
+
+	* styles/remus.css: Added .logo, .generated a, menu item styles.
+
 2003-11-27  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* all: Webserver framework based on Twisted. Remus specific
