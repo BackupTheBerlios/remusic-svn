@@ -15,7 +15,8 @@
   <xsl:param name="admon.graphics" select="1"/>
   <xsl:param name="use.extensions" select="1"/>
   <xsl:param name="tablecolumns.extension" select="0"/>
-  <xsl:param name="fop.extensions" select="1"/>
+  <xsl:param name="passivetex.extensions" select="1"/>
+  <xsl:param name="fop.extensions" select="0"/>
   <xsl:param name="double.sided" select="1"/>
 
 
@@ -40,8 +41,8 @@
 	      margin-left="0.5in - {$page.margin.inner} + {$title.margin.left}">
       <fo:leader
         leader-pattern="rule"
-        leader-length.maximum="720"
-        leader-length.optimum="720"/>
+        leader-length.maximum="190mm"
+        leader-length.optimum="190mm"/>
     </fo:block>
     <fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format"
 	      xsl:use-attribute-sets="book.titlepage.recto.style"
