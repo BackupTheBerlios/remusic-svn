@@ -98,7 +98,7 @@ install.install.sub_commands.append(('gettext_install', None))
 
 dist = setup(
     name="remusserver",
-    version="0.1",
+    version="0.1.0",
     description="Webserver used in the REMUS project ",
     author="Daniel Larsson",
     author_email="Daniel.Larsson@servicefactory.se",
