@@ -108,7 +108,7 @@ class keyboard_handler:
             if self.panel.hidden():
                 self.panel.window().erase()
                 self.panel.window().box()
-                self.panel.window().addstr(1, 1, "REMUS player v@PACKAGE_VERSION@")
+                self.panel.window().addstr(1, 1, "REMUS player @PACKAGE_VERSION@")
                 self.panel.window().addstr(2, 1, "(c) Daniel Larsson")
                 self.panel.show()
                 self.panel.window().refresh()
