@@ -642,8 +642,63 @@ metainfo_ogg = MetaInfo_ogg()
 # ------------------------------------------------------------
 
 
-def metainfo_sid(filename, metainfo):
-    pass
+class MetaInfo_sid:
+
+    def read(self, filename, metainfo):
+        
+        try:
+            if minfo.title:
+                metainfo["title"] = minfo.title
+            if minfo.genre:
+                metainfo["genre"] = minfo.genre
+            if minfo.date:
+                metainfo["year"] = minfo.date
+            if minfo.trackno:
+                metainfo["tracknr"] = minfo.trackno
+            if minfo.album:
+                metainfo["album"] = minfo.album
+            if minfo.artist:
+                metainfo["artist"] = minfo.artist
+            if minfo.length:
+                metainfo["length"] = "00:%02d:%02d" % \
+                                     (minfo.length / 60, minfo.length % 60)
+        except:
+            pass
+
+        import mmpython.audio.eyeD3
+        file = mmpython.audio.eyeD3.Mp3AudioFile(filename)
+        metainfo["bitrate"] = file.getBitRateString()
+        metainfo["samplefreq"] = file.header.sampleFreq
+        metainfo["audio_mode"] = file.header.mode
+        metainfo["subtype"] = "MPEG %s layer %s" % (file.header.version,
+                                                    'I' * file.header.layer)
+
+
+    def update(self, filename, metainfo):
+        import mmpython.audio.eyeD3
+        file = mmpython.audio.eyeD3.Mp3AudioFile(filename)
+
+        if metainfo.has_key("title"):
+            file.tag.setTitle(metainfo["title"])
+        if metainfo.has_key("album"):
+            file.tag.setAlbum(metainfo["album"])
+        if metainfo.has_key("artist"):
+            file.tag.setArtist(metainfo["artist"])
+        if metainfo.has_key("year"):
+            file.tag.setDate(metainfo["year"])
+        if metainfo.has_key("tracknr"):
+            file.tag.setTrackNum(metainfo["tracknr"])
+        if metainfo.has_key("genre"):
+            file.tag.setGenre("genre")
+
+        # Saving as 2.3 instead of 2.4, since id3v2 doesn't seem to
+        # recognize 2.4 yet.
+        file.tag.update(mmpython.audio.eyeD3.ID3_V2_3)
+
+
+metainfo_sid = MetaInfo_sid()
+
+
 
 
 mime_map = {

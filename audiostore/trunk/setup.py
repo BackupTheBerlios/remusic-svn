@@ -80,17 +80,19 @@ build.build.sub_commands.insert(0, ('audiostore_build', None))
 
 dist = setup(
     name="audiostore",
-    version="0.1",
+    version="0.2",
     description="WebDAV server for storing audio files",
     author="Daniel Larsson",
     author_email="Daniel.Larsson@servicefactory.se",
     url="http://www.remus.org/audiostore",
     long_description=__doc__,
 
-    packages = ['remus', 'remus.audiostore', 'remus.webserver.handlers'],
+    packages = ['remus', 'remus.audiostore', 'remus.webserver'],
     scripts = ['audiostore_resync'],
     data_files = [('etc/remus/audiostore',
                    ('db/audiostore.sql',)),
+                  ('libdata/remus',
+                   ('www/music.rpy',)),
                   ('libdata/remus/styles',
                    ('styles/audiostore.css',
                     'styles/index.html.xsl',

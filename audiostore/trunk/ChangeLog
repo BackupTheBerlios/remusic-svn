@@ -1,4 +1,29 @@
-2003-10-21  Daniel Larsson  <daniel@djllaptop.servicefactory.se>
+2003-11-27  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/audiostore: Removed obsolete files as part of the switch
+	from medusa to twisted.
+	
+	* remus/audiostore/as_collection.py (mk_filename, mk_sqlname):
+	Translate from SQL names to "filesystem" names, and vice versa.
+	(Collection.select): Support order_by and group_by queries.
+	(SearchColl.parse_query): Change semantics of URL queries without
+	field specifier to match songs with either title, album name or
+	artist name, rather than having to match all three, which is
+	rather dumb. Also, it had a syntax error to top it off...
+
+	* remus/audiostore/sidinfo.py: Embryo to supporting SID files in
+	the store.
+
+	* remus/database.py (Select.select): Pass along the query to the
+	self.tables function, to correctly compute the set of tables
+	needed to consult for the given query.
+
+	* remus/webserver/audiostore.py: New file. Wraps an audiostore
+	collection as a twisted resource.
+
+	* README: medusa -> twisted
+
+2003-10-21  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/audiostore/as_collection.py: Numerous changes to
 	accomodate the changes below.
@@ -25,7 +50,7 @@
 	based on what fields are used, and correct WHERE-clauses are
 	inserted based on table relations.
 
-2003-10-01  Daniel Larsson  <daniel@djllaptop.servicefactory.se>
+2003-10-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* setup.py: Added custom distutil command, so I can create the SQL
 	tables on installation. distutils is a fairly complex system, I
@@ -41,7 +66,7 @@
 	the database, which is fed through xsltproc with an XSLT style
 	sheet, and the resulting HTML page is sent back.
 
-2003-09-22  Daniel Larsson  <daniel@djllaptop.servicefactory.se>
+2003-09-22  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* setup.py: distutils installation / distribution building.
 

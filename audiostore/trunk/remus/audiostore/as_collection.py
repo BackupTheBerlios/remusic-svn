@@ -15,6 +15,7 @@ import logging
 import stat
 import time
 import posixpath
+import string
 
 try:
     from cStringIO import StringIO
@@ -55,6 +56,19 @@ def audiostore_file_root(root):
     as the xslt transformation script and others."""
     global _fs_root
     _fs_root = root
+
+
+db_to_fn = string.maketrans(" ", "_")
+fn_to_db = string.maketrans("_", " ")
+
+#
+# Translate between file names and SQL column values
+#
+def mk_filename(path):
+    return path.replace("?", "  q").replace("/", "\\").replace("&", " and ").replace("(", " p ").replace(")", " d ").translate(db_to_fn).lower()
+
+def mk_sqlname( path):
+    return path.translate(fn_to_db).replace(" d ", ")").replace(" p ", "(").replace("  and  ", " & ").replace("\\", "/").replace("  q", "?")
 
 
 class Collection(object):
@@ -111,17 +125,15 @@ class Collection(object):
         return (0444, 0, 1, 1, os.getuid(), os.getgid(), 0,
                 time.time(), time.time(), time.time())
 
-    def filesystem(self):
-        return self.fs
-
     def subcollection(self, name):
+        print "Looking for subcollection", name
         if name == "songs":
             return SongsColl(self)
         elif name == "search":
             return SearchColl(self)
         elif name == "list":
             return PlaylistColl(self)
-        elif name.startswith("**song**"):
+        elif name.startswith("--song--"):
             return SongId(self, name)
         else:
             return None
@@ -151,7 +163,10 @@ class Collection(object):
             selection.addcolumn(field)
 
         logger.info(self.query and self.query.expr()[0])
-        sql, args = selection.select(self.query)
+        sql, args = selection.select(
+            query=self.query,
+            order_by=self.order_by,
+            group_by=self.group_by)
         logger.info("Performing SQL: %s", sql % self.db.literal(args))
 
         from MySQLdb.cursors import DictCursor
@@ -202,7 +217,7 @@ class Collection(object):
         count = cursor.execute(sql, args)
     
         for au_id in cursor:
-            audioobject = AudiostoreAudioObject(self.store, au_id)
+            audioobject = audiostore.AudioObject(self.store, au_id)
             logger.info("removing audio clip %s", au_id)
             audioobject.remove()
 
@@ -242,9 +257,9 @@ class SearchColl(Collection):
                 my_queries.append(REGEXP(self.field_map[field], regex))
             except ValueError:
                 my_queries.append(
-                    AND(REGEXP(db_audiostore.au_title, regex),
-                        REGEXP(db_audiostore.alb_name, regex),
-                        REGEXP(db_audiostore.art_name, regex)))
+                    OR(OR(REGEXP(db_audiostore.au_title, q),
+                          REGEXP(db_audiostore.alb_name, q)),
+                       REGEXP(db_audiostore.art_name, q)))
         return reduce(AND, my_queries)
 
 
@@ -319,7 +334,7 @@ class SongId(Song):
         Collection.__init__(self, parent, query)
 
     def name(self):
-        return "__song__%s" % self.id
+        return "--song--%s" % self.id
 
 
 class SongList(Collection):
@@ -364,9 +379,14 @@ class PlaylistColl(Collection):
     def subcollection(self, name):
         """The name of the subcollection is used to look up an XSLT
         file to apply."""
-        print "FS root is", _fs_root
-        xsl_stylesheet = os.path.join(_fs_root, "styles", "%s.xsl" % name)
-        return IndexXML(self, xsl_stylesheet)
+        subcol = super(PlaylistColl, self).subcollection(name)
+        if not subcol:
+            print "Playlist subcoll:", name
+            xsl_stylesheet = os.path.join(_fs_root, "styles", "%s.xsl" % name)
+            return IndexXML(self, xsl_stylesheet)
+        else:
+            print "Playlist subcoll:", name, "returns", subcol
+            return subcol
 
 
 def xml_fix_string(s):
@@ -400,7 +420,7 @@ class IndexXML(Collection):
         )
     
     order_by = (
-        "au_name",
+        "au_title",
         "alb_name",
         "au_track_number",
         )
@@ -412,7 +432,7 @@ class IndexXML(Collection):
         self.server_name = 'unknown.org'
         self.xsltfile = xsltfile
 
-    def create_file(self):
+    def create_file(self, request=None):
         # Build an index page
         import tempfile
         fd, tempname = tempfile.mkstemp()
@@ -420,16 +440,20 @@ class IndexXML(Collection):
         os.write(fd, '<?xml version="1.0" encoding="utf-8"?>\n')
         os.write(fd, '<audiolist length="%s">\n' % cnt)
 
-        os.write(fd, '\t<path>%s</path>\n' % xml_fix_string(self.parent.cwd()))
+        if request:
+            path = request.path[len(self.urlroot):]
+        else:
+            path = self.parent.cwd()
+        os.write(fd, '\t<path>%s</path>\n' % xml_fix_string(path))
 
         for dict in self.cursor:
             
             dict["art_name"] = xml_fix_string(dict["art_name"])
             dict["au_title"] = xml_fix_string(dict["au_title"])
             dict["alb_name"] = xml_fix_string(dict["alb_name"])
-            dict["songid"] = "**song**%s" % dict["au_id"]
+            dict["songid"] = "--song--%s" % dict["au_id"]
 
-            filename = self.filesystem().mk_filename(dict["songid"])
+            filename = mk_filename(dict["songid"])
             dict["filename"] = xml_fix_string(filename)
             dict["au_length_sec"] = dict["TIME_TO_SEC(au_length)"]
 
@@ -470,9 +494,9 @@ class IndexXML(Collection):
     def isdir(self):
         return False
 
-    def open(self, mode):
+    def open(self, mode, request=None):
         if not self.file or self.file.closed:
-            self.create_file()
+            self.create_file(request)
         self.file.seek(0)
         return self.file
         
@@ -550,7 +574,7 @@ class AlbumsColl(Collection):
         db_audiostore.alb_name,
         )
 
-    def __init__(self, parent, query=None,):
+    def __init__(self, parent, query=None):
         Collection.__init__(self, parent, query)
 
     def isdir(self):
@@ -558,6 +582,14 @@ class AlbumsColl(Collection):
 
     def name(self):
         return "album"
+
+    def subcollection(self, name):
+        print "Albums: subcollection =", name
+        coll = Collection.subcollection(self, name)
+        if coll:
+            return coll
+        else:
+            return AlbumColl(self, name)
 
 
 class AlbumColl(Collection):
@@ -572,9 +604,10 @@ class AlbumColl(Collection):
 
     def __init__(self, parent, album):
         self.album = album
-        Collection.__init__(self, parent, AND(parent.query,
-                                              EQUAL(db_audiostore.alb_name,
-                                                    album)))
+        my_query = EQUAL(db_audiostore.alb_name, album)
+        if parent.query:
+            my_query = AND(parent.query, my_query)
+        Collection.__init__(self, parent, my_query)
 
     def name(self):
         return self.album
@@ -595,7 +628,7 @@ class GenreColl(Collection):
 
     fields = (
         db_audiostore.art_name,
-        )
+    )
 
     group_by = (
         'art_name',
@@ -603,7 +636,9 @@ class GenreColl(Collection):
 
     def __init__(self, parent, genre):
         self.genre = genre
-        query = EQUAL(db_audiostore.ge_genre, genre)
+        query = AND(
+            EQUAL(db_audiostore.ge_genre, genre),
+            EQUAL(db_audiostore.art_id, db_audiostore.au_artist))
         Collection.__init__(self, parent, query)
 
     def isdir(self):

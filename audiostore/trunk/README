@@ -8,11 +8,11 @@
 
   * Python 2.3
   * MySQL 3.23.57
-  * medusa 0.5.3
+  * twisted 1.1.0
   * id3lib-3.8.3
   * mpg123-0.59r_9
   * vorbis-tools-1.0
-  * cadaver-0.21.0 (*)
+  * cadaver-0.22.0 (*)
 
   These are the packages audiostore uses directly.  Most of the above
   packages in turn depend on other packages, which aren't included
@@ -36,7 +36,7 @@
   used to generate the HTML pages.  To change the look of these, fiddle
   with the following files directly:
 
-  /usr/local/libdata/remus/styles/audiostore.xsl
+  /usr/local/libdata/remus/styles/index.html.xsl
   /usr/local/libdata/remus/styles/audiostore.css
 
   The format of the XML file which is processed by the above XSLT code

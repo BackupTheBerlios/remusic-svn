@@ -52,7 +52,7 @@ class Relation(Column):
 def query_tables(query, tables):
     "Insert the tables needed for the query into 'tables'."
     if hasattr(query, 'table') and query.table not in tables:
-        tables.append(table)
+        tables.append(query.table)
     if hasattr(query, 'left'):
         query_tables(query.left, tables)
     if hasattr(query, 'right'):
@@ -95,7 +95,7 @@ class Select:
         a tuple of arguments to pass to the 'cursor.execute'
         method."""
         relations = []
-        tables = tables or self.tables()
+        tables = tables or self.tables(query)
         for table in tables:
             for reltable in tables:
                 if table == reltable:
@@ -127,7 +127,7 @@ class Select:
     def select(self, query=None, order_by=None, group_by=None):
         "Return an SQL select statement"
         columns = ", ".join([ col.name for col in self.__columns ])
-        tables = ", ".join([ tab.name for tab in self.tables() ])
+        tables = ", ".join([ tab.name for tab in self.tables(query) ])
 
         where_clause, args = self.where(query)
         
