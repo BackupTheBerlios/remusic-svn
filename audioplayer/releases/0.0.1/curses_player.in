@@ -1,0 +1,281 @@
+#!/usr/local/bin/python
+# -*- coding: UTF-8 -*-
+#
+"""Download a playlist from the audiostore, and drive mpg123 with it"""
+
+import os
+import sys
+import re
+import logging
+import curses
+
+from curses import panel
+
+#import remus.player.audioplugin
+import remus.player.remus_playlist
+#import remus.player.pluginmp3
+from remus.player.player import Player
+
+logger = logging.getLogger("remus.player")
+logger.addHandler(logging.FileHandler("curses_player.log"))
+
+
+help = """\
+   \033[1mCOMMANDS\033[m
+
+"""
+
+
+
+class keyboard_handler:
+    def __init__(self, player):
+        self.player = player
+        w = curses.newwin(4, 20, 0, 58)
+
+        self.panel = panel.new_panel(w)
+        self.panel.hide()
+
+        w = curses.newwin(13, 38, 5, 21)
+        self.helppanel = panel.new_panel(w)
+        self.helppanel.hide()
+        w.box()
+        w.addstr(1, 15, "COMMANDS", curses.A_BOLD)
+        w.addstr(3, 2, "t     - Toggle time display")
+        w.addstr(4, 2, "n     - Next song")
+        w.addstr(5, 2, "p     - Toggle pause")
+        w.addstr(6, 2, "<n>   - Jump <n> songs forward")
+        w.addstr(7, 2, "ESC   - Abort jump")
+        w.addstr(8, 2, "->    - Fast forward")
+        w.addstr(9, 2, "<C>-L - Refresh screen")
+        w.addstr(10, 2, "?     - This screen")
+        w.addstr(11, 2, "q     - Quit")
+
+        self.nr = ''
+        curses.meta(1)
+        self.multi = None
+
+    def handle_read(self):
+        cmd = sys.stdin.read(1)
+        if not self.helppanel.hidden():
+            self.helppanel.hide()
+            panel.update_panels()
+            self.player.refresh()
+
+        if self.multi:
+            if ord(cmd) == 67:
+                self.player.fast_forward()
+            elif ord(cmd) == 68:
+                self.player.fast_backward()
+            else:
+                logger.warning("Unhandled multikbd input: %d" % ord(cmd))
+            self.multi = False
+        elif cmd == 't':
+            # Toggle time mode
+            self.player.toggle_time_mode()
+        elif cmd == 'n':
+            logger.warning("Next song")
+            self.player.next()
+        elif cmd == 'p':
+            self.player.pause()
+        elif cmd == 'q':
+            self.player.quit()
+        elif cmd in '0123456789':
+            if not self.nr:
+                self.panel.window().erase()
+                self.panel.window().box()
+                self.panel.window().addstr(1, 1, "Jump to song: ")
+                self.panel.show()
+            self.nr += cmd
+            self.panel.window().addch(cmd)
+            self.panel.window().refresh()
+            if len(self.nr) == 2:
+                self.panel.hide()
+                self.player.next(int(self.nr)-1)
+                self.nr = ''
+        elif cmd == "\r" and self.nr:
+            self.panel.hide()
+            self.player.next(int(self.nr)-1)
+            self.nr = ''
+        elif ord(cmd) == 27: # ESC
+            if not self.panel.hidden():
+                self.panel.hide()
+                self.nr = ''
+                panel.update_panels()
+                self.player.refresh()
+        elif ord(cmd) == 12: # Ctrl-L
+            self.player.refresh()
+        elif cmd == "v":
+            if self.panel.hidden():
+                self.panel.window().erase()
+                self.panel.window().box()
+                self.panel.window().addstr(1, 1, "REMUS player @PACKAGE_VERSION@")
+                self.panel.window().addstr(2, 1, "(c) Daniel Larsson")
+                self.panel.show()
+                self.panel.window().refresh()
+            else:
+                self.panel.hide()
+                self.player.refresh()
+
+        elif cmd == "?":
+            if self.helppanel.hidden():
+                self.helppanel.show()
+            panel.update_panels()
+            curses.doupdate()
+            
+        elif ord(cmd) == 91:
+            self.multi = True
+        else:
+            logger.warning("Unhandled kbd input: %d" % ord(cmd))
+            
+
+class curses_player(Player):
+
+    def __init__(self, url):
+        Player.__init__(self)
+        self.keyb_handler = keyboard_handler(self)
+
+        self.playlist.add_url(url)
+        self.playlist.shuffle()
+
+        # Create curses windows
+        self.w = curses.newwin(4, 80, 0, 0)
+        self.songw = curses.newpad(len(self.playlist)+curses.LINES, 70)
+
+        for song in self.playlist:
+            time = song.length
+            artist = song.artist
+            title = song.title
+            time = "%d:%02d" % (time / 60, time % 60)
+            s = "%-30s  %-30s  %5s" % (artist[:30], title[:30], time)
+            s = s[:69] + "\n"
+            import codecs
+            s = codecs.getencoder("ascii")(s, 'replace')[0]
+            self.songw.addstr(s)
+
+        lines = curses.LINES-5
+        songnrw = curses.newwin(lines, 4, 5, 0)
+        for i in range(1, lines):
+            songnrw.addstr("%3d\n" % i)
+        songnrw.refresh()
+        self.songnrw = songnrw
+
+        self.convert_time = self.time_elapsed
+        self.oldsecs = 0
+        self.update_songwin()
+
+    def idle(self, arg):
+        # Check stdin for input
+        super(curses_player, self).idle()
+        import select
+        s = select.select([sys.stdin.fileno()], [], [], 0.1)
+        if s[0]:
+            self.keyb_handler.handle_read()
+        return True
+
+    def refresh(self):
+        self.w.redrawwin()
+        self.songnrw.redrawwin()
+        self.w.refresh()
+        self.songnrw.refresh()
+        self.update_songwin()
+
+    def ready(self, plugin):
+        "Plugin signaling it's ready to receive streams"
+        self.play_song()
+
+    def elapsed_time(self, time):
+        "Plugin telling us how long we've been playing current song"
+        self.time = time
+        self.refresh_playerwin()
+
+    def streaminfo(self, attrs):
+        info = "MPEG %s %s, %s kbit/s, %s Hz %s" % \
+               (1, "I" * attrs['layer'], 'unknown', 'unknown', attrs['mode'])
+        self.w.addstr(2, 1, info)
+        self.w.refresh()
+
+    def plugin_error(self, plugin, error):
+        pass
+
+    def next(self, jump=0):
+        self.cursong += jump
+        self.eof(self)
+
+    def fast_forward(self):
+        self.plugin.fast_forward(32)
+
+    def fast_backward(self):
+        self.plugin.fast_backward(32)
+
+    def toggle_time_mode(self):
+        if self.convert_time == self.time_elapsed:
+            self.convert_time = self.time_remaining
+        else:
+            self.convert_time = self.time_elapsed
+
+    def time_elapsed(self, time):
+        return "Elapsed", time
+
+    def time_remaining(self, time):
+        return "Remains", self.playlist[self.cursong].length - time
+
+    def refresh_playerwin(self):
+        mode, time = self.convert_time(self.time)
+        secs = int(time)
+        mins, secs = secs / 60, secs % 60
+        if secs != self.oldsecs:
+            self.oldsecs = secs
+            self.w.addstr(3, 1, "%s: %2d:%02d" % (mode, mins, secs))
+            self.w.refresh()
+
+    def play(self):
+        super(curses_player, self).play()
+        self.w.erase()
+        if self.cursong >= len(self.playlist):
+            self.quit()
+            return
+
+        song = self.playlist[self.cursong]
+            
+        time = song.length
+        artist = song.artist
+        title = song.title
+        time = "%d:%02d" % (time / 60, time % 60)
+        s = "Playing %s - %s (%s)" % (artist, title, time)
+        self.w.addstr(1, 1, s.encode("UTF-8"))
+        self.w.refresh()
+
+        # Set window title if this is an xterm
+        if os.environ["TERM"] == "xterm":
+            t = "\033]0;%s - %s\007" % (artist, title)
+            sys.stdout.write(t.encode("UTF-8"))
+
+#        self.plugin.play(song["url"])
+        self.update_songwin()
+
+
+    def update_songwin(self):
+        self.songw.refresh(self.cursong + 1, 0, 5, 5, curses.LINES-2, 75)
+
+
+def main(win):
+    url = sys.argv[1]
+
+    win = curses.initscr()
+
+    mpg_player = None
+    try:
+        curses.cbreak()
+        # Hide cursor
+        curses.curs_set(0)
+        
+        mpg_player = curses_player(url)
+        mpg_player.start()
+
+    finally:
+        curses.endwin()
+        if mpg_player:
+            mpg_player.quit()
+
+#curses.wrapper(main)
+main(None)
