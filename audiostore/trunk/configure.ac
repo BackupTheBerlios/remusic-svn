@@ -2,7 +2,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
  
-AC_INIT(remus-audiostore, 0.5.0)
+AC_INIT(remus-audiostore, 0.4.1)
 AM_INIT_AUTOMAKE
 
 RELEASE_DATE=2004-02-10

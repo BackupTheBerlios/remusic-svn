@@ -1,5 +1,13 @@
 2004-02-11  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
+	* remus/audiostore/as_collection.py: Removed references to
+	remus_art_alb_map.
+
+	* remus/audiostore/audiostore.py: Removed references to
+	remus_art_alb_map.
+
+	* db/audiostore.xml: Removed the remus_art_alb_map table.
+
 	* styles/index.html.xsl: Set encoding to UTF-8.
 
 	* setup.py.in (dist): Added docbook.css.
