@@ -1,3 +1,16 @@
+2004-02-11  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/i18n/Init.py (dgettext): Encode strings in UTF-8 format.
+
+	* www/RemusPage.html: Added <meta> tag to define content
+	type. Added validation icons/links.
+
+	* www/images/valid_xhtml.png, www/images/valid_xss.png,
+	www/images/anybrowser.png: Validation icons.
+
+	* styles/remus.css: Added some Plone styles for the validation
+	icons.
+
 2004-02-09  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/webserver/menu.py: New menu model/widget.

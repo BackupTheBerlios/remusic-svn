@@ -32,7 +32,7 @@ function RemusMenu(element)
 }
 
 RemusMenu.prototype.openMenu = function(element) {
-    var children = this.menu.getElementsByTagName("span") // childNodes[i];
+    var children = this.menu.getElementsByTagName("span");
     for(var i = 0; i < children.length; ++i) {
         var child = children[i];
         if (child != element) {
@@ -44,7 +44,7 @@ RemusMenu.prototype.openMenu = function(element) {
 }
 
 RemusMenu.prototype.toggleMenu = function(element) {
-    var children = this.menu.getElementsByTagName("span") // childNodes[i];
+    var children = this.menu.getElementsByTagName("span");
     for(var i = 0; i < children.length; ++i) {
         var child = children[i];
         if (child != element) {
@@ -56,7 +56,7 @@ RemusMenu.prototype.toggleMenu = function(element) {
 }
 
 RemusMenu.prototype.hideMenus = function() {
-    var children = this.menu.getElementsByTagName("span") // childNodes[i];
+    var children = this.menu.getElementsByTagName("span");
     for(var i = 0; i < children.length; ++i) {
         var child = children[i];
         this._hideMenu(child);

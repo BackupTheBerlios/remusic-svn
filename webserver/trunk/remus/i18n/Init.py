@@ -77,7 +77,19 @@ def translation(domain):
     return _curtranslations[domain]
 
 def dgettext(domain):
-    return translation(domain).gettext
+    trans = translation(domain)
+    _gettext = trans.gettext
+
+    def gettext(s):
+        "Encode the string as UTF8"
+        charset = trans.charset()
+        if charset:
+            import codecs
+            return codecs.getencoder("UTF8")(
+                unicode(_gettext(s), charset))[0]
+        else:
+            return s
+    return gettext
 
 def get_langinfo():
     return _curlanguage
@@ -96,6 +108,7 @@ def get_locale():
 
 def current_lang():
     return lang
+
 
 def installed_languages():
     # Returns the union of all domains' installed languages
