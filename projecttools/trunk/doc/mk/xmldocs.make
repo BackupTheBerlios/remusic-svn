@@ -41,7 +41,7 @@ docdir = $(datadir)/gnome/help/remus/$(lang)
 
 # **************  You should not have to edit below this line  *******************
 xml_files = $(entities) $(docname).xml
-styledir = $(top_srcdir)/doc/stylesheet
+styledir = $(top_srcdir)/doc/xsl/images
 
 # Convert xml to html with xsltproc
 # xsltproc   -o outputdir/ /usr/share/sgml/docbook/xsl-stylesheets/html/chunk.xsl filename.xml
@@ -70,7 +70,7 @@ EXTRA_DIST = $(xml_files) $(omffile)
 CLEANFILES = omf_timestamp $(docname).html/*.html $(docname).fo $(docname).pdf
 
 # If the following file is in a subdir (like help/) you need to add that to the path
-include $(top_srcdir)/doc/omf.make
+include $(top_srcdir)/doc/mk/omf.make
 
 all: omf convert-html convert-pdf
 
@@ -94,7 +94,7 @@ install-data-local:
 	  cp $(srcdir)/$$file $(DESTDIR)$(docdir); \
 	done
 	  $(mkinstalldirs) $(DESTDIR)$(docdir)/$(docname); \
-	  for file in $(docname)/*.html; do \
+	  for file in $(docname).html/*.html; do \
 	    basefile=`echo $$file | sed -e  's,^.*/,,'`; \
 	    $(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/$(docname)/$$basefile; \
 	  done
