@@ -4,7 +4,7 @@
   is shipped with four different XSLT files for transforming the
   database description into SQL, a python module, a DocBook
   "fragment", and optionally a graphviz graph.
-
+  
 * Prerequisites:
 
   sqlml is using xsltproc to transform the XML.  To generate the

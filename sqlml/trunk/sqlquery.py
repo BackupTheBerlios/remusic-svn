@@ -5,7 +5,7 @@ imported by generated modules from sqlml source files, which contains
 descriptions of specific tables.
 """
 
-__author__ = "Daniel Larsson <daniel.larsson@servicefactory.se>"
+__author__ = "Daniel Larsson <daniel.j.larsson@chello.se>"
 
 __all__ = (
     'Table',
@@ -364,8 +364,8 @@ class FuncBinaryOp(Function):
                and self.columns[0].canonical_name() \
                or self.columns[0]
         right = hasattr(self.columns[1], 'canonical_name') \
-               and self.columns[1].canonical_name() \
-               or self.columns[1]
+                and self.columns[1].canonical_name() \
+                or self.columns[1]
         return "(%s %s %s)" % (left, self.function, right)
 
 
