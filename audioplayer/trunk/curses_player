@@ -197,7 +197,7 @@ class curses_player:
 
 
     def ready(self, plugin):
-        "Plugin signaling it's ready to recieve streams"
+        "Plugin signaling it's ready to receive streams"
         self.play_song()
         
 
@@ -269,8 +269,10 @@ class curses_player:
         if self.curr_song >= len(self.songs):
             self.keyb_handler.close()
             self.quit()
-            
+            return
+
         song = self.songs[self.curr_song]
+            
         time = song["time"]
         artist = song["artist"]
         title = song["song"]
@@ -279,9 +281,10 @@ class curses_player:
         self.w.addstr(1, 1, s.encode("UTF-8"))
         self.w.refresh()
 
-        # Set window title (assumes we're running in an xterm)
-        t = "\033]0;%s - %s\007" % (artist, title)
-        sys.stdout.write(t.encode("UTF-8"))
+        # Set window title if this is an xterm
+        if os.environ["TERM"] == "xterm":
+            t = "\033]0;%s - %s\007" % (artist, title)
+            sys.stdout.write(t.encode("UTF-8"))
 
         self.plugin.play(song["url"])
         self.update_songwin()

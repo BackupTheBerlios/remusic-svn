@@ -30,7 +30,8 @@ class Playlist:
         # fairly WinAMP-centric, an XML format is a decent way of
         # doing it.
         heading = file.readline()
-        assert heading == "#EXTM3U\n"
+        print "("+heading+")"
+        assert heading.startswith("#EXTM3U")
 
         songs = []
         for line in file:
