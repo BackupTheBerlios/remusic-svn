@@ -1,0 +1,39 @@
+@import url(/styles/remus.css);
+
+
+div.text, div.header {
+	margin-left:		1in;
+}
+
+
+.menuitem, .menuitem a {
+	text-decoration:	none;
+	color:			white;
+	font-size:		9pt;
+	padding-left:		5pt;
+	padding-right:		5pt;
+}
+
+.menuitem:hover, .menuitem a:hover {
+	color:			black;
+	background-color:	#10b0b0;
+	cursor:			pointer;
+}
+
+.topmenu {
+	background-color:	#10a0a0;
+}
+
+div.topmenu {
+	padding:		5pt 5pt 5pt 5pt;
+}
+
+.menu {
+	position:		absolute;
+	visibility:		hidden;
+	background-color:	#10a0a0;	
+	padding:		5pt 5pt 5pt 5pt;
+	border-width:		2pt;
+	border-style:		outset;
+	border-color:		#30b0b0;
+}

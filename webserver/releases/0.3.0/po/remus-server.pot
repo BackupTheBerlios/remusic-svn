@@ -1,0 +1,93 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: Mon Feb  9 04:10:48 2004\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../remus/webserver/menu.py:85
+msgid "Home"
+msgstr ""
+
+#: ../remus/webserver/menu.py:86
+msgid "To Remus homepage"
+msgstr ""
+
+#: ../remus/webserver/menu.py:88
+msgid "Music"
+msgstr ""
+
+#: ../remus/webserver/menu.py:89
+msgid "Browse the music database"
+msgstr ""
+
+#: ../remus/webserver/menu.py:91
+msgid "Playlists"
+msgstr ""
+
+#: ../remus/webserver/menu.py:92
+msgid "Manage playlists"
+msgstr ""
+
+#: ../remus/webserver/menu.py:94
+msgid "Statistics"
+msgstr ""
+
+#: ../remus/webserver/menu.py:95
+msgid "Various server statistics"
+msgstr ""
+
+#: ../remus/webserver/menu.py:97
+msgid "Language"
+msgstr ""
+
+#: ../remus/webserver/menu.py:98
+msgid "Select language"
+msgstr ""
+
+#: ../remus/webserver/menu.py:101
+msgid "Documents"
+msgstr ""
+
+#: ../remus/webserver/menu.py:102
+msgid "Available documents"
+msgstr ""
+
+#: ../remus/webserver/menu.py:109
+msgid "Audiostore Manual"
+msgstr ""
+
+#: ../remus/webserver/menu.py:110
+msgid "The audiostore manual"
+msgstr ""
+
+#: ../remus/webserver/remuspage.py:65
+msgid "Generated at %s by "
+msgstr ""
+
+#: ../remus/webserver/remuspage.py:69
+msgid " server at "
+msgstr ""
+
+#: ../remus/webserver/server.py:45
+msgid "Starting remus server"
+msgstr ""
+
+#: ../www/index.rpy:27
+msgid "Remus music server"
+msgstr ""
+
+#: ../www/index.rpy:30
+msgid "Browse the music database to view its contents, and to download songs. You can upload songs to the database through the web as well."
+msgstr ""
+

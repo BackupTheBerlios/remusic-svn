@@ -1,0 +1,49 @@
+@import url(/styles/menu.css);
+
+body {
+	font-family:		monospace;
+}
+
+.logo {
+	font-family:		monospace;
+	font-size:		24pt;
+}
+
+.navigation {
+	margin-bottom:		0.5cm;
+}
+
+.generated {
+	font-size:		6pt;
+	font-family:		monospace;
+	text-align:		center;
+}
+
+.generated a {
+	color:			black;
+	text-decoration:	none;
+}
+
+div.text, div.header {
+	margin-left:		1in;
+}
+
+/* Snatched from Plone (http://plone.org) */
+#portal-colophon {
+    float: none;
+    margin: 0em 0em 2em 0em;
+    padding: 0.5em 0em 1em 0em;
+    text-align: center;
+}
+
+#portal-colophon ul,
+#portal-colophon ul li,
+#portal-colophon ul li a {
+    list-style: none;
+    display: inline;
+    text-decoration: none;
+}
+
+#portal-colophon ul li a img {
+    border: none
+}
