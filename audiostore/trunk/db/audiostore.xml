@@ -100,15 +100,6 @@
 	</sql:type>
       </sql:column>
 
-      <sql:column name="alb_artist">
-	<doc:description>
-	  Reference to the artist of this album.
-	</doc:description>
-	<sql:type>
-	  <sql:key table="remus_artists" column="art_id"/>
-	</sql:type>
-      </sql:column>
-
       <sql:column name="alb_mb_album_id">
 	<doc:description>
 	  Musicbrainz album id.
@@ -167,6 +158,37 @@
   </sql:table>
 
   <sql:table>
+    <sql:name>remus_art_alb_map</sql:name>
+    <doc:short>Identifies which albums a particular artist appears in</doc:short>
+    <sql:columns>
+      <sql:column name="artalb_id">
+	<sql:type primary-key="auto">
+	  SMALLINT UNSIGNED
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="artalb_artist">
+	<doc:description>
+	  Key to artist table.
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_artists" column="art_id"/>
+	</sql:type>
+      </sql:column>
+
+      <sql:column name="artalb_album">
+	<doc:description>
+	  Key to album table.
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_albums" column="alb_id"/>
+	</sql:type>
+      </sql:column>
+
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
     <sql:name>remus_genres</sql:name>
 
     <doc:short>
@@ -208,20 +230,12 @@
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
-      <sql:column name="au_artist">
+      <sql:column name="au_artalb">
 	<doc:description>
-	  This song's artist.
+	  This song's artist and album.
 	</doc:description>
 	<sql:type>
-	  <sql:key table="remus_artists" column="art_id"/>
-	</sql:type>
-      </sql:column>
-      <sql:column name="au_album">
-	<doc:description>
-	  The album this song appeared on.
-	</doc:description>
-	<sql:type>
-	  <sql:key table="remus_albums" column="alb_id"/>
+	  <sql:key table="remus_art_alb_map" column="artalb_id"/>
 	</sql:type>
       </sql:column>
       <sql:column name="au_genre">
@@ -356,6 +370,7 @@
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
+
       <sql:column name="plm_parent">
 	<doc:description>
 	  The playlist I'm a member of.
@@ -364,14 +379,7 @@
 	  <sql:key table="remus_playlists" column="pl_id"/>
 	</sql:type>
       </sql:column>
-      <sql:column name="plm_song">
-	<doc:description>
-	  The song at this position in the playlist.
-	</doc:description>
-	<sql:type>
-	  <sql:key table="remus_audio_objects" column="au_id"/>
-	</sql:type>
-      </sql:column>
+
       <sql:column name="plm_playlist">
 	<doc:description>
 	  A nested playlist.
@@ -380,6 +388,16 @@
 	  <sql:key table="remus_playlists" column="pl_id"/>
 	</sql:type>
       </sql:column>
+
+      <sql:column name="plm_song">
+	<doc:description>
+	  The song at this position in the playlist.
+	</doc:description>
+	<sql:type>
+	  <sql:key table="remus_audio_objects" column="au_id"/>
+	</sql:type>
+      </sql:column>
+
     </sql:columns>
   </sql:table>
 

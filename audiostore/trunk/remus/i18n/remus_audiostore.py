@@ -20,7 +20,7 @@
 import Init
 
 # Add the languages we support
-Init.add_translation('remus-audiostore', 'sv', 'Swedish',
+Init.add_translation('remus-audiostore', 'sv', 'Svenska',
                      'sv_SE.ISO8859-1', '/images/sv.png')
 Init.add_translation('remus-audiostore', 'en', 'English',
                      'en_US.ISO8859-1', '/images/en.png')

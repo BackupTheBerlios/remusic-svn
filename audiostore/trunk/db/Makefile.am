@@ -13,6 +13,7 @@ DOC		= ../doc/manual/C/db-${DB}.xml
 
 DOTFILE		= ${DB}.dot
 DOTGRAPH	= ../doc/manual/figures/${DB}.${GRAPHFORMAT}
+SIZE		= 8,11
 
 DOCBOOK_XSLTPROC_ARGS = --stringparam dbfigure figures/${DB}.${GRAPHFORMAT} \
                         --stringparam topelement chapter

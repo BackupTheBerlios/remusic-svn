@@ -91,12 +91,18 @@
         <meta name="generator" content="REMUS audiostore"/>
         <link rel="stylesheet" href="/styles/remus.css" type="text/css"/>
         <link rel="stylesheet" href="/styles/audiostore.css" type="text/css"/>
+	<script type="text/javascript" language="JavaScript" src="/scripts/menu.js"></script>
+	
       </head>
-      <body>
+      <body onclick="menu.hideMenus()">
         <div class="logo">
           &amp;<span style="color:red">re:</span><i>MUS</i><span style="color:blue">ic</span>;
         </div>
         <hr/>
+
+        <!-- Menu placeholder -->
+	<menu/>
+
         <h2>
           <xsl:call-template name="gentext">
             <xsl:with-param name="key" select="'MusicFrom'"/>
@@ -328,28 +334,28 @@
       <thead>
         <tr class="colhead">
           <th>
-            <a href="?order=art_sortname&amp;order=alb_name&amp;order=au_track_number">
+            <a href="?order=remus_artists.art_sortname&amp;order=remus_albums.alb_name&amp;order=remus_audio_objects.au_track_number">
               <xsl:call-template name="gentext">
                 <xsl:with-param name="key" select="'Artist'"/>
               </xsl:call-template>
 	    </a>
           </th>
           <th>
-            <a href="?order=alb_name&amp;order=au_track_number">
+            <a href="?order=remus_albums.alb_name&amp;order=remus_audio_objects.au_track_number">
               <xsl:call-template name="gentext">
                 <xsl:with-param name="key" select="'Album'"/>
               </xsl:call-template>
             </a>
           </th>
           <th>
-            <a href="?order=au_title">
+            <a href="?order=remus_audio_objects.au_title">
               <xsl:call-template name="gentext">
                 <xsl:with-param name="key" select="'Song'"/>
               </xsl:call-template>
             </a>
           </th>
           <th>
-            <a href="?order=au_length">
+            <a href="?order=remus_audio_objects.au_length">
               <xsl:call-template name="gentext">
                 <xsl:with-param name="key" select="'Time'"/>
               </xsl:call-template>
@@ -401,7 +407,7 @@
             <xsl:value-of select="$audiostore.root"/>
 	    <xsl:text>album/</xsl:text>
 	    <xsl:value-of select="album"/>
-	    <xsl:text>/</xsl:text>
+            <xsl:text>/list/index.html</xsl:text>
           </xsl:attribute>
           <xsl:value-of select="album"/>
         </a>

@@ -11,12 +11,13 @@ subsets, such as:
 """
 
 import os
-import re
 import logging
-import stat
-import time
 import posixpath
+import re
+import stat
 import string
+import time
+import types
 
 try:
     from cStringIO import StringIO
@@ -77,8 +78,8 @@ class Collection(object):
         'song'    : db_audiostore.remus_audio_objects_au_title,
         'artist'  : db_audiostore.remus_artists_art_name,
         'album'   : db_audiostore.remus_albums_alb_name,
-        'album_id': db_audiostore.remus_audio_objects_au_album,
-        'artist_id':db_audiostore.remus_albums_alb_artist,
+#        'album_id': db_audiostore.remus_audio_objects_au_album,
+#        'artist_id':db_audiostore.remus_albums_alb_artist,
         'length'  : db_audiostore.remus_audio_objects_au_length,
         }
 
@@ -139,11 +140,12 @@ class Collection(object):
         assert False
 
     def stat(self, request=None):
-        if self.isdir() or self.select() > 0:
+        if self.select() > 0:
             stat = (0444, 0, 1, 1, os.getuid(), os.getgid(), 0,
                     time.time(), time.time(), time.time())
         else:
-            stat = None
+            raise IOError, "file not found"
+
         if self.cursor:
             self.cursor.close()
             self.cursor = None
@@ -199,25 +201,29 @@ class Collection(object):
         else:
             group_by = self.group_by
 
-        # Make sure all 'order_by' fields are present in the query.
-        # This isn't necessarily the case if the user passed a custom
-        # field list.
-        if order_by:
-            order_by = filter(lambda e: e in fields, order_by)
-
         selection = sqlquery.Select()
         for field in fields:
             selection.addcolumn(field)
 
-        sql, args = selection.select(
+        # Make sure all 'order_by' fields are present in the query.
+        # This isn't necessarily the case if the user passed a custom
+        # field list.
+        
+        if order_by:
+            order_by = [ e for e in order_by
+                         if e.table in selection.gettables()
+                         or type(e) in types.StringTypes ]
+
+        sql = selection.select(
             query=self.query,
             order_by=order_by,
             group_by=group_by)
 
-        logger.info("Performing SQL: %s", sql % self.db.literal(args))
+        logger.info("Performing SQL: %s", sql)
+        logger.info("Order by: %s, %s, %s", self.order_by, order_by, kw)
 
         self.cursor = self.db.cursor(cursorclass)
-        return self.cursor.execute(sql, args)
+        return self.cursor.execute(sql)
 
 
     def update(self):
@@ -229,8 +235,8 @@ class Collection(object):
         # Get the list of file names, and update the audio file
         # before updating the database
         cursor = self.db.cursor()
-        sql, args = selection.select(query=self.query)
-        count = cursor.execute(sql, args)
+        sql = selection.select(query=self.query)
+        count = cursor.execute(sql)
 
         for filename, mimetype in cursor:
             audiostore.mime_map[mimetype].update(filename, self.updates)
@@ -257,8 +263,8 @@ class Collection(object):
         selection = sqlquery.Select()
         selection.addcolumn(table.primary_key)
 
-        sql, args = selection.select(query=self.query)
-        count = cursor.execute(sql, args)
+        sql = selection.select(query=self.query)
+        count = cursor.execute(sql)
 
         # Ok, we know which table to update, and the above query told us
         # which rows to update. Trim off duplicate values:
@@ -284,12 +290,12 @@ class Collection(object):
         selection = sqlquery.Select()
         selection.addcolumn(db_audiostore.remus_audio_objects_au_id)
 
-        sql, args = selection.select(query)
+        sql = selection.select(query)
         sql += limit
 
         cursor = self.db.cursor()
 
-        count = cursor.execute(sql, args)
+        count = cursor.execute(sql)
     
         for au_id in cursor:
             audioobject = audiostore.AudioObject(self.store, au_id)
@@ -300,10 +306,11 @@ class Collection(object):
 class SearchColl(Collection):
 
     fields = (
-        db_audiostore.remus_audio_objects_au_title,
-        db_audiostore.remus_albums_alb_name,
-        db_audiostore.remus_artists_art_name,
-        db_audiostore.remus_audio_objects_au_length
+        db_audiostore.remus_audio_objects.au_title,
+        db_audiostore.remus_albums.alb_name,
+        db_audiostore.remus_artists.art_name,
+        db_audiostore.remus_audio_objects.au_length,
+        db_audiostore.remus_art_alb_map.artalb_id,
         )
 
     op_map = {
@@ -352,8 +359,8 @@ class SearchColl(Collection):
 class SongsColl(Collection):
 
     fields = (
-        db_audiostore.remus_audio_objects_au_title,
-        db_audiostore.remus_audio_objects_au_length
+        db_audiostore.remus_audio_objects.au_title,
+        db_audiostore.remus_audio_objects.au_length
         )
 
     def __init__(self, parent):
@@ -367,8 +374,8 @@ class Song(Collection):
 
     # Not really a collection, this is a single song
     fields = (
-        db_audiostore.remus_audio_objects_au_title,
-        db_audiostore.remus_audio_objects_au_length
+        db_audiostore.remus_audio_objects.au_title,
+        db_audiostore.remus_audio_objects.au_length
         )
 
     def __init__(self, parent, songtitle):
@@ -503,8 +510,7 @@ class IndexXMLBase(Collection):
 
     def create_file(self, request=None):
         # Build an index page
-        import tempfile
-        fd, tempname = tempfile.mkstemp()
+        xmlfile = StringIO()
 
         # FIXME: Shouldn't hardcode this
         urlroot = "/music/"
@@ -528,10 +534,10 @@ class IndexXMLBase(Collection):
             server = "http://unknown.org"
             path = self.cwd()
 
-        os.write(fd, '<?xml version="1.0" encoding="utf-8"?>\n')
+        print >> xmlfile, '<?xml version="1.0" encoding="utf-8"?>\n'
 
         cnt = self.select()
-        os.write(fd, '<%s length="%s">\n' % (self.document_type, cnt))
+        print >> xmlfile, '<%s length="%s">\n' % (self.document_type, cnt)
 
         # Strip away "list/<stylesheet>", if present
         if posixpath.basename(posixpath.dirname(path)) == "list":
@@ -541,28 +547,72 @@ class IndexXMLBase(Collection):
             path = "".join([ (elem and "<d>%s</d>" % elem)
                              for elem in path.split("/") ])
 
-        os.write(fd, '  <path>%s</path>\n' % path)
+        print >> xmlfile, '  <path>%s</path>\n' % path
 
-        self.write_body(fd)
+        self.write_body(xmlfile)
 
-        os.write(fd, "</%s>\n" % self.document_type)
-        os.close(fd)
+        print >> xmlfile, "</%s>\n" % self.document_type
+
         self.cursor.close()
         self.cursor = None
 
         # Perform xslt transformation on the file
         from commands import getstatusoutput
         import remus.i18n
-        params = "--stringparam audiostore.root %s" % urlroot
-        params += " --stringparam audiostore.url %s%s" % (server, urlroot)
-        params += " --stringparam l10n.gentext.language %s" % remus.i18n.current_lang()
-        logger.info("xsltproc %s %s %s" % \
-                    (params, self.xsltfile, tempname))
-        st, output = getstatusoutput("xsltproc %s %s %s" % \
-                                     (params, self.xsltfile, tempname))
+        import libxslt
+        import libxml2
 
-        self.file = StringIO(output)
-        os.unlink(tempname)
+        params = {
+            'audiostore.root':      "'%s'"   % urlroot,
+            'audiostore.url':       "'%s%s'" % (server, urlroot),
+            'l10n.gentext.language':"'%s'"   % remus.i18n.current_lang(),
+            }
+
+        xsltfile = open(self.xsltfile).read()
+
+        # If the XSLT file contains the <menu/> element, create menu
+        # and insert it.
+        if xsltfile.find("<menu/>") != -1:
+            import remus.webserver.menu
+
+            menu = remus.webserver.menu.create_basemenu()
+            widget = remus.webserver.menu.Menu(menu)
+            menu = widget.generate(None, remus.webserver.menu.document).toxml()
+
+            xsltfile = xsltfile.replace("<menu/>", menu)
+
+            # Update the encoding to the appropriate one, since the menu
+            # contains translated text.
+            charset = remus.i18n.translation("remus-server").charset()
+            if charset:
+                xsltfile = xsltfile.replace('encoding="US-ASCII"',
+                                            'encoding="%s"' % charset)
+
+        style = libxml2.readDoc(xsltfile, self.xsltfile, None, 0)
+        stylesheet = libxslt.parseStylesheetDoc(style)
+        if stylesheet == None:
+            style.freeDoc()
+            self.file = None
+            logger.error("XSLT processing error")
+            return
+
+        xmlfile.seek(0)
+        doc = libxml2.parseDoc(xmlfile.read())
+        res = stylesheet.applyStylesheet(doc, params)
+        result = stylesheet.saveResultToString(res)
+
+        # Postprocess HTML pages, so IE6 is happy (#&¤%/&%#¤)
+        if result.find('PUBLIC "-//W3C//DTD XHTML 1.0') != -1:
+            # Remove the XML header
+            result = '\n'.join(result.split('\n')[1:])
+
+            # Remove CDATA markers
+            result = result.replace("<![CDATA[", "").replace("]]>", "")
+
+
+        self.file = StringIO(result)
+        style.freeDoc()
+        doc.freeDoc()
 
     def content_type(self):
         try:
@@ -575,13 +625,16 @@ class IndexXMLBase(Collection):
         return False
 
     def open(self, mode, request=None):
+        logger.info("open called")
         # Check query parameters for custom ordering
         if request.args.has_key('order'):
             # Find out what order parameters we had before, which
             # doesn't have a DESC modifier on them. For those, we
             # reverse the search order (i.e. apply the DESC modifier).
             coll_order = self.order_by or ()
-            old_order = [ x.strip() for x in coll_order \
+            old_order = [ type(i) in types.StringTypes and i or i.name
+                          for i in coll_order ]
+            old_order = [ x.strip() for x in old_order \
                           if x.find("DESC") == -1 ]
             
             self.order_by = [ key in old_order and key+" DESC" or key \
@@ -623,30 +676,31 @@ def TIME_TO_SEC(*args):
 class IndexXMLAudioList(IndexXMLBase):
     
     fields = (
-        db_audiostore.remus_audio_objects_au_id,
-        db_audiostore.remus_artists_art_name,
-        db_audiostore.remus_albums_alb_name,
-        db_audiostore.remus_audio_objects_au_title,
-        db_audiostore.remus_audio_objects_au_length,
-        db_audiostore.remus_audio_objects_au_track_number,
-        db_audiostore.remus_audio_objects_au_content_type,
-        db_audiostore.remus_audio_objects_au_bitrate,
-        db_audiostore.remus_audio_objects_au_sample_freq,
-        db_audiostore.remus_audio_objects_au_audio_mode,
-        db_audiostore.remus_audio_objects_au_subtype,
-        db_audiostore.remus_audio_objects_au_audio_clip,
-        TIME_TO_SEC(db_audiostore.remus_audio_objects_au_length),
+        db_audiostore.remus_audio_objects.au_id,
+        db_audiostore.remus_artists.art_name,
+        db_audiostore.remus_albums.alb_name,
+        db_audiostore.remus_art_alb_map.artalb_id,        
+        db_audiostore.remus_audio_objects.au_title,
+        db_audiostore.remus_audio_objects.au_length,
+        db_audiostore.remus_audio_objects.au_track_number,
+        db_audiostore.remus_audio_objects.au_content_type,
+        db_audiostore.remus_audio_objects.au_bitrate,
+        db_audiostore.remus_audio_objects.au_sample_freq,
+        db_audiostore.remus_audio_objects.au_audio_mode,
+        db_audiostore.remus_audio_objects.au_subtype,
+        db_audiostore.remus_audio_objects.au_audio_clip,
+        TIME_TO_SEC(db_audiostore.remus_audio_objects.au_length),
         )
     
     order_by = (
-        db_audiostore.remus_artists_art_sortname,
-        db_audiostore.remus_albums_alb_name,
-        db_audiostore.remus_audio_objects_au_track_number,
+        db_audiostore.remus_artists.art_sortname,
+        db_audiostore.remus_albums.alb_name,
+        db_audiostore.remus_audio_objects.au_track_number,
         )
 
     document_type = "audiolist"
 
-    def write_body(self, fd):
+    def write_body(self, file):
         for dict in self.cursor:
             dict["art_name"] = xml_fix_string(dict["art_name"])
             dict["au_title"] = xml_fix_string(dict["au_title"])
@@ -657,7 +711,7 @@ class IndexXMLAudioList(IndexXMLBase):
             dict["filename"] = xml_fix_string(filename)
             dict["au_length_sec"] = dict["TIME_TO_SEC(remus_audio_objects.au_length)"]
 
-            os.write(fd, '''<audioclip>
+            print >> file, '''<audioclip>
             <artist>%(art_name)s</artist>
             <title>%(au_title)s</title>
             <album>%(alb_name)s</album>
@@ -670,7 +724,7 @@ class IndexXMLAudioList(IndexXMLBase):
             <sample-freq>%(au_sample_freq)s</sample-freq>
             <audio-mode>%(au_audio_mode)s</audio-mode>
             <subtype>%(au_subtype)s</subtype>
-            </audioclip>\n''' % dict)
+            </audioclip>\n''' % dict
             
 
 class IndexXMLDirList(IndexXMLBase):
@@ -701,24 +755,20 @@ class IndexXMLDirList(IndexXMLBase):
         self.fields = parent.parent.fields
         self.group_by = parent.parent.group_by
 
-    def write_body(self, fd):
+    def write_body(self, file):
 
         first_item = True
         for dict in self.cursor:
 
-            # FIXME: This makes the assumption, dict only contains one
-            # item, and this item is a valid subcollection.  This is
-            # pretty much always true, but...
-            coll = self.parent.parent.subcollection(dict.values()[0])
+            # 'dict' might contain multiple values, but should contain
+            # one and only one string value, and this is our name for
+            # the subcollection
+            subcol = [ v for v in dict.values()
+                       if type(v) in types.StringTypes ]
+            assert len(subcol) == 1
+            coll = self.parent.parent.subcollection(subcol[0])
 
-            # FIXME: This is worse... we're counting the first 'field'
-            # item, but this may result in a different query
-            # altogether, i.e. not counting what we want to
-            # count... (since we're reducing the number of fields in
-            # the query, we might also reduce the number of tables in
-            # the query, thus producing the wrong results).
-            coll.select(fields=[COUNT(coll.fields[0])], group_by=None)
-            cnt = coll.cursor.fetchone().values()[0]
+            cnt = coll.select()
 
             for key in dict.keys():
                 if key[:11] == 'TIME_TO_SEC':
@@ -729,38 +779,40 @@ class IndexXMLDirList(IndexXMLBase):
                     filename = mk_filename(dict["songid"])
                     dict["filename"] = xml_fix_string(filename)
                     del dict[key]
-                else:
+                elif type(dict[key]) in types.StringTypes:
                     dict[key] = xml_fix_string(dict[key])
+                else:
+                    del dict[key]
 
             # Write a list of columns first
             if first_item:
-                os.write(fd, '  <columns cols="%s">\n' % len(dict))
+                print >> file, '  <columns cols="%s">\n' % len(dict)
                 for key in dict.keys():
-                    col = self.column_map.get(key, key)
-                    os.write(fd, '    <column key="%s">%s</column>\n' % (key, col))
-                os.write(fd, "  </columns>\n")
+                    col = self.column_map.get(key)
+                    print >> file, '    <column key="%s">%s</column>\n' % (key, col)
+                print >> file, "  </columns>\n"
                 first_item = False
 
-            os.write(fd, '  <item length="%s">\n' % cnt)
+            print >> file, '  <item length="%s">\n' % cnt
             for key, val in dict.items():
                 if key in self.link_cols.keys():
                     linkattr = ' link="%s"' % eval(self.link_cols[key])
                 else:
                     linkattr = ''
                 attrs = linkattr
-                os.write(fd, "    <%s%s>%s</%s>\n" % (key, attrs, val, key))
+                print >> file, "    <%s%s>%s</%s>\n" % (key, attrs, val, key)
             
-            os.write(fd, "  </item>\n")
+            print >> file, "  </item>\n"
 
 
 class ArtistsColl(Collection):
 
     fields = (
-        db_audiostore.remus_artists_art_name,
+        db_audiostore.remus_artists.art_name,
         )
 
     order_by = (
-        db_audiostore.remus_artists_art_sortname,
+        db_audiostore.remus_artists.art_sortname,
         )
 
     def __init__(self, parent, query=None):
@@ -783,11 +835,12 @@ class ArtistsColl(Collection):
 class ArtistColl(Collection):
 
     fields = (
-        db_audiostore.remus_albums_alb_name,
+        db_audiostore.remus_albums.alb_name,
+        db_audiostore.remus_art_alb_map.artalb_id,
         )
 
     group_by = (
-        db_audiostore.remus_albums_alb_name,
+        db_audiostore.remus_albums.alb_name,
         )
 
     def __init__(self, parent, artist, query=None):
@@ -815,11 +868,12 @@ class ArtistColl(Collection):
 class AlbumsColl(Collection):
 
     fields = (
-        db_audiostore.remus_albums_alb_name,
+        db_audiostore.remus_albums.alb_name,
+        db_audiostore.remus_art_alb_map.artalb_id,
         )
 
     order_by = (
-        db_audiostore.remus_albums_alb_name,
+        db_audiostore.remus_albums.alb_name,
         )
 
     def __init__(self, parent, query=None):
@@ -887,7 +941,8 @@ class GenreColl(Collection):
         self.genre = genre
         query = AND(
             EQUAL(db_audiostore.remus_genres_ge_genre, genre),
-            EQUAL(db_audiostore.remus_artists_art_id, db_audiostore.remus_audio_objects_au_artist))
+            EQUAL(db_audiostore.remus_audio_objects_au_artalb,
+                  db_audiostore.remus_art_alb_map.artalb_id))
         Collection.__init__(self, parent, query)
 
     def isdir(self):

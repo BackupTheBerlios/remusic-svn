@@ -22,8 +22,10 @@ except ImportError:
     HAVE_MUSICBRAINZ = False
     pass
 
-
+from sqlquery import *
 import as_collection
+
+from db_audiostore import *
 
 logger = logging.getLogger("remus.audiostore.mysql")
 
@@ -80,31 +82,29 @@ class Interface:
                 self.db.begin()
                 cursor = self.db.cursor()
 
-                count = cursor.execute(
-                    """SELECT
-                         au_id
-                       FROM
-                         remus_audio_objects,
-                         remus_albums,
-                         remus_artists
-                       WHERE
-                         art_name=%(artist)s AND
-                         alb_name=%(album)s AND
-                         au_title=%(title)s AND
-                         au_artist=art_id AND
-                         au_album=alb_id""", metafields)
-
+                select = Select()
+                select.addcolumn(remus_audio_objects.au_id)
+                query = AND(
+                    EQUAL(remus_audio_objects.au_artalb,
+                          remus_art_alb_map.artalb_id),
+                    EQUAL(remus_artists.art_name, metafields['artist']),
+                    EQUAL(remus_albums.alb_name, metafields['album']),
+                    EQUAL(remus_audio_objects.au_title,
+                          metafields['title']))
+                
+                count = cursor.execute(select.select(query=query))
+                
                 if count == 0:
                     metafields["art_id"] = self.add_artist(metafields)
                     metafields["alb_id"] = self.add_album(metafields)
+                    metafields["artalb_id"] = self.add_artalb_map(metafields)
                     metafields["ge_id"] = self.add_genre(metafields)
                     cursor.execute(
                         """INSERT INTO remus_audio_objects
                         VALUES (
                           NULL,
                           %(title)s,
-                          %(art_id)s,
-                          %(alb_id)s,
+                          %(artalb_id)s,
                           %(ge_id)s,
                           %(mimetype)s,
                           %(year)s,
@@ -128,7 +128,7 @@ class Interface:
                 logger.exception("Failed to store clip in database")
                 self.db.rollback()
                 raise IOError("Failed to store in database")
-        
+
         except KeyError:
             logger.exception("Error!")
             raise IOError("Unsupported format")
@@ -147,12 +147,6 @@ class Interface:
             match = "art_mb_artist_id=%(artist_id)s"
         else:
             match = "art_name=%(artist)s"
-        logger.info("""SELECT
-                   art_id
-               FROM
-                   remus_artists
-               WHERE
-            """ + match % metafields)
         count = cursor.execute(
             """SELECT
                    art_id
@@ -182,22 +176,16 @@ class Interface:
 
         if metafields["album_id"]:
             match = "alb_mb_album_id=%(album_id)s"
+            album_id = metafields["album_id"]
         else:
             match = "alb_name=%(album)s"
-        print ("""SQL: SELECT
-                   alb_id
-               FROM
-                   remus_albums
-               WHERE
-            """ + match) % metafields
+            album_id = "NULL"
         count = cursor.execute(
             """SELECT
                    alb_id
                FROM
-                   remus_albums,
-                   remus_artists
+                   remus_albums
                WHERE
-                   art_id = alb_artist AND 
             """ + match, metafields)
 
         if count == 0:
@@ -206,8 +194,7 @@ class Interface:
                    VALUES (
                      NULL,
                      %(album)s,
-                     %(art_id)s,
-                     NULL,
+                     %(album_id)s,
                      NULL,
                      NULL,
                      NOW(),
@@ -218,6 +205,31 @@ class Interface:
         else:
             return cursor.fetchone()[0]
 
+    def add_artalb_map(self, metafields):
+
+        select = Select()
+        select.addcolumn(remus_art_alb_map.artalb_id)
+
+        cursor = self.db.cursor()
+        query = AND(
+            EQUAL(remus_art_alb_map.artalb_artist, metafields["art_id"]),
+            EQUAL(remus_art_alb_map.artalb_album,  metafields["alb_id"]))
+        
+        count = cursor.execute(select.select(query=query))
+
+        if count == 0:
+            cursor.execute(
+                """INSERT INTO remus_art_alb_map
+                   VALUES (
+                     NULL,
+                     %(art_id)s,
+                     %(alb_id)s)
+                """, metafields)
+            return cursor.lastrowid
+        else:
+            return cursor.fetchone()[0]
+
+        
     def add_genre(self, metafields):
         cursor = self.db.cursor()
 
@@ -247,23 +259,14 @@ class Interface:
 
     def resync(self, query=None):
         cursor = self.db.cursor()
-        if query:
-            q, args = query.expr()
-            where = "WHERE %s" % q
-        else:
-            where = ''
-            args = None
 
-        sql = """
-            SELECT
-                au_id, au_audio_clip, au_content_type
-            FROM
-                remus_audio_objects %s""" % where
+        select = Select()
+        select.addcolumn(remus_audio_objects.au_id)
+        select.addcolumn(remus_audio_objects.au_audio_clip)
+        select.addcolumn(remus_audio_objects.au_content_type)
+        sql = select.select(query=query)
 
-        if args:
-            count = cursor.execute(sql, args)
-        else:
-            count = cursor.execute(sql)
+        count = cursor.execute(sql)
 
         logger.info("Resyncing %d audio clips", count)
     
@@ -288,6 +291,7 @@ class Interface:
 
             metafields["art_id"] = self.add_artist(metafields)
             metafields["alb_id"] = self.add_album(metafields)
+            metafields["artalb_id"] = self.add_artalb_map(metafields)
             metafields["ge_id"] = self.add_genre(metafields)
             update_cur = cursor.connection.cursor()
             sql = """
@@ -295,8 +299,7 @@ class Interface:
                     remus_audio_objects
                 SET
                     au_title=%(title)s,
-                    au_album=%(alb_id)s,
-                    au_artist=%(art_id)s,
+                    au_artalb=%(artalb_id)s,
                     au_genre=%(ge_id)s,
                     au_content_type=%(mimetype)s,
                     au_length=%(length)s,

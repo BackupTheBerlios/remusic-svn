@@ -9,9 +9,10 @@ Audiostore README
   * Python 2.3
   * MySQL 3.23.57
   * twisted 1.1.0
-  * libxslt-1.1.2
-  * mmpython-0.3
-  * cadaver-0.22.0 (*)
+  * libxslt 1.1.2
+  * mmpython 0.3
+  * sqlml 0.2.0
+  * cadaver 0.22.0 (*)
 
   These are the packages audiostore uses directly.  Most of the above
   packages in turn depend on other packages, which aren't included

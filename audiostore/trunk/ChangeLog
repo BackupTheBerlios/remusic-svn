@@ -1,3 +1,28 @@
+2004-02-09  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* MANIFEST.in: Added lots of files (complete development fileset).
+
+	* remus/audiostore/as_collection.py (Collection.select): Filter
+	out 'order_by' columns, if those columns' tables aren't part of
+	the query (which can happen if the selected fields are
+	overridden).
+	(IndexXMLBase.create_file): Use libxslt's python module, instead
+	of the xsltproc command line tool.  This avoids creating a
+	temporary file as well.
+
+	Insert remus menu code into the XSLT stylesheet, if it contains
+	the "<menu/>" placeholder tag.
+
+	Remove the xml header line, if the results of the XSLT
+	transformation is XHTML, since IE6 chokes on this header.
+
+	* remus/audiostore/audiostore.py: Use sqlquery to perform queries,
+	rather than SQL directly.
+
+	* styles/index.html.xsl: Added menu code; including the menu
+	javascript file, and added the "<menu/>" placeholder, which
+	audiostore will replace with the HTML code of the standard menu.
+
 2004-02-04  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* MANIFEST.in: Added missing files.

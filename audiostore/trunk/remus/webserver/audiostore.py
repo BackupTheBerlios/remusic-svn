@@ -3,12 +3,14 @@
 
 import time
 import types
+import logging
 
 import twisted.web.resource
 
 import remus.audiostore
 import webdav
 
+logger = logging.getLogger("remus.audiostore")
 
 # Cache of SQL queries
 class QueryCache:
@@ -81,9 +83,10 @@ class ASWrapper(webdav.WebDAV):
             ch = get_cached_collection(prepath,
                                        self.collection,
                                        child)
-            if ch.stat(request):
+            try:
+                ch.stat(request)
                 return ASWrapper(ch)
-            else:
+            except IOError:
                 print "Failed to stat", ch, ch.cwd()
                 return twisted.web.resource.error.NoResource("No such resource")
         else:
@@ -148,7 +151,7 @@ class ASWrapper(webdav.WebDAV):
         list = self.collection.subcollection("dirlist")
         prepath = tuple(request.prepath) + ("dirlist", "index.html")
         coll = get_cached_collection(prepath, list, "index.html")
-        
+
         # Set up some information for the HTML generation
         file = coll.open("r", request)
         request.write(file.read())
