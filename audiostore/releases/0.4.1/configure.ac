@@ -42,6 +42,10 @@ dnl
 dnl Check for docbook-xsl
 dnl
 
+dnl Hardcoded for now...
+DOCBOOK_XSL=/usr/local/share/xsl/docbook
+AC_SUBST(DOCBOOK_XSL)
+
 dnl
 dnl Check for xsltproc
 dnl
