@@ -1,3 +1,13 @@
+2004-02-04  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/webserver/webdav/utils.py: Removed import of obsolete file
+	(constants).
+
+	* www/index.css: Made menu slightly smaller, and made cursor a
+	pointer over all menu items.
+
+	* MANIFEST.in: Added some missing files.
+
 2004-02-03  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/i18n/Init.py (current_lang): 'lang' isn't accessible

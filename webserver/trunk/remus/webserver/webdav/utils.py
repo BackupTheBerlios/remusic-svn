@@ -15,8 +15,11 @@ import urlparse
 
 from twisted.web import microdom
 
-from constants import RT_ALLPROP, RT_PROPNAME, RT_PROP
+# Request classes in propfind
 
+RT_ALLPROP=1
+RT_PROPNAME=2
+RT_PROP=3
 
 def parse_propfind(xml_doc):
     """ parse an propfind xml file and return a list of props 

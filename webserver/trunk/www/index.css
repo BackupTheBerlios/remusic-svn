@@ -9,18 +9,22 @@ div.text, div.header {
 .menuitem, .menuitem a {
 	text-decoration:	none;
 	color:			white;
-	font-size:		12pt;
-	padding-left:		10pt;
-	padding-right:		10pt;
+	font-size:		9pt;
+	padding-left:		5pt;
+	padding-right:		5pt;
 }
 
-.menuitem a:hover {
+.menuitem:hover, .menuitem a:hover {
 	color:			black;
 	background-color:	#10b0b0;
+	cursor:			pointer;
+}
+
+.topmenu {
+	background-color:	#10a0a0;
 }
 
 div.topmenu {
-	background-color:	#10a0a0;
 	padding:		5pt 5pt 5pt 5pt;
 }
 
@@ -29,5 +33,7 @@ div.topmenu {
 	visibility:		hidden;
 	background-color:	#10a0a0;	
 	padding:		5pt 5pt 5pt 5pt;
-	left:			100pt;
+	border-width:		2pt;
+	border-style:		outset;
+	border-color:		#30b0b0;
 }
