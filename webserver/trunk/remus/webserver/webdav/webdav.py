@@ -203,7 +203,7 @@ class WebDAV(twisted.web.resource.Resource):
             depth = 'infinity'
 
         try:
-            self.stat()
+            self.stat(request)
         except IOError:
             # logger.exception("Failed to stat %s", path)
             request.setResponseCode(twisted.protocols.http.NOT_FOUND)
@@ -250,12 +250,12 @@ class WebDAV(twisted.web.resource.Resource):
             return ''
 
         try:
-            file = self.open('rb')
+            file = self.open('rb', request)
         except IOError:
             request.setResponseCode(twisted.protocols.http.NOT_FOUND)
             return ''
 
-        file_stat = self.stat()
+        file_stat = self.stat(request)
         mtime = file_stat[stat.ST_MTIME]
         file_length = file_stat[stat.ST_SIZE]
 
@@ -310,29 +310,30 @@ class WebDAV(twisted.web.resource.Resource):
 
     def renderPUT(self, request):
         try:
-            l = int(request.get_header("Content-Length"))
+            l = int(request.getHeader("Content-Length"))
             logger.info("Incomming file: %d bytes long", l)
 
-            path, params, query, fragment = request.split_uri()
-
+            urlpath = request.URLPath()
+            path = urlpath.path
+            logger.info("path is %s", path)
 
             if '%' in path:
                 path = unquote (path)
 
                 path = path[len(self.urlroot):]
 
-            if request.has_key("Content-Type"):
+            if request.getAllHeaders().has_key("Content-Type"):
                 content_type = request.getHeader("Content-Type")
 
             try:
-                file = self.open(path, 'w+')
-                request.collector = put_collector(file, l, request, 0)
-
-                # no terminator while receiving PUT data
-                request.channel.set_terminator (None)
+                file = self.open('w+', request)
+                FileStore(file, l, request, False)
+                return twisted.web.server.NOT_DONE_YET
             except:
+                logger.exception("Error in PUT")
                 request.setResponseCode(424)
         except:
+            logger.exception("Error in PUT")
             request.setResponseCode(twisted.protocols.http.LENGTH_REQUIRED)
 
 
@@ -886,3 +887,65 @@ def gen_estring(ecode):
     ec = int(str(ecode))
     return "HTTP/1.1 %s %s" % (ec,
                                twisted.protocols.http.RESPONSES.get(ec, ''))
+
+
+from twisted.spread import pb
+
+class FileStore(pb.Viewable):
+    request = None
+    def __init__(self, file, size, request, is_update):
+        self.file = file
+        self.size = size
+        self.request = request
+        #self.written = self.file.tell()
+        self.is_update = is_update
+        self.bytes_in = 0
+        request.registerProducer(self, 0)
+
+    def resumeProducing(self):
+        data = self.request.content.read()
+        bi = self.bytes_in
+        ld = len(data)
+        if bi + ld >= self.size:
+            chunk = self.size - bi
+            self.file.write(data[:chunk])
+            self.file.close()
+            if chunk != ld:
+                logger.info('orphaned %d bytes: <%s>' % (ld - chunk,
+                                                         repr(data[chunk:])))
+
+            if self.is_update:
+                self.request.setResponseCode(twisted.protocols.http.NO_CONTENT)
+            else:
+                self.request.setResponseCode(twisted.protocols.http.CREATED)
+
+            self.request.unregisterProducer()
+            self.request.finish()
+            self.request = None
+        else:
+            self.file.write(data)
+            self.bytes_in += ld
+
+    def pauseProducing(self):
+        pass
+
+    def stopProducing(self):
+        self.file.close()
+        self.request = None
+
+    # Remotely relay producer interface.
+
+    def view_resumeProducing(self, issuer):
+        self.resumeProducing()
+
+    def view_pauseProducing(self, issuer):
+        self.pauseProducing()
+
+    def view_stopProducing(self, issuer):
+        self.stopProducing()
+
+
+    synchronized = ['resumeProducing', 'stopProducing']
+
+from twisted.python import threadable
+threadable.synchronize(FileStore)
