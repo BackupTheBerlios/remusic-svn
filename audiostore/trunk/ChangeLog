@@ -1,5 +1,12 @@
 2004-01-17  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
+	* remus/audiostore/as_collection.py: Now using sqlml.
+	(IndexXML.create_file): Replace %20 with ' '
+
+	* db/audiostore.xml: Now using sqlml. Added playlist tables.
+
+	* db/Makefile.am: Now using sqlml.
+
 	* www/music.rpy: Don't reconnect to mysql, we run out of
 	connections!
 
