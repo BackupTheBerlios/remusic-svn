@@ -1,0 +1,51 @@
+<!-- 
+     Project wide entities for use in documentation.
+-->
+
+<!ENTITY % _project.name "Remus">
+<!ENTITY project.name "%_project.name;">
+<!ENTITY project.nametag "<application>%_project.name;</application>">
+<!ENTITY project.website "<ulink url='http://%_project.name;.foobar.net'><application>%_project.name;</application> website</ulink>">
+<!ENTITY project.people "<authorgroup>
+<author>
+  <firstname>Daniel</firstname><surname>Larsson</surname>
+  <email>Daniel.Larsson@servicefactory.se</email>
+</author>
+</authorgroup>">
+
+
+<!-- Subprojects -->
+<!ENTITY % remus-audiostore  "Remus audiostore">
+<!ENTITY % remus-audioripper "Remus audioripper">
+<!ENTITY % remus-audioplayer "Remus player">
+<!ENTITY % remus-webserver   "Remus webserver">
+
+<!ENTITY subproject.this.version "@PACKAGE_VERSION@">
+<!ENTITY subproject.this.name    "%@PACKAGE_NAME@;">
+
+<!-- Miscellany entities -->
+<!ENTITY prompt.root "#">
+<!ENTITY prompt.user "$">
+
+<!ENTITY % quot '"'>
+
+
+<!-- Applications -->
+<!ENTITY app.mysql        '<application>MySQL</application>'>
+<!ENTITY app.mysql.url    'http://www.mysql.com/'>
+<!ENTITY app.mysql.link   '<ulink url="http://www.mysql.com/"><application>MySQL</application></ulink>'>
+<!ENTITY app.windows      '<trademark class="registered">Microsoft Windows</trademark>'>
+<!ENTITY app.python       '<application>Python</application>'>
+<!ENTITY app.python.url   'http://www.python.org/'>
+<!ENTITY app.python.link  '<ulink url="&app.python.url;"><application>Python</application></ulink>'>
+<!ENTITY app.twisted      '<application>Twisted</application>'>
+<!ENTITY app.twisted.url  'http://twistedmatrix.com'>
+<!ENTITY app.twisted.link '<ulink url="&app.twisted.url;">&app.twisted;</ulink>'>
+<!ENTITY app.cadaver      'cadaver'>
+
+
+<!-- Standards -->
+<!ENTITY std.webdav          'WebDAV'>
+<!ENTITY std.webdav.url      'http://www.webdav.org/'>
+<!ENTITY std.webdav.link     '<ulink url="&std.webdav.url;">WebDAV</ulink>'>
+<!ENTITY std.webdav.url.link '<ulink url="&std.webdav.url;">http://www,webdav.org</ulink>'>
