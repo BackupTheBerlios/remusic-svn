@@ -28,7 +28,6 @@ function RemusMenu(element)
     
     for(var i = 0; i < this.menu.childNodes.length; ++i) {
         var child = this.menu.childNodes[i];
-        child.onclick = this.openMenu;
     }    
 }
 
@@ -37,34 +36,52 @@ RemusMenu.prototype.openMenu = function(element) {
     for(var i = 0; i < children.length; ++i) {
         var child = children[i];
         if (child != element) {
-            this.hideMenu(child);
+            this._hideMenu(child);
         } else {
-            this.toggleMenu(child);
+            this._showMenu(child);
         }
     }
 }
 
 RemusMenu.prototype.toggleMenu = function(element) {
+    var children = this.menu.getElementsByTagName("span") // childNodes[i];
+    for(var i = 0; i < children.length; ++i) {
+        var child = children[i];
+        if (child != element) {
+            this._hideMenu(child);
+        } else {
+            this._toggleMenu(child);
+        }
+    }
+}
+
+RemusMenu.prototype.hideMenus = function() {
+    var children = this.menu.getElementsByTagName("span") // childNodes[i];
+    for(var i = 0; i < children.length; ++i) {
+        var child = children[i];
+        this._hideMenu(child);
+    }
+}
+
+RemusMenu.prototype._toggleMenu = function(element) {
     var id = element.id + "_menu";
     var menu = document.getElementById(id);
     if (menu) {
         if (menu.style) {
             if (menu.style.visibility == 'visible') {
-                this.hideMenu(element);
+                this._hideMenu(element);
             } else {
-                this.showMenu(element);
+                this._showMenu(element);
             }
         }
     }
 }
 
-RemusMenu.prototype.showMenu = function(element) {
+RemusMenu.prototype._showMenu = function(element) {
     var id = element.id + "_menu";
     var menu = document.getElementById(id);
     if (menu) {
         if (menu.style) {
-            alert(element.offsetLeft + ", " + element.offsetTop);
-            alert(element.innerHTML);
             var x = element.offsetLeft + document.body.scrollLeft;
             var y = element.offsetTop + element.offsetHeight + document.body.scrollTop + 5;
             menu.style.top = y+"px";
@@ -74,7 +91,7 @@ RemusMenu.prototype.showMenu = function(element) {
     }
 }
 
-RemusMenu.prototype.hideMenu = function(element) {
+RemusMenu.prototype._hideMenu = function(element) {
     var id = element.id + "_menu";
     var menu = document.getElementById(id);
     if (menu) {

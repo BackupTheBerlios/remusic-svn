@@ -1,3 +1,27 @@
+#
+# Copyright (C) 2004 Daniel Larsson
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+#
+
+"""Base class for Remus pages.
+
+Common routines, and subclass of twisted.web.woven.page.Page, to
+ensure a common look of remus pages.
+"""
 
 import os, sys
 import logging
@@ -6,6 +30,7 @@ from twisted.web.woven import page, widgets
 from twisted.web import microdom
 
 import remus.i18n
+import menu
 
 logger = logging.getLogger("remus.webserver")
 
@@ -54,28 +79,6 @@ class Stylesheet(widgets.Widget):
         self['type'] = "text/css"
         self['href'] = href
 
-
-class Menu(widgets.Widget):
-    tagName = 'div'
-    
-    def setUp(self, request, node, data):
-        _ = remus.i18n.dgettext('remus-server')
-        for menuitem in self.model:
-            link = document.createElement("a")
-            link.attributes.update({
-                'href':  menuitem.orig["link"],
-                'title': _(menuitem.orig["tooltip"])})
-            if menuitem.orig.has_key('text'):
-                link.appendChild(document.createTextNode(_(menuitem.orig["text"])))
-            elif menuitem.orig.has_key('element'):
-                link.appendChild(menuitem.orig['element'])
-
-            span = document.createElement("span")
-            span.attributes.update({
-                'class':  "menuitem"})
-            span.appendChild(link)
-            self.appendChild(span)
-            self["class"] = "topmenu"
 
 class Generated(widgets.Widget):
     tagName = 'div'
@@ -130,35 +133,6 @@ class RemusPage(page.Page):
 
     templateDirectory = "/usr/local/libdata/remus"
 
-    # Fake '_' to make gettext add these strings to the .pot
-    # file. Translation is done when actually generating the menu.
-    _ = lambda a: a
-
-    _menu = [
-        {
-            'text': _('Home'),
-            'link': '/',
-            'tooltip': _('To Remus homepage')
-        },
-        {
-            'text': _('Browse'),
-            'link': '/music/',
-            'tooltip': _('Browse the music database')
-        },
-        {
-            'text': _('Playlists'),
-            'link': '/playlists/',
-            'tooltip': _('Manage playlists')
-        },
-        {
-            'text': _('Server statistics'),
-            'link': '/stats/',
-            'tooltip': _('Various server statistics')
-        },
-        ]
-
-    del _
-
     def __init__(self, *args, **kwargs):
         page.Page.__init__(self, *args, **kwargs)
 
@@ -175,19 +149,7 @@ class RemusPage(page.Page):
             'baseurl': None
             }
 
-        # Add languages to the menu
-        # FIXME: Change this when I have a better menu code, this
-        # should be a popup menu
-        self.menu = self._menu[:]
-        langinfos = remus.i18n.installed_languages()
-        langs = langinfos.keys()
-        langs.sort()
-        for lang in langs:
-            self.menu.append({
-                'element': parse('<img width="20pt" src="%s"/>' % langinfos[lang]['icon']),
-                'link':    '/lang/?lang=%s' % lang,
-                'tooltip': langinfos[lang]['language']
-                })
+        self.menu = menu.create_basemenu()
 
     def wvfactory_Stylesheet(self, request, node, model):
         return Stylesheet(model)
@@ -196,16 +158,29 @@ class RemusPage(page.Page):
         return self.title
 
     def wmfactory_stylesheet(self, request):
-        return "/styles/remus.css"
+        return "/styles/toppages.css"
 
     def wvfactory_Menu(self, request, node, model):
-        return Menu(model)
+        return menu.Menu(model)
 
     def wmfactory_menu(self, request):
         return self.menu
 
     def wmfactory_generated(self, request):
-        self.generated['baseurl'] = request.prePathURL()
+        from urllib import quote
+        inet, addr, port = request.getHost()
+        if request.isSecure():
+            default = 443
+        else:
+            default = 80
+        if port == default:
+            hostport = ''
+        else:
+            hostport = ':%d' % port
+        self.generated['baseurl'] = quote('http%s://%s%s/' % (
+            request.isSecure() and 's' or '',
+            request.getRequestHostname(),
+            hostport), "/:")
         return self.generated
 
     def wvfactory_Generated(self, request, node, model):

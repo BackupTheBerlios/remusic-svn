@@ -20,7 +20,7 @@
 import Init
 
 # Add the languages we support
-Init.add_translation('remus-server', 'sv', 'Swedish',
+Init.add_translation('remus-server', 'sv', 'Svenska',
                      'sv_SE.ISO8859-1', '/images/sv.png')
 Init.add_translation('remus-server', 'en', 'English',
                      'en_US.ISO8859-1', '/images/en.png')

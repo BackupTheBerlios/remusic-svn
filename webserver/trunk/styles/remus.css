@@ -1,3 +1,5 @@
+@import url(/styles/menu.css);
+
 body {
 	font-family:		monospace;
 }
@@ -12,7 +14,7 @@ body {
 }
 
 .generated {
-	font-size:		8pt;
+	font-size:		6pt;
 	font-family:		monospace;
 }
 
@@ -23,22 +25,4 @@ body {
 
 div.text, div.header {
 	margin-left:		1in;
-}
-
-.menuitem a {
-	text-decoration:	none;
-	color:			white;
-	font-size:		12pt;
-	padding-left:		10pt;
-	padding-right:		10pt;
-}
-
-.menuitem a:hover {
-	color:			black;
-	background-color:	#10b0b0;
-}
-
-div.topmenu {
-	background-color:	#10a0a0;
-	padding:		5pt 5pt 5pt 5pt;
 }

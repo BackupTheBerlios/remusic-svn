@@ -1,3 +1,26 @@
+2004-02-09  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* remus/webserver/menu.py: New menu model/widget.
+
+	* po/sv.po: Updated.
+
+	* po/remus-server.pot: Some new strings to translate.
+
+	* remus/webserver/remuspage.py: Use the new menu widget.
+	(RemusPage.wmfactory_generated): Fixed base URL generation.
+
+	* setup.py (dist): Added menu code/stylesheet to distribution.
+
+	* www/RemusPage.html: Removed the xml header, IE6 doesn't like it.
+	Include the menu script.
+
+	* www/scripts/menu.js: Corrected menu bugs.
+
+	* www/index.rpy: Removed unused module imports.
+
+	* styles/remus.css: Decreased the "generated" font size a bit.
+	Moved the menu stylesheet to a separate file.
+
 2004-02-04  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/webserver/webdav/utils.py: Removed import of obsolete file

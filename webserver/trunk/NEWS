@@ -1,0 +1,16 @@
+* Release 0.3.0
+
+** Changes
+
+   New menu widget and model, with associated DHTML menu implemented
+   in javascript.
+
+** Bugs fixed
+
+   XML header in XHTML pages aren't liked by IE6, so I've removed
+   those.
+
+
+# Local Variables:
+# mode: outline
+# End:

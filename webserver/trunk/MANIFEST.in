@@ -5,11 +5,13 @@ include remus.conf.default
 include remus_server
 include remus_server.sh
 include www/index.rpy
-include www/index.css
 include www/lang.rpy
 include www/RemusPage.html
-include styles/remus.css
 include www/images/sv.png
 include www/images/en.png
+include www/scripts/menu.js
+include styles/remus.css
+include styles/toppages.css
+include styles/menu.css
 include po/sv.po
 include po/sv.mo
