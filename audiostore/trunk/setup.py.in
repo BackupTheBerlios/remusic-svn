@@ -92,12 +92,11 @@ class gettext_install(Command):
         import os
         dir = os.path.join(self.install_dir, 'share/locale')
         for file in os.listdir('po'):
-            if file[-3:] == '.po':
+            if file[-3:] == '.mo':
                 lang = os.path.splitext(file)[0]
-                os.system("msgfmt -o po/%s.mo po/%s.po" % (lang, lang))
                 outfile = self.distribution.metadata.name + '.mo'
                 (out, _) = self.copy_file(
-                    os.path.join("po", lang+'.mo'),
+                    os.path.join("po", file),
                     os.path.join(dir, lang, "LC_MESSAGES", outfile))
                 self.outfiles.append(out)
 
@@ -155,3 +154,40 @@ dist = setup(
               'audiostore_build': audiostore_build,
               'gettext_install': gettext_install},
     )
+
+print "\n\n"
+# Check for some necessary python modules
+try:
+    import MySQLdb
+except ImportError:
+    print "*** Couldn't find MySQLdb python package!"
+    print "Please install it, remus audiostore requires it."
+    print "See http://sourceforge.net/projects/mysql-python\n"
+
+try:
+    import mmpython
+except ImportError:
+    print "*** Couldn't find mmpython python package!"
+    print "Please install it, remus audiostore requires it."
+    print "See http://sourceforge.net/projects/mmpython/\n"
+
+try:
+    import twisted
+except ImportError:
+    print "*** Couldn't find the twisted python package!"
+    print "Please install it, remus audiostore requires it."
+    print "See http://twistedmatrix.com/\n"
+
+import commands
+status, output = commands.getstatusoutput("which xsltproc")
+if status != 0:
+    print "*** Can't seem to find xsltproc"
+    print "Please install libxslt, remus audiostore requires it."
+    print "See http://xmlsoft.org/XSLT/\n"
+
+print """*** IMPORTANT! ***
+
+remus audiostore needs to apply a patch to mmpython to work correctly.
+You'll find this patch in the file mmpython.patch, which you should find
+in this directory.
+"""

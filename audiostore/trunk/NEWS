@@ -6,4 +6,7 @@
   and for XSLT generated pages, using Norman Walsh's l10n package,
   part of the docbook-xsl package.
 
-  
+
+# Local Variables:
+# mode: outline
+# End:

@@ -199,6 +199,12 @@ class Collection(object):
         else:
             group_by = self.group_by
 
+        # Make sure all 'order_by' fields are present in the query.
+        # This isn't necessarily the case if the user passed a custom
+        # field list.
+        if order_by:
+            order_by = filter(lambda e: e in fields, order_by)
+
         selection = sqlquery.Select()
         for field in fields:
             selection.addcolumn(field)

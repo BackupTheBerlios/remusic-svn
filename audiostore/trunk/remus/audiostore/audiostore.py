@@ -17,8 +17,9 @@ except:
 try:
     import musicbrainz
     from musicbrainz.queries import *
-    HAVE_MUSICBRAINZ = 1
+    HAVE_MUSICBRAINZ = True
 except ImportError:
+    HAVE_MUSICBRAINZ = False
     pass
 
 
@@ -101,10 +102,10 @@ class Interface:
                         """INSERT INTO remus_audio_objects
                         VALUES (
                           NULL,
+                          %(title)s,
                           %(art_id)s,
                           %(alb_id)s,
                           %(ge_id)s,
-                          %(title)s,
                           %(mimetype)s,
                           %(year)s,
                           %(length)s,
@@ -210,7 +211,8 @@ class Interface:
                      NULL,
                      NULL,
                      NOW(),
-                     NOW())
+                     NOW(),
+                     NULL)
                 """, metafields)
             return cursor.lastrowid
         else:
@@ -226,14 +228,14 @@ class Interface:
             """SELECT
                    ge_id
                FROM
-                   remus_genre
+                   remus_genres
                WHERE
                    ge_genre=%(genre)s
             """, metafields)
 
         if count == 0:
             cursor.execute(
-                """INSERT INTO remus_genre
+                """INSERT INTO remus_genres
                    VALUES (
                      NULL,
                      %(genre)s)
@@ -336,7 +338,7 @@ class AudioObject:
                    remus_audio_objects,
                    remus_artists,
                    remus_albums,
-                   remus_genre
+                   remus_genres
                WHERE
                    au_artist = art_id AND
                    au_album = alb_id AND

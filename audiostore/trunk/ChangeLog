@@ -1,3 +1,21 @@
+2004-02-04  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* MANIFEST.in: Added missing files.
+
+	* setup.py.in (gettext_install.run): Don't generate .mo files on
+	installation, assume this is done at release build.
+	(dist): Make sure some python modules are present, and warn if
+	not. Also, print message about the mmpython patch.
+
+	* remus/audiostore/as_collection.py (Collection.select): Remove
+	'order_by' fields, if they don't appear in the 'fields' list.
+
+	* remus/audiostore/audiostore.py: Didn't define HAVE_MUSICBRAINZ
+	if it wasn't found.  Also, due to reordering of fields in the
+	database some time ago, uploading of songs didn't work in a fresh
+	install.  The remus_genre table was renamed to remus_genres some
+	time ago, but this wasn't updated everywhere.
+
 2004-02-03  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* Makefile.am (SUBDIRS): Added 'styles', we need to build
