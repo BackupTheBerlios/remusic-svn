@@ -1,3 +1,22 @@
+* Release 0.4.2
+
+  2004-02-13
+
+** Bugfixes
+
+*** Localization
+
+    Localization was rather braindead in previous versions, since the
+    "current language" information was server wide, thus all clients
+    were affected by language switches (duh...).  Now this information
+    is kept in the session object, which is unique per browser session.
+
+*** Appropriate audio file extensions
+
+    Audio file URLs now have an appropriate "file" extension based on
+    its content type, instead of no extension at all. 
+
+
 * Release 0.4.1
 
   2004-02-11
