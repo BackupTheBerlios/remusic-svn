@@ -19,7 +19,7 @@
 <gentext key="artist.link.title" text="Lista alla artister"/>
 <gentext key="album.link.title" text="Lista alla album"/>
 <gentext key="dirlist.link.title" text="Lista inneh&#229;llet i denna katalog"/>
-<gentext key="m3u.link.title" text="Spellista i ut&#246;kat M3U-format (de flesta spelare st&#246; detta format)"/>
+<gentext key="m3u.link.title" text="Spellista i ut&#246;kat M3U-format (de flesta spelare st&#246;djer detta format)"/>
 <gentext key="m3u.title" text="Spellista (m3u)"/>
 <gentext key="remus.link.title" text="Spellista i remusformat (internt format)"/>
 <gentext key="remus.title" text="Spellista (remus)"/>
@@ -28,8 +28,10 @@
 
 
 <gentext key="root.link.title" text="Till toppen av musiktr&#228;det"/>
-<gentext key="Artists" text="Artister"/>
+<gentext key="Album" text="Album"/>
 <gentext key="Albums" text="Album"/>
+<gentext key="Artist" text="Artist"/>
+<gentext key="Artists" text="Artister"/>
 <gentext key="Count" text="Antal"/>
 <gentext key="DirList" text="Kataloglista"/>
 <gentext key="FromTheStore" text="fr&#229;n audiostore på"/>
@@ -37,8 +39,11 @@
 <gentext key="Generated" text="Genererad av"/>
 <gentext key="Genre" text="Genre"/>
 <gentext key="MusicFrom" text="Musik fr&#229;n"/>
-<gentext key="NumberOfItems" text="Antal:"/>
+<gentext key="NumberOfItems" text="Antal"/>
+<gentext key="NumberOfSongs" text="Antal l&#229;tar"/>
+<gentext key="Song" text="S&#229;ng"/>
 <gentext key="Songlist" text="S&#229;nglista"/>
+<gentext key="Time" text="Tid"/>
 
 <context name="styles">
 

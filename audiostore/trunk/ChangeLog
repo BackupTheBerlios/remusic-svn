@@ -1,5 +1,27 @@
 2004-02-03  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
+	* Makefile.am (SUBDIRS): Added 'styles', we need to build
+	translation files!
+
+	* setup.py.in (dist): Added l10n.dtd.
+
+	* remus/audiostore/as_collection.py (SongList): Removed class,
+	noone seemed to use it.
+	(IndexXMLBase.create_file): Pass language info to the XSLT
+	process.
+	(IndexXMLBase.open): Reset self.file on return, else previously
+	generated pages will be cached and delivered, regardless of
+	language.
+	(IndexXMLAudioList.order_by, ArtistsColl.order_by)
+	(RootColl.__init__): Added/fixed order_by, to make listings a bit
+	more sane.
+
+	* styles/locale/en.xml, styles/locale/sv.xml: Added 'Album',
+	'Artist', 'Song', 'Time' and 'NumberOfSongs' translations.
+
+	* styles/index.html.xsl: Added some localization code for missing
+	strings.
+
 	* po/*: Localized strings for the 'static' pages.
 	
 	* configure.ac, devsetup.sh: Added localization support.

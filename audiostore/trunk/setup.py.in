@@ -134,6 +134,7 @@ dist = setup(
                     'styles/remus.xsl',
                     'styles/param.xsl',
                     'styles/l10n.xml',
+                    'styles/l10n.dtd',
                     'styles/l10n.xsl',
                     'styles/en.xml',
                     'styles/sv.xml',

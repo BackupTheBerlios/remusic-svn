@@ -42,7 +42,6 @@
   <xsl:param name="l10n.gentext.use.xref.language" select="0"/>
 
   <xsl:include href="l10n.xsl"/>
-  <xsl:include href="gentext.xsl"/>
   <xsl:include href="param.xsl"/>
 
   <xsl:template match="d">
@@ -330,22 +329,39 @@
         <tr class="colhead">
           <th>
             <a href="?order=art_sortname&amp;order=alb_name&amp;order=au_track_number">
-	      Artist:
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'Artist'"/>
+              </xsl:call-template>
 	    </a>
           </th>
           <th>
-            <a href="?order=alb_name&amp;order=au_track_number">Album: </a>
+            <a href="?order=alb_name&amp;order=au_track_number">
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'Album'"/>
+              </xsl:call-template>
+            </a>
           </th>
           <th>
-            <a href="?order=au_title">Song:</a>
+            <a href="?order=au_title">
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'Song'"/>
+              </xsl:call-template>
+            </a>
           </th>
           <th>
-            <a href="?order=au_length">Time:</a>
+            <a href="?order=au_length">
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'Time'"/>
+              </xsl:call-template>
+            </a>
           </th>
         </tr>
         <tr class="subtitle">
           <th colspan="4">
-	    Number of songs: <xsl:value-of select="@length"/>
+            <xsl:call-template name="gentext">
+              <xsl:with-param name="key" select="'NumberOfSongs'"/>
+            </xsl:call-template>
+            <xsl:text>: </xsl:text><xsl:value-of select="@length"/>
 	  </th>
         </tr>
       </thead>
@@ -432,7 +448,7 @@
           <xsl:call-template name="gentext">
             <xsl:with-param name="key" select="'NumberOfItems'"/>
           </xsl:call-template>
-          <xsl:text> </xsl:text>
+          <xsl:text>: </xsl:text>
           <xsl:value-of select="../@length"/>
 	</th>
       </tr>

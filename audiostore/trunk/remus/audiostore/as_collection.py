@@ -442,25 +442,6 @@ class SearchResultSong(Song):
         return "--".join(self.songtuple)
     
 
-class SongList(Collection):
-
-    fields = (
-        db_audiostore.remus_audio_objects_au_id,
-        )
-
-    order_by = (
-        db_audiostore.remus_albums_alb_name,
-        db_audiostore.remus_audio_objects_au_track_number,
-        )
-
-    def __init__(self, parent):
-        super(SongList, self).__init__(parent)
-
-    def name(self):
-        return "songlist"
-
-    
-
 class PlaylistColl(Collection):
     """Return a playlist file in some format.
 
@@ -565,8 +546,10 @@ class IndexXMLBase(Collection):
 
         # Perform xslt transformation on the file
         from commands import getstatusoutput
+        import remus.i18n
         params = "--stringparam audiostore.root %s" % urlroot
         params += " --stringparam audiostore.url %s%s" % (server, urlroot)
+        params += " --stringparam l10n.gentext.language %s" % remus.i18n.current_lang()
         logger.info("xsltproc %s %s %s" % \
                     (params, self.xsltfile, tempname))
         st, output = getstatusoutput("xsltproc %s %s %s" % \
@@ -601,8 +584,10 @@ class IndexXMLBase(Collection):
 
         if not self.file or self.file.closed:
             self.create_file(request)
-        self.file.seek(0)
-        return self.file
+        #self.file.seek(0)
+        file = self.file
+        self.file = None
+        return file
         
     def stat(self, request=None):
         if not self.file or self.file.closed:
@@ -648,7 +633,7 @@ class IndexXMLAudioList(IndexXMLBase):
         )
     
     order_by = (
-        db_audiostore.remus_audio_objects_au_title,
+        db_audiostore.remus_artists_art_sortname,
         db_audiostore.remus_albums_alb_name,
         db_audiostore.remus_audio_objects_au_track_number,
         )
@@ -768,6 +753,10 @@ class ArtistsColl(Collection):
         db_audiostore.remus_artists_art_name,
         )
 
+    order_by = (
+        db_audiostore.remus_artists_art_sortname,
+        )
+
     def __init__(self, parent, query=None):
         Collection.__init__(self, parent, query)
 
@@ -882,7 +871,7 @@ class GenreColl(Collection):
 
     fields = (
         db_audiostore.remus_artists_art_name,
-    )
+        )
 
     group_by = (
         'art_name',
@@ -924,6 +913,12 @@ class RootColl(Collection):
     fields = (
         db_audiostore.remus_genres_ge_genre,
         )
+
+    order_by = (
+        db_audiostore.remus_genres_ge_genre,
+        )
+
+
 
     def __init__(self, store):
         Collection.__init__(self, store=store)
