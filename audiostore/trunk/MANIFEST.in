@@ -12,6 +12,9 @@ include Makefile.am
 include Makefile.in
 include Makefile
 include setup.py.in
+include intltool-extract.in
+include intltool-merge.in
+include intltool-update.in
 include db/Makefile.am
 include db/Makefile.in
 include db/Makefile
