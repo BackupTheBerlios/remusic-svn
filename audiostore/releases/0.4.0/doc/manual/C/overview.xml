@@ -1,0 +1,55 @@
+<chapter id="chapter1">
+  <title>Overview</title>
+  
+  <section id="oview_intro1">
+    <title>Introduction</title>
+    
+    <para>The Remus audiostore is a structured storage of audio files,
+    providing automated sorting and searching.  It can store files in
+    various formats, including MP3 and Ogg/Vorbis, and perform
+    searches on them provided they have appropriate tags.
+    </para>
+    <para>The storage is implemented as a combination of file system
+    storage (the audio files) and a &app.mysql.link; database (the
+    metadata, such as title and artist), and provides both a
+    programmatic interface (currently in &app.python.link;) and a
+    &std.webdav.link; interface for browser access.
+    </para>
+  </section>
+  
+  <section id="oview_features1">
+    <title>Features</title>
+
+    <variablelist>
+      <varlistentry>
+	<term>Structured store</term>
+      <listitem>
+	<para>Audio files are automatically structured into a
+	&lt;genre>/&lt;artist>/&lt;album>/&lt;song> hierarchy. This is
+	done using the <emphasis>tags</emphasis> embedded in most
+	audio files.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>Distributed access</term>
+	<listitem>
+	  <para>The audiostore is accessed through the
+	  <application>http</application> protocol, thus providing
+	  networked access.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>File system access</term>
+	<listitem>
+	  <para>While the store isn't a conventional filesystem, it
+	  provides a &std.webdav.link; interface for filesystem like
+	  access. Nautilus and Microsoft Explorer, for instance,
+	  supports integration with WebDAV servers.</para>
+	</listitem>
+      </varlistentry>  
+    </variablelist>
+    
+  </section>
+  
+</chapter>
+

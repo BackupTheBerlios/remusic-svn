@@ -1,0 +1,66 @@
+<preface id="book-preface">
+  <title>Preface</title>
+  
+  <bridgehead id="preface-audience" renderas="sect2">
+    Intended Audience
+  </bridgehead>
+
+  <para>This manual describes the Remus audiostore, a software
+  package to manage a set of audio files (MP3, Ogg, SID, etc).  After
+  reading this document you will know how to populate the audiostore,
+  how to browse and search it, and how rename and remove files.</para>
+
+  <para>It contains descriptions of both the very high level
+  interfaces to the store (e.g. WWW), and more low level (but perhaps
+  more powerful) interfaces, such as database table layout,
+  &app.python.link; interfaces, etc.</para>
+
+  <bridgehead id="preface-overview" renderas="sect2">Organization of This
+  Book</bridgehead>
+
+  <para>This book is split into two logically distinct sections.  The
+  first section, <emphasis>Using &project.nametag;</emphasis>, covers
+  the installation and basic usage of &project.nametag;.  It is
+  expected that the reader will follow these chapters in sequence,
+  possibly skipping chapters covering familiar topics.  The second
+  section, <emphasis>The Design of &project.nametag;</emphasis>
+  discusses the internal software, what components are used, and how
+  they interact. </para>
+
+  <bridgehead id="preface-conv" renderas="sect2">Conventions used in
+  this book</bridgehead>
+
+  <para>To provide a consistent and easy to read text, several
+  conventions are followed throughout the book.</para>
+
+  <bridgehead id="preface-conv-typographic"
+  renderas="sect3">Typographic Conventions</bridgehead>
+
+  <variablelist>
+    <varlistentry>
+      <term><emphasis>Italic</emphasis></term>
+      <listitem>
+	<para>An <emphasis>italic</emphasis> font is used for URLs,
+	emphasized text, and the first usage of technical
+	terms.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><varname>Monospace</varname></term>
+      <listitem>
+	<para>A <varname>monospaced</varname> font is used for error
+	messages, commands, environment variables, names of ports,
+	hostnames, user names, group names, device names, variables,
+	and code fragments.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><application>Bold</application></term>
+      <listitem>
+	<para>A <application>bold</application> font is used for
+	applications, commands, and keys.</para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  
+</preface>

@@ -1,0 +1,110 @@
+Audiostore README
+
+* Prerequisites:
+
+  These are the various software packages used by audiostore.  Other
+  versions of these packages may work, but these are the versions
+  I am using at the moment:
+
+  * Python 2.3
+  * MySQL 3.23.57
+  * twisted 1.1.0
+  * libxslt-1.1.2
+  * mmpython-0.3
+  * cadaver-0.22.0 (*)
+
+  These are the packages audiostore uses directly.  Most of the above
+  packages in turn depend on other packages, which aren't included
+  here.  Refer to respective package's installation instructions.
+
+  (*) cadaver isn't used, but it's a nice command line webdav client,
+  quite handy for browsing and populating the audiostore.
+
+
+* Installation
+
+  When the above packages are installed, run (as root):
+
+  # python setup.py install
+
+  Edit $prefix/etc/audiostore.conf if you want to make any local
+  adjustments.
+
+  Eventually this will be configurable from the above file, but right
+  now, to change which CSS file is used to display the HTML pages from
+  the audiostore server is hardcoded into the XSLT stylesheet which is
+  used to generate the HTML pages.  To change the look of these, fiddle
+  with the following files directly:
+
+  $prefix/libdata/remus/styles/index.html.xsl
+  $prefix/libdata/remus/styles/audiostore.css
+
+  The format of the XML file which is processed by the above XSLT code
+  isn't specified anywhere as of yet.  I'll write up a DTD or a schema
+  one day (it's extremely simple though, and should be obvious from
+  reading the XSL file, if you know a bit about XSL.  Not everything
+  from the database is currently exposed in the XML, most noticably
+  genres, but also audio format is missing, and more.  This will
+  likely change in the not too distant future.
+
+
+* Running the server
+
+  Due to some limitations in python's distutils, the daemon program is
+  located in $prefix/bin (and not in $prefix/libexec which I
+  would have preferred).  I'll fix this at some point.  Anyhow, to
+  start the server, run '$prefix/bin/remus_server'.  Unless you
+  change the port number from the default 80, you need to run this as
+  root (change this in $prefix/etc/audiostore.conf).
+
+
+* Populating the audiostore
+
+  To populate the audiostore, send ID3-tagged mp3 files over http
+  using the PUT command.  By far the easiest way to do this is to 'cd'
+  to the directory containing your mp3 files, and
+
+  $ cadaver http://url.to.server/music
+  dav:/music/> mput *.mp3
+
+  If your mp3s are scattered in different directories, use 'lcd'
+  (local cd) in cadaver to move around, and issue 'mput *.mp3' in each
+  directory containing mp3 files.
+
+  When you've populated it, open your webbrowser, and type in
+  http://url.to.server/music, and a list of all the mp3s should show up.
+
+
+* Using the audiostore
+
+  A number of mp3 players seems to have varying problems playing songs
+  from the audiostore.
+
+  mpg123, a command line mp3 player, plays both single songs and
+  playlists fine.
+
+  xmms can't handle typing in an URL to a playlist on the command
+  line, but clicking on the playlist links in the web interface works
+  fine (clicking a link first downloads the playlist to a local file,
+  then feeds this to the player, a vital difference).
+
+  mplayer hangs after reading the playlist, when giving the URL on the
+  command line.  Even downloading the playlist, and giving the local
+  file to mplayer seems to hang it the same way (it busy waits, eating
+  CPU cycles).  Playing single files directly from the audiostore
+  works fine though.
+
+  Windows Media player worked fine last I tested (admittedly a while
+  ago).
+
+  As part of the remus project, I've written a simple player, using
+  the gstreamer framework, which also works.  Right now it's a simple
+  curses based player, lacking many features of many popular players,
+  but which at least provides basic player features.  The goal of this
+  player, however, is not to become yet another WinAMP / XMMS type
+  application, but rather a simple player responding to remote control
+  signals, making it a poor substitute for desktop use.
+
+# Local Variables:
+# mode: outline
+# End:
