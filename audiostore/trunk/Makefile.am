@@ -1,1 +1,1 @@
-SUBDIRS = doc db
+SUBDIRS = doc db po

@@ -1,3 +1,44 @@
+2004-02-03  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* po/*: Localized strings for the 'static' pages.
+	
+	* configure.ac, devsetup.sh: Added localization support.
+
+	* setup.py.in (gettext_install): Added installation of gettext
+	locale catalogs.
+	(dist): Added remus.i18n package, for native language support.
+
+	* remus/audiostore/as_collection.py (IndexXMLDirList.column_map):
+	Added au_title -> 'Song' mapping to column headings.
+
+	* remus/i18n/remus_audiostore.py: Install gettext catalogs for the
+	audiostore.
+
+	* www/playlists.rpy: List/manage playlists. For now, just lists
+	available playlists.
+
+	* styles/Makefile.am: Build locale files.
+
+	* styles/xsl/xsl.xsl: Verbatim copy from docbook-xsl. Transforms
+	language source files into runtime files.
+
+	* styles/locale/sv.xml: Swedish text strings for index.html
+	generation.
+
+	* styles/locale/en.xml: English text strings for index.html
+	generation.
+
+	* styles/l10n.dtd: Verbatim copy from docbook-xsl.
+
+	* styles/l10n.xml: Imports the language files (currently en.xml
+	and sv.xml).
+	
+	* styles/l10n.xsl: Verbatim copy (apart from a change of a path)
+	from docbook-xsl.
+
+	* styles/index.html.xsl: l10n/i18n support added, using Norman
+	Walsh's DocBook stylesheets dealing with this.
+
 2004-02-01  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/audiostore/as_collection.py (Collection.select): Made

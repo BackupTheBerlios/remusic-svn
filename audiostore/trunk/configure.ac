@@ -8,6 +8,13 @@ AM_INIT_AUTOMAKE
 RELEASE_DATE=2004-02-01
 AC_SUBST(RELEASE_DATE)
 
+# FreeBSD needs these
+CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+LDFLAGS="$LDFLAGS -L/usr/local/lib"
+
+AC_PROG_INTLTOOL
+AM_MAINTAINER_MODE
+
 dnl ==========================================================================
 dnl
 dnl If you add a version number here, you *must* add an AC_SUBST line for
@@ -15,7 +22,7 @@ dnl it too, or it will never make it into the spec file!
 dnl
 dnl ==========================================================================
 
-SCROLLKEEPER_BUILD_REQUIRED=0.3.4
+SCROLLKEEPER_BUILD_REQUIRED=0.3.14
 AC_SUBST(SCROLLKEEPER_BUILD_REQUIRED)
 
 dnl ==========================================================================
@@ -50,6 +57,16 @@ AC_PATH_PROG(DOT, dot)
 AM_CONDITIONAL(HAVE_DOT, test -n "$DOT")
 
 
+dnl
+dnl Internationalization
+dnl
+
+GETTEXT_PACKAGE=remus-audiostore
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [The gettext package name])
+ALL_LINGUAS="sv"
+AM_GLIB_GNU_GETTEXT
+
 AC_OUTPUT(
 setup.py
 Makefile
@@ -61,5 +78,7 @@ doc/xml/project.ent
 doc/manual/Makefile
 doc/manual/C/Makefile
 doc/manual/C/remus-audiostore-C.omf
+po/Makefile.in
 styles/param.xsl
+styles/Makefile
 )

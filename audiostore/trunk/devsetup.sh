@@ -11,3 +11,4 @@
 ${aclocal:-aclocal}
 ${automake:-automake} --add-missing
 ${autoconf:-autoconf}
+intltoolize --automake

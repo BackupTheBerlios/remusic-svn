@@ -36,7 +36,13 @@
     doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN"
     doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"/>
   
-  
+
+  <xsl:param name="l10n.gentext.default.language" select="'en'"/>
+  <xsl:param name="l10n.gentext.language" select="''"/>
+  <xsl:param name="l10n.gentext.use.xref.language" select="0"/>
+
+  <xsl:include href="l10n.xsl"/>
+  <xsl:include href="gentext.xsl"/>
   <xsl:include href="param.xsl"/>
 
   <xsl:template match="d">
@@ -78,7 +84,11 @@
   <xsl:template match="/">
     <html xmlns="http://www.w3.org/1999/xhtml">
       <head>
-        <title>REMUS audio listing</title>
+        <title>
+          <xsl:call-template name="gentext">
+            <xsl:with-param name="key" select="'page.title'"/>
+          </xsl:call-template>
+        </title>
         <meta name="generator" content="REMUS audiostore"/>
         <link rel="stylesheet" href="/styles/remus.css" type="text/css"/>
         <link rel="stylesheet" href="/styles/audiostore.css" type="text/css"/>
@@ -88,7 +98,13 @@
           &amp;<span style="color:red">re:</span><i>MUS</i><span style="color:blue">ic</span>;
         </div>
         <hr/>
-        <h2>Music from <xsl:apply-templates select=".//path"/></h2>
+        <h2>
+          <xsl:call-template name="gentext">
+            <xsl:with-param name="key" select="'MusicFrom'"/>
+          </xsl:call-template>
+          <xsl:text> </xsl:text>
+          <xsl:apply-templates select=".//path"/>
+        </h2>
 
 	<xsl:variable name="relurl">
 	  <xsl:choose>
@@ -99,7 +115,12 @@
 	</xsl:variable>
 
         <div class="navigation">
-          <a title="Top of the music tree" href="{$audiostore.root}">
+          <a href="{$audiostore.root}">
+            <xsl:attribute name="title">
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'root.link.title'"/>
+              </xsl:call-template>
+            </xsl:attribute>
             <xsl:choose>
               <xsl:when test="$home.image != ''">
                 <img>
@@ -109,12 +130,19 @@
                 </img>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:text>Home</xsl:text>
+                <xsl:call-template name="gentext">
+                  <xsl:with-param name="key" select="'Home'"/>
+                </xsl:call-template>
               </xsl:otherwise>
             </xsl:choose>
           </a>
           <xsl:text>|</xsl:text>
-          <a title="List of all artists" href="{$audiostore.root}artist/">
+          <a href="{$audiostore.root}artist/">
+            <xsl:attribute name="title">
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'artist.link.title'"/>
+              </xsl:call-template>
+            </xsl:attribute>
             <xsl:choose>
               <xsl:when test="$artists.image != ''">
                 <img>
@@ -124,12 +152,19 @@
                 </img>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:text>Artists</xsl:text>
+                <xsl:call-template name="gentext">
+                  <xsl:with-param name="key" select="'Artists'"/>
+                </xsl:call-template>
               </xsl:otherwise>
             </xsl:choose>
           </a>
           <xsl:text>|</xsl:text>
-          <a title="List of all albums" href="{$audiostore.root}album/">
+          <a href="{$audiostore.root}album/">
+            <xsl:attribute name="title">
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'album.link.title'"/>
+              </xsl:call-template>
+            </xsl:attribute>
             <xsl:choose>
               <xsl:when test="$albums.image != ''">
                 <img>
@@ -139,7 +174,9 @@
                 </img>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:text>Albums</xsl:text>
+                <xsl:call-template name="gentext">
+                  <xsl:with-param name="key" select="'Albums'"/>
+                </xsl:call-template>
               </xsl:otherwise>
             </xsl:choose>
           </a>
@@ -166,7 +203,9 @@
 		    </img>
 		  </xsl:when>
 		  <xsl:otherwise>
-		    <xsl:text>Directory list</xsl:text>
+                    <xsl:call-template name="gentext">
+                      <xsl:with-param name="key" select="'DirList'"/>
+                    </xsl:call-template>
 		  </xsl:otherwise>
 		</xsl:choose>
 	      </xsl:when>
@@ -180,7 +219,9 @@
 		    </img>
 		  </xsl:when>
 		  <xsl:otherwise>
-		    <xsl:text>Song list</xsl:text>
+                    <xsl:call-template name="gentext">
+                      <xsl:with-param name="key" select="'Songlist'"/>
+                    </xsl:call-template>
 		  </xsl:otherwise>
 		</xsl:choose> 
 	      </xsl:when>
@@ -189,10 +230,14 @@
 	  <xsl:variable name="linktitle">
 	    <xsl:choose>
 	      <xsl:when test="audiolist">
-		<xsl:text>List the contents in this directory</xsl:text>
+                <xsl:call-template name="gentext">
+                  <xsl:with-param name="key" select="'dirlist.link.title'"/>
+                </xsl:call-template>
 	      </xsl:when>
 	      <xsl:when test="dirlisting">
-		<xsl:text>List all songs in this scope (potentially a long list)</xsl:text>
+                <xsl:call-template name="gentext">
+                  <xsl:with-param name="key" select="'songlist.link.title'"/>
+                </xsl:call-template>
 	      </xsl:when>
 	    </xsl:choose>
 	  </xsl:variable>
@@ -200,7 +245,12 @@
 	    <xsl:value-of select="$linktext"/>
           </a>
           <xsl:text>|</xsl:text>
-          <a title="Playlist in extended M3U format (most players support this)">
+          <a>
+            <xsl:attribute name="title">
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'m3u.link.title'"/>
+              </xsl:call-template>
+            </xsl:attribute>
             <xsl:attribute name="href">
 	      <xsl:value-of select="$relurl"/><xsl:text>list/list.m3u</xsl:text>
             </xsl:attribute>
@@ -213,12 +263,19 @@
                 </img>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:text>Playlist (m3u)</xsl:text>
+                <xsl:call-template name="gentext">
+                  <xsl:with-param name="key" select="'m3u.title'"/>
+                </xsl:call-template>
               </xsl:otherwise>
             </xsl:choose>
           </a>
           <xsl:text>|</xsl:text>
-          <a title="Playlist in remus format (internal format, used by the remus player)">
+          <a>
+            <xsl:attribute name="title">
+              <xsl:call-template name="gentext">
+                <xsl:with-param name="key" select="'remus.link.title'"/>
+              </xsl:call-template>
+            </xsl:attribute>
             <xsl:attribute name="href">
 	      <xsl:value-of select="$relurl"/><xsl:text>list/remus</xsl:text>
             </xsl:attribute>
@@ -231,7 +288,9 @@
                 </img>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:text>Playlist (remus)</xsl:text>
+                <xsl:call-template name="gentext">
+                  <xsl:with-param name="key" select="'remus.title'"/>
+                </xsl:call-template>
               </xsl:otherwise>
             </xsl:choose>
           </a>
@@ -242,12 +301,19 @@
         <hr/>
         
         <div class="generated">
-          <xsl:text>Generated by </xsl:text>
+          <xsl:call-template name="gentext">
+            <xsl:with-param name="key" select="'Generated'"/>
+          </xsl:call-template>
+          <xsl:text> </xsl:text>
           <a href="{$remus.url}">
             <xsl:text>remus.audiostore </xsl:text>
 	    <xsl:value-of select="$remus.version"/>
           </a>
-          <xsl:text> from the audiostore at </xsl:text>
+          <xsl:text> </xsl:text>
+          <xsl:call-template name="gentext">
+            <xsl:with-param name="key" select="'FromTheStore'"/>
+          </xsl:call-template>
+          <xsl:text> </xsl:text>
           <a href="{$audiostore.url}">
             <xsl:value-of select="$audiostore.url"/>
           </a>
@@ -352,14 +418,22 @@
     <thead xmlns="http://www.w3.org/1999/xhtml">
       <tr class="colhead">
 	<xsl:apply-templates/>
-	<th>Count</th>
+	<th>
+          <xsl:call-template name="gentext">
+            <xsl:with-param name="key" select="'Count'"/>
+          </xsl:call-template>
+        </th>
       </tr>
       <tr class="subtitle">
 	<th>
 	  <xsl:attribute name="colspan">
 	    <xsl:value-of select="@cols+1"/>
 	  </xsl:attribute>
-	  Number of items: <xsl:value-of select="../@length"/>
+          <xsl:call-template name="gentext">
+            <xsl:with-param name="key" select="'NumberOfItems'"/>
+          </xsl:call-template>
+          <xsl:text> </xsl:text>
+          <xsl:value-of select="../@length"/>
 	</th>
       </tr>
     </thead>
@@ -371,7 +445,11 @@
 	<xsl:attribute name="href">
 	  <xsl:text>?order=</xsl:text><xsl:value-of select="@key"/>
 	</xsl:attribute>
-	<xsl:value-of select="."/>
+        <xsl:call-template name="gentext">
+          <xsl:with-param name="key">
+            <xsl:value-of select="."/>
+          </xsl:with-param>
+        </xsl:call-template>
       </a>
     </th>
   </xsl:template>

@@ -573,7 +573,7 @@ class IndexXMLBase(Collection):
                                      (params, self.xsltfile, tempname))
 
         self.file = StringIO(output)
-        #os.unlink(tempname)
+        os.unlink(tempname)
 
     def content_type(self):
         try:
@@ -688,6 +688,7 @@ class IndexXMLDirList(IndexXMLBase):
         'art_name' : 'Artist',
         'alb_name' : 'Album',
         'ge_genre' : 'Genre',
+        'au_title' : 'Song',
         }
 
     link_cols = {

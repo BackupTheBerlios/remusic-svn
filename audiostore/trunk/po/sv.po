@@ -1,0 +1,30 @@
+# Swedish messages for remus audiostore.
+# Copyright (C) 2004 Daniel Larsson <Daniel.Larsson@servicefactory.se> 2004
+# This file is distributed under the same license as the remus-audiostore package.
+# Daniel Larsson <Daniel.Larsson@servicefactory.se>, 2004.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: remus-audiostore 0.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-02-02 16:02+0100\n"
+"PO-Revision-Date: 2004-02-02 16:07+0100\n"
+"Last-Translator: Daniel Larsson <Daniel.Larsson@servicefactory.se>\n"
+"Language-Team: Swedish <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: www/playlists.rpy:14
+msgid "Playlist administration"
+msgstr "Administration av spellistor"
+
+#: www/playlists.rpy:16
+msgid "No playlists defined"
+msgstr "Inga spellistor skapade"
+
+#: www/playlists.rpy:18
+msgid "Defined playlists:"
+msgstr "Skapade spellistor"

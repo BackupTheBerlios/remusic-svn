@@ -73,9 +73,41 @@ class audiostore_setup (Command):
 
 # class audiostore_setup
 
+class gettext_install(Command):
+    description = "Install gettext catalog files"
 
-install.install.sub_commands.append(('audiostore_setup', None))
+    user_options = []
+    
+    def initialize_options(self):
+        self.install_dir = None
+        self.outfiles = []
+
+    def finalize_options (self):
+        self.set_undefined_options(
+            'install',
+            ('install_data', 'install_dir'),
+            )
+
+    def run(self):
+        import os
+        dir = os.path.join(self.install_dir, 'share/locale')
+        for file in os.listdir('po'):
+            if file[-3:] == '.po':
+                lang = os.path.splitext(file)[0]
+                os.system("msgfmt -o po/%s.mo po/%s.po" % (lang, lang))
+                outfile = self.distribution.metadata.name + '.mo'
+                (out, _) = self.copy_file(
+                    os.path.join("po", lang+'.mo'),
+                    os.path.join(dir, lang, "LC_MESSAGES", outfile))
+                self.outfiles.append(out)
+
+    def get_outputs (self):
+        return self.outfiles
+
+
 build.build.sub_commands.insert(0, ('audiostore_build', None))
+install.install.sub_commands.append(('audiostore_setup', None))
+install.install.sub_commands.append(('gettext_install', None))
 
 dist = setup(
     name="@PACKAGE_NAME@",
@@ -86,7 +118,7 @@ dist = setup(
     url="http://www.remus.org/audiostore",
     long_description=__doc__,
 
-    packages = ['remus', 'remus.audiostore', 'remus.webserver'],
+    packages = ['remus', 'remus.i18n', 'remus.audiostore', 'remus.webserver'],
     scripts = ['audiostore_resync'],
     data_files = [('etc/remus/audiostore',
                    ('db/audiostore.sql',)),
@@ -100,7 +132,12 @@ dist = setup(
                     'styles/list.m3u.xsl',
                     'styles/list.m3u.mime',
                     'styles/remus.xsl',
-                    'styles/param.xsl')),
+                    'styles/param.xsl',
+                    'styles/l10n.xml',
+                    'styles/l10n.xsl',
+                    'styles/en.xml',
+                    'styles/sv.xml',
+                    )),
 #                  ('share/doc/remus',
 #                   ('doc/manual/C/manual.html/*',))
                   ],
@@ -114,5 +151,6 @@ dist = setup(
     ],
     verbose=1,
     cmdclass={'audiostore_setup': audiostore_setup,
-              'audiostore_build': audiostore_build}
+              'audiostore_build': audiostore_build,
+              'gettext_install': gettext_install},
     )
