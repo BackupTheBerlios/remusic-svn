@@ -11,7 +11,7 @@
 <!-- see NOTE ABOUT PATHS in README file for details -->
 
 <xsl:param name="html.stylesheet">docbook.css</xsl:param>
-
+<xsl:param name="table.borders.with.css" select="1"/>
 <xsl:param name="local.l10n.xml" select="document('l10n.xml')"/>
 
 <!-- Including new title page stylesheets for customizing the placement 
