@@ -75,10 +75,14 @@ dist = setup(
     url="http://www.remus.org/webserver",
     long_description=__doc__,
 
-    packages = ['remus', 'remus.webserver', 'remus.webserver.handlers'],
+    packages = ['remus', 'remus.webserver',
+                'remus.webserver.handlers',
+                'remus.webserver.webdav'],
     scripts = ['remus_server'],
-    data_files = [('etc/remus',
-                   ('remus.conf.default',)),
+    data_files = [('libdata/remus',
+                   ('www/index.rpy','www/RemusPage.html')),
+                  ('libdata/remus/styles',
+                   ('styles/remus.css',)),
                   ],
     classifiers = [
         "Development Status :: 0 - Alpha",

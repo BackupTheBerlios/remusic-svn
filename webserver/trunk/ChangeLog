@@ -1,0 +1,6 @@
+2003-11-27  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* all: Webserver framework based on Twisted. Remus specific
+	resources, and a fairly generic WebDAV resource. The WebDAV
+	resource if somewhat kludgy, being a currently half hearted
+	retrofit into twisted from a BasicHTTPServer based implementation.
