@@ -1,1 +1,1 @@
-SUBDIRS = fo
+SUBDIRS = fo html
