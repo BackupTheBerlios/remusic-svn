@@ -26,7 +26,7 @@
 # 	Version: 0.1.2 (last updated: March 20, 2002)
 #
 
-omf_dest_dir=$(shell scrollkeeper-config --omfdir)/remus-docs
+omf_dest_dir=$(shell scrollkeeper-config --omfdir)/remus
 scrollkeeper_localstate_dir = $(shell scrollkeeper-config --pkglocalstatedir)
 
 omf: omf_timestamp
