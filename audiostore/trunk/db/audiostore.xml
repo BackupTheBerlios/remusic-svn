@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
-<sql:database xmlns:sql="http://remus.sourceforge.net/xml/sql/1.0"
-              xmlns:doc="http://remus.sourceforge.net/xml/doc/1.0">
+<sql:database xmlns:sql="http://sqlml.sourceforge.net/xml/sql/1.0"
+              xmlns:doc="http://sqlml.sourceforge.net/xml/doc/1.0">
   <sql:name>remus</sql:name>
 
   <sql:table>
@@ -206,6 +206,53 @@
       <sql:column name="au_audio_clip">
 	<sql:type>
 	  VARCHAR(128) NOT NULL
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <sql:name>remus_playlists</sql:name>
+    <sql:columns>
+      <sql:column name="pl_id">
+	<sql:type primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column name="pl_name">
+	<sql:type>
+	  VARCHAR(128) NOT NULL
+	</sql:type>
+      </sql:column>      
+      <sql:column name="pl_modified">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+      <sql:column name="pl_created">
+	<sql:type>
+	  TIMESTAMP
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <sql:table>
+    <sql:name>remus_plmapping</sql:name>
+    <sql:columns>
+      <sql:column name="plm_songnr">
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column name="plm_playlist">
+	<sql:type>
+	  <sql:key table="remus_playlists" column="pl_id"/>
+	</sql:type>
+      </sql:column>
+      <sql:column name="plm_song">
+	<sql:type>
+	  <sql:key table="remus_audio_objects" column="au_id"/>
 	</sql:type>
       </sql:column>
     </sql:columns>

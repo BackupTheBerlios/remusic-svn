@@ -1,3 +1,12 @@
+2004-01-17  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* www/music.rpy: Don't reconnect to mysql, we run out of
+	connections!
+
+	* styles/audiostore.css: Moved .generated to remus.css.
+
+	* styles/index.html.xsl: Added remus stylesheet, and remus logo.
+
 2003-12-14  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/audiostore/as_collection.py (Collection.stat): stat() on a

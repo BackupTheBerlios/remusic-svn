@@ -22,10 +22,15 @@
       <head>
         <title>REMUS audio listing</title>
         <meta name="generator" content="REMUS audiostore"/>
+        <link rel="stylesheet" href="/styles/remus.css" type="text/css"/>
         <link rel="stylesheet" href="/styles/audiostore.css" type="text/css"/>
       </head>
       <body>
-        <h1>REMUS: Music from <xsl:value-of select="audiolist/path"/></h1>
+        <div class="logo">
+          &amp;<span style="color:red">re:</span><i>MUS</i><span style="color:blue">ic</span>;
+        </div>
+        <hr/>
+        <h2>Music from <xsl:value-of select="audiolist/path"/></h2>
 
         <div class="navigation">
           <a href="{$audiostore.root}">

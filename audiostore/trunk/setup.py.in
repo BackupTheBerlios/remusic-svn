@@ -29,7 +29,7 @@ class audiostore_build (Command):
     def run (self):
         
         import os
-        cmd = "make all"
+        cmd = "gmake all"
         os.system(cmd)
 
 #        for file in SQL_XML_FILES:
@@ -91,13 +91,16 @@ dist = setup(
     data_files = [('etc/remus/audiostore',
                    ('db/audiostore.sql',)),
                   ('libdata/remus',
-                   ('www/music.rpy',)),
+                   ('www/music.rpy',
+                    'www/playlists.rpy',
+                    )),
                   ('libdata/remus/styles',
                    ('styles/audiostore.css',
                     'styles/index.html.xsl',
                     'styles/m3u.xsl',
                     'styles/param.xsl')),
-                  ('share/doc/remus'
+#                  ('share/doc/remus',
+#                   ('doc/manual/C/manual.html/*',))
                   ],
     classifiers = [
         "Development Status :: 0 - Alpha",
