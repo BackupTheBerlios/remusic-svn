@@ -10,22 +10,22 @@
     </doc:description>
     <sql:name>remus_artists</sql:name>
     <sql:columns>
-      <sql:column sql:name="art_id">
-	<sql:type sql:primary-key="auto">
+      <sql:column name="art_id">
+	<sql:type primary-key="auto">
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="art_name">
+      <sql:column name="art_name">
 	<sql:type>
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="art_sortname">
+      <sql:column name="art_sortname">
 	<sql:type>
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="art_mb_artist_id">
+      <sql:column name="art_mb_artist_id">
         <doc:description>
 	  Musicbrainz artist identity
         </doc:description>
@@ -33,7 +33,7 @@
 	  CHAR(36)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="art_url">
+      <sql:column name="art_url">
         <doc:description>
 	  Optional URL to artist
         </doc:description>
@@ -41,12 +41,12 @@
 	  VARCHAR(128)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="art_modified">
+      <sql:column name="art_modified">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="art_created">
+      <sql:column name="art_created">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
@@ -60,42 +60,42 @@
     </doc:description>
     <sql:name>remus_albums</sql:name>
     <sql:columns>
-      <sql:column sql:name="alb_id">
-	<sql:type sql:primary-key="auto">
+      <sql:column name="alb_id">
+	<sql:type primary-key="auto">
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="alb_name">
+      <sql:column name="alb_name">
 	<sql:type>
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="alb_artist">
+      <sql:column name="alb_artist">
 	<sql:type>
-	  <sql:key sql:table="remus_artists" sql:column="art_id"/>
+	  <sql:key table="remus_artists" column="art_id"/>
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="alb_mb_album_id">
+      <sql:column name="alb_mb_album_id">
 	<sql:type>
 	  CHAR(36)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="alb_nr_of_tracks">
+      <sql:column name="alb_nr_of_tracks">
 	<sql:type>
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="alb_duration">
+      <sql:column name="alb_duration">
 	<sql:type>
 	  TIME
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="alb_modified">
+      <sql:column name="alb_modified">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="alb_created">
+      <sql:column name="alb_created">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
@@ -109,12 +109,12 @@
     </doc:description>
     <sql:name>remus_genres</sql:name>
     <sql:columns>
-      <sql:column sql:name="ge_id">
-	<sql:type sql:primary-key="auto">
+      <sql:column name="ge_id">
+	<sql:type primary-key="auto">
 	  SMALLINT UNSIGNED
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="ge_genre">
+      <sql:column name="ge_genre">
 	<sql:type>
 	  VARCHAR(30)
 	</sql:type>
@@ -128,82 +128,82 @@
     </doc:description>
     <sql:name>remus_audio_objects</sql:name>
     <sql:columns>
-      <sql:column sql:name="au_id">
-	<sql:type sql:primary-key="auto">
+      <sql:column name="au_id">
+	<sql:type primary-key="auto">
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_title">
+      <sql:column name="au_title">
 	<sql:type>
 	  VARCHAR(60)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_artist">
+      <sql:column name="au_artist">
 	<sql:type>
-	  <sql:key sql:table="remus_artists" sql:column="art_id"/>
+	  <sql:key table="remus_artists" column="art_id"/>
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_album">
+      <sql:column name="au_album">
 	<sql:type>
-	  <sql:key sql:table="remus_albums" sql:column="alb_id"/>
+	  <sql:key table="remus_albums" column="alb_id"/>
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_genre">
+      <sql:column name="au_genre">
 	<sql:type>
-	  <sql:key sql:table="remus_genres" sql:column="ge_id"/>
+	  <sql:key table="remus_genres" column="ge_id"/>
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_content_type">
+      <sql:column name="au_content_type">
 	<sql:type>
 	  VARCHAR(40)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_year">
+      <sql:column name="au_year">
 	<sql:type>
 	  YEAR
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_length">
+      <sql:column name="au_length">
 	<sql:type>
 	  TIME
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_track_number">
+      <sql:column name="au_track_number">
 	<sql:type>
 	  SMALLINT UNSIGNED
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_modified">
+      <sql:column name="au_modified">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_created">
+      <sql:column name="au_created">
 	<sql:type>
 	  TIMESTAMP
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_bitrate">
+      <sql:column name="au_bitrate">
 	<sql:type>
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_sample_freq">
+      <sql:column name="au_sample_freq">
 	<sql:type>
 	  INT UNSIGNED
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_audio_mode">
+      <sql:column name="au_audio_mode">
 	<sql:type>
 	  VARCHAR(20)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_subtype">
+      <sql:column name="au_subtype">
 	<sql:type>
 	  VARCHAR(40)
 	</sql:type>
       </sql:column>
-      <sql:column sql:name="au_audio_clip">
+      <sql:column name="au_audio_clip">
 	<sql:type>
 	  VARCHAR(128) NOT NULL
 	</sql:type>

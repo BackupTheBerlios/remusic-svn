@@ -48,26 +48,32 @@ import remus.database
   </xsl:template>
 
   <xsl:template match="sql:column" mode="name">
-    <xsl:value-of select="@sql:name"/>
+    <xsl:value-of select="@name"/>
     <xsl:if test="position() != last() - 1">
       <xsl:text>,</xsl:text>
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="sql:column">
-    <xsl:value-of select="@sql:name"/>
+    <xsl:value-of select="@name"/>
     <xsl:choose>
       <xsl:when test="sql:type/sql:key">
         <xsl:text> = remus.database.Relation("</xsl:text>
-        <xsl:value-of select="@sql:name"/>
+        <xsl:value-of select="@name"/>
         <xsl:text>",</xsl:text>
-        <xsl:value-of select="sql:type/sql:key/@sql:column"/>
+        <xsl:value-of select="sql:type/sql:key/@column"/>
         <xsl:text>)
+</xsl:text>
+      </xsl:when>
+      <xsl:when test="sql:type/@primary-key">
+        <xsl:text> = remus.database.PrimaryKey("</xsl:text>
+        <xsl:value-of select="@name"/>
+        <xsl:text>")
 </xsl:text>
       </xsl:when>
       <xsl:otherwise>
         <xsl:text> = remus.database.Column("</xsl:text>
-        <xsl:value-of select="@sql:name"/>
+        <xsl:value-of select="@name"/>
         <xsl:text>")
 </xsl:text>
       </xsl:otherwise>
@@ -83,7 +89,7 @@ import remus.database
 
 
   <xsl:template match="sql:key">
-    <xsl:value-of select="@sql:column"/>),
+    <xsl:value-of select="@column"/>),
   </xsl:template>
 
 

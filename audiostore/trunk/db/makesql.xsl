@@ -28,14 +28,14 @@
 
 
   <xsl:template match="sql:column">
-    <xsl:value-of select="@sql:name"/>
+    <xsl:value-of select="@name"/>
     <xsl:apply-templates select="sql:type"/>
     <xsl:choose>
-      <xsl:when test="sql:type/@sql:primary-key = 'auto'">
+      <xsl:when test="sql:type/@primary-key = 'auto'">
         <xsl:text>,
         PRIMARY KEY (</xsl:text>
-        <xsl:value-of select="@sql:name"/>),
-        INDEX (<xsl:value-of select="@sql:name"/>)
+        <xsl:value-of select="@name"/>),
+        INDEX (<xsl:value-of select="@name"/>)
       </xsl:when>
     </xsl:choose>
     <xsl:if test="position() != last()-1">
@@ -47,7 +47,7 @@
   <xsl:template match="sql:type">
     <xsl:apply-templates/>
     <xsl:choose>
-      <xsl:when test="@sql:primary-key = 'auto'">
+      <xsl:when test="@primary-key = 'auto'">
         <xsl:text>NOT NULL AUTO_INCREMENT</xsl:text>
       </xsl:when>
     </xsl:choose>
@@ -57,12 +57,12 @@
   <xsl:template match="sql:key">
     <xsl:text>INT UNSIGNED,</xsl:text>
     <xsl:text>INDEX (</xsl:text>
-    <xsl:value-of select="ancestor::sql:column/@sql:name"/>),
+    <xsl:value-of select="ancestor::sql:column/@name"/>),
     <xsl:text>FOREIGN KEY (</xsl:text>
-    <xsl:value-of select="ancestor::sql:column/@sql:name"/>
+    <xsl:value-of select="ancestor::sql:column/@name"/>
     <xsl:text>) REFERENCES </xsl:text>
-    <xsl:value-of select="@sql:table"/>
-    <xsl:text>(</xsl:text><xsl:value-of select="@sql:column"/>
+    <xsl:value-of select="@table"/>
+    <xsl:text>(</xsl:text><xsl:value-of select="@column"/>
     <xsl:text>) ON DELETE RESTRICT</xsl:text>
   </xsl:template>
 

@@ -29,25 +29,6 @@ from query import *
 
 logger = logging.getLogger("audiostore.mysql")
 
-"""
-/
-    artist/
-        <artist>/
-            <album>/
-                <song>
-    album/
-        <album>/
-            <song>
-    song/
-        <song>
-    <genre>/
-        <artist>/
-        album/
-        song/
-
-    search/<text>
-"""
-
 
 _fs_root = None
 
@@ -65,15 +46,26 @@ fn_to_db = string.maketrans("_", " ")
 # Translate between file names and SQL column values
 #
 def mk_filename(path):
-    return path.replace("?", "  q").replace("/", "\\").replace("&", " and ").replace("(", " p ").replace(")", " d ").translate(db_to_fn).lower()
+    return path.replace("?", "  q") \
+           .replace("/", "\\") \
+           .replace("&", " and ") \
+           .replace("(", " p ") \
+           .replace(")", " d ") \
+           .translate(db_to_fn).lower()
 
 def mk_sqlname( path):
-    return path.translate(fn_to_db).replace(" d ", ")").replace(" p ", "(").replace("  and  ", " & ").replace("\\", "/").replace("  q", "?")
+    return path.translate(fn_to_db) \
+           .replace(" d ", ")") \
+           .replace(" p ", "(") \
+           .replace("  and  ", " & ") \
+           .replace("\\", "/") \
+           .replace("  q", "?")
 
 
 class Collection(object):
 
     tables = ()
+    fields = ()
     group_by = None
     order_by = None
 
@@ -81,6 +73,8 @@ class Collection(object):
         'song'    : db_audiostore.au_title,
         'artist'  : db_audiostore.art_name,
         'album'   : db_audiostore.alb_name,
+        'album_id': db_audiostore.au_album,
+        'artist_id':db_audiostore.alb_artist,
         }
 
     def __init__(self, parent=None, query=None, store=None):
@@ -101,6 +95,17 @@ class Collection(object):
     def name(self):
         return "UNKNOWN"
     
+    def rename(self, old_names, new_names, coll=None):
+        if not coll:
+            coll = self
+        if old_names:
+            if old_names[-1] != new_names[-1]:
+                self._rename(mk_sqlname(new_names[-1]), coll)
+            self.parent.rename(old_names[:-1], new_names[:-1], coll)
+
+    def _rename(self, newname, coll):
+        assert False, "can't rename %s" % self.__class__
+
     def cwd(self):
         """Return the 'current working directory', which this hierarchy
         represents"""
@@ -113,7 +118,10 @@ class Collection(object):
         if not self.cursor:
             self.select()
 
-        return self.cursor.rowcount > 1
+        isdir = self.cursor.rowcount > 1
+        self.cursor.close()
+        self.cursor = None
+        return isdir
 
     def content_type(self):
         return "text/html"
@@ -122,8 +130,14 @@ class Collection(object):
         assert False
 
     def stat(self):
-        return (0444, 0, 1, 1, os.getuid(), os.getgid(), 0,
-                time.time(), time.time(), time.time())
+        if self.select() > 0:
+            stat = (0444, 0, 1, 1, os.getuid(), os.getgid(), 0,
+                    time.time(), time.time(), time.time())
+        else:
+            stat = None
+        self.cursor.close()
+        self.cursor = None
+        return stat
 
     def subcollection(self, name):
         print "Looking for subcollection", name
@@ -156,7 +170,7 @@ class Collection(object):
 
     def select(self, fields = None):
         if not fields:
-            fields = self.fields
+            fields = self.fields or self.parent.fields
 
         selection = remus.database.Select()
         for field in fields:
@@ -187,22 +201,51 @@ class Collection(object):
         count = cursor.execute(sql, args)
 
         for filename, mimetype in cursor:
-            print "Updating", filename
-            mime_map[mimetype].update(filename, self.updates)
+            audiostore.mime_map[mimetype].update(filename, self.updates)
 
         # Update the database
-        set = [ "%s = %s" % (self.field_map[key], self.db.literal(value))
+
+        # First, figure out which tables we're updating.
+        # For now, support only one table, so make sure all updated
+        # fields belong to the same one
+        update_tables = [ self.field_map[key].table
+                          for key in self.updates.keys() ]
+
+        table = update_tables[0]
+        for t in update_tables[1:]:
+            if t != table:
+                raise "Can't update multiple tables yet"
+
+
+        # Create a selection, and add the table's primary key column
+        # to the selection (NOTE: We're making the assumption the table
+        # has a primary key, and this key is a single column. While this
+        # isn't true in general, it's safe in this context: every remus
+        # database has a single column primary key)
+        selection = remus.database.Select()
+        selection.addcolumn(table.primary_key)
+
+        sql, args = selection.select(query=self.query)
+        count = cursor.execute(sql, args)
+
+        # Ok, we know which table to update, and the above query told us
+        # which rows to update. Trim off duplicate values:
+        import sets
+        rows = sets.Set([ key for (key,) in cursor.fetchall() ])
+
+        # Construct the column update
+        set = [ "%s = %s" % (self.field_map[key].name, self.db.literal(value))
                 for key, value in self.updates.items() ]
+
+        # Create 'where' clause from the rows
+        where = " or ".join([ "%s = %s" % (table.primary_key.name, key)
+                              for key in rows ])
+        
         sql = "UPDATE %s SET %s WHERE %s" % \
-              (", ".join(selection.tables(self.query)),
-               ", ".join(set),
-               selection.where(query))
+              (table.name, ", ".join(set), where)
 
-        if args:
-            count = cursor.execute(sql, args)
-        else:
-            count = cursor.execute(sql)
-
+        count = cursor.execute(sql)
+        cursor.close()
         return count
 
     def remove(self, limit="LIMIT 1"):
@@ -303,14 +346,20 @@ class Song(Collection):
         if count != 1:
             raise IOError, "file not found"
 
-        return os.stat(self.cursor.fetchone()["au_audio_clip"])
+        stat = os.stat(self.cursor.fetchone()["au_audio_clip"])
+        self.cursor.close()
+        self.cursor = None
+        return stat
 
     def content_type(self):
         count = self.select(fields=(db_audiostore.au_content_type,))
         if count != 1:
             raise IOError, "file not found"
 
-        return self.cursor.fetchone()["au_content_type"]
+        content_type = self.cursor.fetchone()["au_content_type"]
+        self.cursor.close()
+        self.cursor = None
+        return content_type
 
     def open(self, mode):
         if mode and mode[0] == 'w':
@@ -323,6 +372,8 @@ class Song(Collection):
                 raise IOError, "file not found"
             
             filename = self.cursor.fetchone()["au_audio_clip"]
+            self.cursor.close()
+            self.cursor = None
             return open(filename)
 
 
@@ -474,6 +525,8 @@ class IndexXML(Collection):
             
         os.write(fd, "</audiolist>\n")
         os.close(fd)
+        self.cursor.close()
+        self.cursor = None
 
         # Perform xslt transformation on the file
         from commands import getstatusoutput
@@ -612,6 +665,9 @@ class AlbumColl(Collection):
     def name(self):
         return self.album
 
+    def _rename(self, newname, coll):
+        coll["album"] = newname
+        
     def isdir(self):
         return True
 
@@ -647,6 +703,11 @@ class GenreColl(Collection):
     def name(self):
         return self.genre
 
+#    def _rename(self, newname, coll):
+#        # Look up 'newname' in the DB, and update the genre reference
+#        # rather than changing the name of the particular genre
+#        coll["genre_id"] = newgenre
+        
     def subcollection(self, name):
         print "Genre: subcollection =", name
         
@@ -699,3 +760,4 @@ class RootColl(Collection):
     def albums(self):
         return AlbumsColl(self)
     
+import audiostore

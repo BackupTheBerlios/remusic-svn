@@ -6,6 +6,7 @@ class Table:
     "Describes an SQL table structure"
 
     def __init__(self, database, name, columns):
+        self.primary_key = None
         self.database = database
         self.name = name
         self.columns = columns
@@ -13,6 +14,8 @@ class Table:
             column.settable(self)
         self.setup_relations()
 
+    def setprimary_key(self, column):
+        self.primary_key = column
 
     def setup_relations(self):
         "Initialize relations between tables"
@@ -32,6 +35,16 @@ class Column:
 
     def settable(self, table):
         self.table = table
+
+class PrimaryKey(Column):
+    "Primary key for table"
+
+    def __init__(self, name):
+        Column.__init__(self, name)
+
+    def settable(self, table):
+        Column.settable(self, table)
+        table.setprimary_key(self)
 
 
 class Relation(Column):
@@ -58,6 +71,16 @@ def query_tables(query, tables):
     if hasattr(query, 'right'):
         query_tables(query.right, tables)
 
+
+def query_columns(query, columns):
+    "Insert all columns occurring in the query into 'columns'."
+    if hasattr(query, 'table') and query not in columns:
+        columns.append(query)
+    if hasattr(query, 'left'):
+        query_columns(query.left, columns)
+    if hasattr(query, 'right'):
+        query_columns(query.right, columns)
+    
     
 class Select:
     """Collection of columns, and calculation of what tables need

@@ -51,8 +51,19 @@ def get_cached_collection(path, parent, child):
         return _path_to_query[path]
 
     coll = parent.subcollection(child)
-    _path_to_query[path] = coll
+ #   _path_to_query[path] = coll
     return coll
+
+
+def diffpath(path1, path2):
+    import os
+    t1 = path1.split(os.path.sep)
+    t2 = path2.split(os.path.sep)
+    count = min(len(t1), len(t2))
+    i = 0
+    while i < count and t1[i] == t2[i]:
+        i += 1
+    return t1[i:], t2[i:]
 
 
 class ASWrapper(webdav.WebDAV):
@@ -65,9 +76,17 @@ class ASWrapper(webdav.WebDAV):
     def getChild(self, child, request):
         if child:
             child = remus.audiostore.mk_sqlname(child)
-            return ASWrapper(get_cached_collection(tuple(request.prepath),
-                                                   self.collection,
-                                                   child))
+
+#            return ASWrapper(self.collection.subcollection(child))
+            prepath = tuple(request.prepath) + (child, )
+            ch = get_cached_collection(prepath,
+                                       self.collection,
+                                       child)
+            if ch.stat():
+                return ASWrapper(ch)
+            else:
+                print "Failed to stat", ch, ch.cwd()
+                return twisted.web.resource.error.NoResource("No such resource")
         else:
             return self
 
@@ -84,7 +103,6 @@ class ASWrapper(webdav.WebDAV):
                  for r in rows ]
         rows = [ remus.audiostore.mk_filename("--".join(r)) for r in rows ]
 
-        print "returning dynamic names:", rows
         return rows
 
     def listDynamicEntities(self, request=None):
@@ -100,6 +118,20 @@ class ASWrapper(webdav.WebDAV):
     
     def stat(self):
         return self.collection.stat()
+
+    def moveone(self, src, dst, overwrite):
+        print "Renaming %s to %s" % (src, dst)
+        assert False
+
+    def movetree(self, src, dst, overwrite):
+        print "Renaming %s to %s" % (src, dst)
+        
+        src_path, dst_path = diffpath(src, dst)
+        if len(src_path) != len(dst_path):
+            raise error.DAV_Forbidden("Can't move up/down the hierarchy")
+
+        self.collection.rename(src_path, dst_path)
+        self.collection.update()
 
     def open(self, mode):
         return self.collection.open(mode)

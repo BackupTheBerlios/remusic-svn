@@ -2,3 +2,11 @@ prune .svn
 include ChangeLog
 include GPL
 include sql/audiostore.sql
+include configure
+include configure.in
+include missing
+include install-sh
+include mkinstalldirs
+include Makefile.am
+include Makefile.in
+include Makefile

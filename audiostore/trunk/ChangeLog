@@ -1,3 +1,15 @@
+2003-12-13  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* doc/: Added document generation tools, and first embryo of
+	documentation.
+
+	* configure.ac: Using automake/autoconf for building now.
+	
+	* remus/database.py: Added primary key tracking on tables.
+
+	* remus/webserver/audiostore.py, remus/audiostore/as_collection.py:
+	Support for renaming through WebDAV.
+
 2003-11-27  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* remus/audiostore: Removed obsolete files as part of the switch

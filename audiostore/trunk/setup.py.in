@@ -78,8 +78,8 @@ install.install.sub_commands.append(('audiostore_setup', None))
 build.build.sub_commands.insert(0, ('audiostore_build', None))
 
 dist = setup(
-    name="remus-audiostore",
-    version="0.3.0",
+    name="@PACKAGE_NAME@",
+    version="@PACKAGE_VERSION@",
     description="WebDAV server for storing audio files",
     author="Daniel Larsson",
     author_email="Daniel.Larsson@servicefactory.se",
