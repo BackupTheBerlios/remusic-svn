@@ -83,6 +83,10 @@ class ASWrapper(webdav.WebDAV):
             ch = get_cached_collection(prepath,
                                        self.collection,
                                        child)
+
+            if request.method == "PUT":
+                return ASWrapper(ch)
+            
             try:
                 ch.stat(request)
                 return ASWrapper(ch)

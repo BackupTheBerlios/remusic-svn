@@ -211,8 +211,8 @@ class Collection(object):
         
         if order_by:
             order_by = [ e for e in order_by
-                         if e.table in selection.gettables()
-                         or type(e) in types.StringTypes ]
+                         if type(e) in types.StringTypes 
+                         or e.table in selection.gettables() ]
 
         sql = selection.select(
             query=self.query,
@@ -617,7 +617,7 @@ class IndexXMLBase(Collection):
     def content_type(self):
         try:
             mime_file = os.path.splitext(self.xsltfile)[0] + '.mime'
-            return file(mime_file).read()
+            return file(mime_file).read().strip()
         except IOError:
             return "text/xml"
 
@@ -1012,6 +1012,11 @@ class RootColl(Collection):
     def albums(self):
         return AlbumsColl(self)
 
+    def stat(self, request=None):
+        # We always exist, empty or not
+        return (0444, 0, 1, 1, os.getuid(), os.getgid(), 0,
+                time.time(), time.time(), time.time())
+        
 
 class AudioSaver:
     """Save an incomming stream to file.

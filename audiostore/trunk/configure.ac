@@ -2,10 +2,10 @@
 
 dnl Process this file with autoconf to produce a configure script.
  
-AC_INIT(remus-audiostore, 0.4.0)
+AC_INIT(remus-audiostore, 0.5.0)
 AM_INIT_AUTOMAKE
 
-RELEASE_DATE=2004-02-03
+RELEASE_DATE=2004-02-10
 AC_SUBST(RELEASE_DATE)
 
 # FreeBSD needs these
@@ -74,6 +74,7 @@ db/Makefile
 doc/Makefile
 doc/xsl/Makefile
 doc/xsl/fo/Makefile
+doc/xsl/html/Makefile
 doc/xml/project.ent
 doc/manual/Makefile
 doc/manual/C/Makefile

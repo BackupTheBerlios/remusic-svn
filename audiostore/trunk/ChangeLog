@@ -1,3 +1,21 @@
+2004-02-11  Daniel Larsson  <daniel.larsson@servicefactory.se>
+
+	* setup.py.in (dist): Added docbook.css.
+
+	* remus/audiostore/as_collection.py (Collection.select): Switched
+	around type test when filtering 'order_by'.
+	(IndexXMLBase.content_type): Strip the contents of the '.mime'
+	file of surrounding whitespace.
+	(RootColl.stat): The root collection should always return valid
+	data, i.e. indicate it exists, regardless if any songs are present
+	or not.
+
+	* remus/webserver/audiostore.py (ASWrapper.getChild): Don't return
+	404 error on PUT requests, breaks WebDAV uploading.
+
+	* styles/index.html.xsl: Added XHTML, CSS and 'anybrowser'
+	icon/links.
+
 2004-02-09  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* MANIFEST.in: Added lots of files (complete development fileset).

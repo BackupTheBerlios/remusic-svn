@@ -323,6 +323,34 @@
             <xsl:value-of select="$audiostore.url"/>
           </a>
         </div>
+
+	<div id="portal-colophon">
+	  <ul>
+	    <li>
+	      <a href="http://validator.w3.org/check/referer">
+		<img src="/images/valid_xhtml.png"
+		     height="15" width="80" alt="Valid XHTML"
+		     title="This site is valid XHTML." />
+	      </a>
+	    </li>
+	    <li>
+	      <a href="http://jigsaw.w3.org/css-validator/check/referer">
+		<img src="/images/valid_css.png"
+		     height="15" width="80" alt="Valid CSS"
+		     title="This site was built with valid CSS." />
+	      </a>
+	    </li>
+	    
+	    <li>
+	      <a href="http://www.anybrowser.org/campaign/">
+		<img src="/images/anybrowser.png"
+		     height="15" width="80"
+		     alt="Usable in any browser"
+		     title="This site is usable in any web browser." />
+	      </a>
+	    </li>
+	  </ul>  
+	</div>
       </body>
     </html>
   </xsl:template>
