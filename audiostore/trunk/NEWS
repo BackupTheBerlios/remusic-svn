@@ -1,1 +1,9 @@
-First version.
+* Release 0.4.0 - Localization
+
+  2004-02-03
+
+  Added localization support, for twisted based pages using gettext,
+  and for XSLT generated pages, using Norman Walsh's l10n package,
+  part of the docbook-xsl package.
+
+  
