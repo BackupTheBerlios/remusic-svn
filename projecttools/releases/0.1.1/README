@@ -1,0 +1,14 @@
+* Remus projecttools
+
+  This module contains common files for the various subparts of
+  remus. At the moment, this is limited to files for document
+  generation, most notably makefiles for producing HTML and PDF
+  documentation, common XML entity files, and customizations of Norman
+  Walsh's DocBook XSL stylesheets. The customizations are based on the
+  Gnome Project's customization, but slightly simplified those, and
+  adapted to a newer version of the XSL stylesheets.
+
+
+# Local Variables:
+# mode: outline
+# End:
