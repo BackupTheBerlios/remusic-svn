@@ -27,8 +27,8 @@
   </appendixinfo>
   <title>GNU Free Documentation License</title>
 
-  <sect1 id="fdl-preamble">
-    <title>0. PREAMBLE</title>
+  <bridgehead renderas="sect1" id="fdl-preamble">
+    0. PREAMBLE</bridgehead>
     <para>
       The purpose of this License is to make a manual, textbook, or
       other written document <quote>free</quote> in the sense of
@@ -57,9 +57,9 @@
       printed book. We recommend this License principally for works
       whose purpose is instruction or reference.
     </para>
-  </sect1>
-  <sect1 id="fdl-section1">
-    <title>1. APPLICABILITY AND DEFINITIONS</title>
+
+  <bridgehead renderas="sect1" id="fdl-section1">
+    1. APPLICABILITY AND DEFINITIONS</bridgehead>
     <para id="fdl-document">
       This License applies to any manual or other work that contains a
       notice placed by the copyright holder saying it can be
@@ -147,10 +147,10 @@
       most prominent appearance of the work's title, preceding the
       beginning of the body of the text.
     </para>
-  </sect1>
+
     
-  <sect1 id="fdl-section2">
-    <title>2. VERBATIM COPYING</title>
+  <bridgehead renderas="sect1" id="fdl-section2">
+    2. VERBATIM COPYING</bridgehead>
     <para>
       You may copy and distribute the <link
       linkend="fdl-document">Document</link> in any medium, either
@@ -170,10 +170,10 @@
       You may also lend copies, under the same conditions stated
       above, and you may publicly display copies.
     </para>
-    </sect1>
+
     
-  <sect1 id="fdl-section3">
-    <title>3. COPYING IN QUANTITY</title>
+  <bridgehead renderas="sect1" id="fdl-section3">
+    3. COPYING IN QUANTITY</bridgehead>
     <para>
       If you publish printed copies of the <link
       linkend="fdl-document">Document</link> numbering more than 100,
@@ -225,10 +225,10 @@
       redistributing any large number of copies, to give them a chance
       to provide you with an updated version of the Document.
     </para>
-    </sect1>
+
     
-  <sect1 id="fdl-section4">
-    <title>4. MODIFICATIONS</title>
+  <bridgehead renderas="sect1" id="fdl-section4">
+    4. MODIFICATIONS</bridgehead>
     <para>
       You may copy and distribute a <link
       linkend="fdl-modified">Modified Version</link> of the <link
@@ -474,10 +474,9 @@
       assert or imply endorsement of any <link
       linkend="fdl-modified">Modified Version </link>.
     </para>
-  </sect1>
     
-  <sect1 id="fdl-section5">
-    <title>5. COMBINING DOCUMENTS</title>
+  <bridgehead renderas="sect1" id="fdl-section5">
+    5. COMBINING DOCUMENTS</bridgehead>
     <para>
       You may combine the <link linkend="fdl-document">Document</link>
       with other documents released under this License, under the
@@ -510,10 +509,9 @@
       and any sections entitled <quote>Dedications</quote>.  You must
       delete all sections entitled <quote>Endorsements.</quote>
     </para>
-    </sect1>
     
-  <sect1 id="fdl-section6">
-    <title>6. COLLECTIONS OF DOCUMENTS</title>
+  <bridgehead renderas="sect1" id="fdl-section6">
+    6. COLLECTIONS OF DOCUMENTS</bridgehead>
     <para>
       You may make a collection consisting of the <link
       linkend="fdl-document">Document</link> and other documents
@@ -531,10 +529,9 @@
       follow this License in all other respects regarding verbatim
       copying of that document.
     </para>
-    </sect1>
     
-  <sect1 id="fdl-section7">
-    <title>7. AGGREGATION WITH INDEPENDENT WORKS</title>
+  <bridgehead renderas="sect1" id="fdl-section7">
+    7. AGGREGATION WITH INDEPENDENT WORKS</bridgehead>
     <para>
       A compilation of the <link
       linkend="fdl-document">Document</link> or its derivatives with
@@ -555,10 +552,9 @@
       aggregate. Otherwise they must appear on covers around the whole
       aggregate.
     </para>
-    </sect1>
     
-  <sect1 id="fdl-section8">
-    <title>8. TRANSLATION</title>
+  <bridgehead renderas="sect1" id="fdl-section8">
+    8. TRANSLATION</bridgehead>
     <para>
       Translation is considered a kind of modification, so you may
       distribute translations of the <link
@@ -574,10 +570,9 @@
       translation and the original English version of this License,
       the original English version will prevail.
     </para>
-    </sect1>
     
-  <sect1 id="fdl-section9">
-    <title>9. TERMINATION</title>
+  <bridgehead renderas="sect1" id="fdl-section9">
+    9. TERMINATION</bridgehead>
     <para>
       You may not copy, modify, sublicense, or distribute the <link
       linkend="fdl-document">Document</link> except as expressly
@@ -588,10 +583,9 @@
       License will not have their licenses terminated so long as such
       parties remain in full compliance.
     </para>
-    </sect1>
     
-  <sect1 id="fdl-section10">
-    <title>10. FUTURE REVISIONS OF THIS LICENSE</title>
+  <bridgehead renderas="sect1" id="fdl-section10">
+    10. FUTURE REVISIONS OF THIS LICENSE</bridgehead>
     <para>
       The <ulink type="http"
       url="http://www.gnu.org/fsf/fsf.html">Free Software
@@ -615,10 +609,9 @@
       you may choose any version ever published (not as a draft) by
       the Free Software Foundation.
     </para>
-  </sect1>
 
-  <sect1 id="fdl-using">
-    <title>Addendum</title>
+  <bridgehead renderas="sect1" id="fdl-using">
+    Addendum</bridgehead>
     <para>
       To use this License in a document you have written, include a copy of
       the License in the document and put the following copyright and
@@ -661,7 +654,6 @@
       url="http://www.gnu.org/copyleft/gpl.html"> GNU General Public
       License</ulink>, to permit their use in free software.
     </para>
-  </sect1>
 </appendix>  
 
 
