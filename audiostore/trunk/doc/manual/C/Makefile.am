@@ -8,7 +8,7 @@ entities = \
 	preface.xml \
 	overview.xml \
 	using.xml \
-	database.xml \
+	db-audiostore.xml \
 	project.ent
 figures = \
 	$(figdir)/audiostore.png

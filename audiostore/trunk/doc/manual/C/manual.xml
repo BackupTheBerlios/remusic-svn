@@ -14,7 +14,7 @@
 
 <!ENTITY preface       SYSTEM "preface.xml">
 <!ENTITY chap.overview SYSTEM "overview.xml">
-<!ENTITY chap.database SYSTEM "database.xml">
+<!ENTITY chap.database SYSTEM "db-audiostore.xml">
 <!ENTITY chap.using    SYSTEM "using.xml">
 
 ]>

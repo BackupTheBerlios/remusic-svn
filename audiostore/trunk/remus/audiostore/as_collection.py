@@ -130,6 +130,10 @@ class Collection(object):
         return "text/html"
 
     def open(self, mode):
+        logger.info("Trying to open %s", self.cwd())
+        if mode and mode[0] == 'w':
+            # Someone is saving a file!
+            return AudioSaver(self)
         assert False
 
     def stat(self):
@@ -370,7 +374,7 @@ class Song(Collection):
     def open(self, mode):
         if mode and mode[0] == 'w':
             # Someone is saving a file!
-            return AudioSaver(self, self.dbconnection())
+            return AudioSaver(self)
         else:
             # Open the audio file, and return file object here
             count = self.select(fields=(db_audiostore.remus_audio_objects_au_audio_clip,))
@@ -708,7 +712,7 @@ class GenreColl(Collection):
         self.genre = genre
         query = AND(
             EQUAL(db_audiostore.remus_genres_ge_genre, genre),
-            EQUAL(db_audiostore.art_id, db_audiostore.remus_audio_objects_au_artist))
+            EQUAL(db_audiostore.remus_artists_art_id, db_audiostore.remus_audio_objects_au_artist))
         Collection.__init__(self, parent, query)
 
     def isdir(self):
@@ -771,5 +775,73 @@ class RootColl(Collection):
 
     def albums(self):
         return AlbumsColl(self)
-    
+
+
+class AudioSaver:
+    """Save an incomming stream to file.
+
+    Tries to determine the file type using the 'file(1)' command.
+    """
+
+    def __init__(self, node):
+        self.__node = node
+        self.store = node.store
+        self.__mime = None
+        self.__len = 0
+        self.__file = None
+        
+    def mime_type(self, data):
+        from popen2 import popen2
+        r, w = popen2('file -bi -')
+        w.write(data)
+        w.close()
+        return r.read().strip()
+
+    def __open(self, data):
+        self.__mime = self.mime_type(data)
+        if not self.__mime:
+            logger.error("%s has no recognizable audio mime type",
+                         self.__node.name())
+            raise IOError, "Unknown audio format"
+
+        if not os.path.isdir("/var/db/audiostore"):
+            os.mkdir("/var/db/audiostore")
+
+        self.__filename = os.tempnam("/var/db/audiostore", "audio.")
+
+        # Try create file with proper file extension
+        import mimetypes
+        ext = mimetypes.guess_extension(self.__mime)
+        if ext:
+            self.__filename += ext
+
+        self.__file = open(self.__filename, "w+")
+
+
+    def write(self, data):
+        if not self.__file:
+            self.__open(data)
+
+        self.__len += len(data)
+        self.__file.write(data)
+
+
+    def close(self):
+        logger.info("Transfer of %s complete, inserting into database", self.__node.name())
+        self.__file.close()
+        try:
+            self.store.add(
+                mimetype=self.__mime,
+                filename=self.__filename)
+
+            # Allow nodes to resync, I've written to the database
+            # self.__node.resync_tree()
+        except IOError:
+            logger.exception("Failed to add %s to the audiostore", self.__node.name())
+            os.unlink(self.__filename)
+            raise
+
+
+
+
 import audiostore

@@ -24,7 +24,7 @@ except ImportError:
 
 import as_collection
 
-logger = logging.getLogger("audiostore.mysql")
+logger = logging.getLogger("remus.audiostore.mysql")
 
 __all__ = (
     "Interface",
@@ -66,15 +66,13 @@ class Interface:
 
     def add(self, mimetype, filename):
         """Add audio clip of type 'mimetype' to the database."""
+        logger.info("Trying to add %s [%s]", filename, mimetype)
         try:
             metafields = copy.deepcopy(self.default_fields)
             metafields["mimetype"] = mimetype
             metafields["filename"] = filename
         
             mime_map[mimetype].read(filename, metafields)
-
-            # Make sure genre is in lower case
-            mime_map["genre"] = mime_map["genre"] and mime_map["genre"].lower()
 
             try:
                 self.db.begin()
@@ -88,7 +86,7 @@ class Interface:
                          remus_albums,
                          remus_artists
                        WHERE
-                         art_artist=%(artist)s AND
+                         art_name=%(artist)s AND
                          alb_name=%(album)s AND
                          au_title=%(title)s AND
                          au_artist=art_id AND
@@ -130,6 +128,7 @@ class Interface:
                 raise IOError("Failed to store in database")
         
         except KeyError:
+            logger.exception("Error!")
             raise IOError("Unsupported format")
 
     def add_artist(self, metafields):
@@ -138,7 +137,7 @@ class Interface:
         if metafields["artist_id"]:
             match = "art_mb_artist_id=%(artist_id)s"
         else:
-            match = "art_artist=%(artist)s"
+            match = "art_name=%(artist)s"
         count = cursor.execute(
             """SELECT
                    art_id
@@ -483,9 +482,10 @@ try:
             """
             These docs are from ogg.vorbis.VorbisFile.read()
         
-            @returns: Returns a tuple: (x,y,y) where x is a buffer object of the
-            data read, y is the number of bytes read, and z is whatever the
-            bitstream value means (no clue).
+            @returns: Returns a tuple: (x,y,z) where x is a buffer
+            object of the data read, y is the number of bytes read,
+            and z is whatever the bitstream value means (no clue).
+
             @returntype: tuple
             """
             buff = self.ff.read()
@@ -544,6 +544,7 @@ class MetaInfo_mp3:
         metainfo["audio_mode"] = file.header.mode
         metainfo["subtype"] = "MPEG %s layer %s" % (file.header.version,
                                                     'I' * file.header.layer)
+        logger.info(str(metainfo))
 
 
     def update(self, filename, metainfo):
@@ -704,5 +705,6 @@ metainfo_sid = MetaInfo_sid()
 mime_map = {
     'audio/mpeg':        metainfo_mp3,
     'application/ogg':   metainfo_ogg,
+    'audio/x-ogg':       metainfo_ogg,
     'audio/prs.sid':     metainfo_sid,
     }
