@@ -1,3 +1,7 @@
+* Release 0.3.1 - 2005-04-22
+
+  Added sqlquery.py as test program (make check).
+
 * Release 0.3.0
 
 ** Changes

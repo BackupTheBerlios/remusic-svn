@@ -8,3 +8,7 @@ dist_pkgdata_DATA =	\
 	makedot.xsl	\
 	makedoc.xsl	\
 	sqlml.make
+
+TESTS	= sqlquery.py
+
+TESTS_ENVIRONMENT = python
