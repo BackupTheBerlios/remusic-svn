@@ -1,0 +1,94 @@
+# Template file for remus webserver message catalog
+# Copyright (C) 2004 Daniel Larsson
+# Daniel Larsson <daniel.larsson@servicefactory.se>, 2004.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: remus-webserver 0.1\n"
+"POT-Creation-Date: Mon Feb  9 04:10:48 2004\n"
+"PO-Revision-Date: 2004-01-11 22:09+1\n"
+"Last-Translator: Daniel Larsson <daniel.larsson@servicefactory.se>\n"
+"Language-Team: Swedish <daniel.larsson@servicefactory.se>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: pygettext.py 1.5\n"
+
+#: ../remus/webserver/menu.py:85
+msgid "Home"
+msgstr "Hem"
+
+#: ../remus/webserver/menu.py:86
+msgid "To Remus homepage"
+msgstr "Till Remus hemsida"
+
+#: ../remus/webserver/menu.py:88
+msgid "Music"
+msgstr "Musik"
+
+#: ../remus/webserver/menu.py:89
+msgid "Browse the music database"
+msgstr "Bläddra i musikdatabasen"
+
+#: ../remus/webserver/menu.py:91
+msgid "Playlists"
+msgstr "Spellistor"
+
+#: ../remus/webserver/menu.py:92
+msgid "Manage playlists"
+msgstr "Skapa/ändra spellistor"
+
+#: ../remus/webserver/menu.py:94
+msgid "Statistics"
+msgstr "Statistik"
+
+#: ../remus/webserver/menu.py:95
+msgid "Various server statistics"
+msgstr "Diverse statistik från tjänsten"
+
+#: ../remus/webserver/menu.py:97
+msgid "Language"
+msgstr "Språk"
+
+#: ../remus/webserver/menu.py:98
+msgid "Select language"
+msgstr "Välj språk"
+
+#: ../remus/webserver/menu.py:101
+msgid "Documents"
+msgstr "Dokument"
+
+#: ../remus/webserver/menu.py:102
+msgid "Available documents"
+msgstr "Tillgängliga dokument"
+
+#: ../remus/webserver/menu.py:109
+msgid "Audiostore Manual"
+msgstr "Audiostore-manual"
+
+#: ../remus/webserver/menu.py:110
+msgid "The audiostore manual"
+msgstr "Audiostore-manual"
+
+#: ../remus/webserver/remuspage.py:65
+msgid "Generated at %s by "
+msgstr "Genererad %s av "
+
+#: ../remus/webserver/remuspage.py:69
+msgid " server at "
+msgstr "-tjänsten på "
+
+#: ../remus/webserver/server.py:45
+msgid "Starting remus server"
+msgstr "Startar remusservern"
+
+#: ../www/index.rpy:27
+msgid "Remus music server"
+msgstr "Remus musiktjänst"
+
+#: ../www/index.rpy:30
+msgid ""
+"Browse the music database to view its contents, and to download songs. You "
+"can upload songs to the database through the web as well."
+msgstr "Testing testing"
