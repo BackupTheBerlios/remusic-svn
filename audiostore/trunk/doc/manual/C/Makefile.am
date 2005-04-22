@@ -33,6 +33,8 @@ ${entity_dir}/project.ent: ${entity_dir}/project.ent.in $(top_builddir)/config.s
 
 include $(top_srcdir)/doc/mk/xmldocs.make
 
+Makefile.in: $(top_srcdir)/doc/mk/xmldocs.make
+
 dist-hook: app-dist-hook
 
 $(figdir)/audiostore.png: $(figdir)

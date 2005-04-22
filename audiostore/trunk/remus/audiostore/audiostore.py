@@ -79,16 +79,17 @@ class Interface:
             mime_map[mimetype].read(filename, metafields)
 
             try:
-                self.db.begin()
                 cursor = self.db.cursor()
 
                 select = Select()
                 select.addcolumn(remus_audio_objects.au_id)
                 query = AND(
-                    EQUAL(remus_artists.art_name, metafields['artist']),
-                    EQUAL(remus_albums.alb_name, metafields['album']),
+                    EQUAL(remus_artists.art_name,
+                          self.db.literal(metafields['artist'])),
+                    EQUAL(remus_albums.alb_name,
+                          self.db.literal(metafields['album'])),
                     EQUAL(remus_audio_objects.au_title,
-                          metafields['title']))
+                          self.db.literal(metafields['title'])))
                 
                 count = cursor.execute(select.select(query=query))
                 

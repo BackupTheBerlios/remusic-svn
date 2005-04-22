@@ -1,13 +1,13 @@
   <chapter id="chap_using">
     <title>Using the audiostore</title>
 
-      <para> Before you can start using the audiostore, the audiostore
-      server must be running.  [ Installation should be covered
-      somewhere.  Still undefined how the server integrates the
-      audiostore with other parts of Remus.  Likely, starting the
-      server is the same regardless what components are installed. ]
-      </para>
-
+    <para> Before you can start using the audiostore, the audiostore
+    server must be running.  [ Installation should be covered
+    somewhere.  Still undefined how the server integrates the
+    audiostore with other parts of Remus.  Likely, starting the server
+    is the same regardless what components are installed. ]
+    </para>
+    
     <para> Assuming the audiostore has been populated with some audio
     files, here's what it could look like using Nautilus:
 

@@ -4,8 +4,8 @@
      The Remus audiostore user's guide
 -->
 
-<!DOCTYPE BOOK PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
-"/usr/local/share/xml/docbook/4.2/docbookx.dtd" [
+<!DOCTYPE BOOK PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+"http://www.oasis-open.org/docbook/xml/4.3" [
 
 <!ENTITY % project  SYSTEM "project.ent"> %project;
 
@@ -28,13 +28,14 @@
     
     <copyright>
       <year>2004</year>
+      <year>2005</year>
       <holder>Daniel Larsson</holder>
     </copyright>
     
     <!-- translators: uncomment this:
 	 
 	 <copyright>
-	 <year>2003</year>
+	 <year>2005</year>
 	 <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
 	 </copyright>
 	 

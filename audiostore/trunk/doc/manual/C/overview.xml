@@ -43,8 +43,9 @@
 	<listitem>
 	  <para>While the store isn't a conventional filesystem, it
 	  provides a &std.webdav.link; interface for filesystem like
-	  access. Nautilus and Microsoft Explorer, for instance,
-	  supports integration with WebDAV servers.</para>
+	  access. Nautilus and Microsoft Explorer, among other
+	  applications, supports integration with WebDAV
+	  servers.</para>
 	</listitem>
       </varlistentry>  
     </variablelist>
@@ -52,4 +53,3 @@
   </section>
   
 </chapter>
-

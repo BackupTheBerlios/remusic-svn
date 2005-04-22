@@ -2,10 +2,10 @@
 
 dnl Process this file with autoconf to produce a configure script.
  
-AC_INIT(remus-audiostore, 0.4.2)
+AC_INIT(remus-audiostore, 0.4.3, daniel.j.larsson@chello.se)
 AM_INIT_AUTOMAKE
 
-RELEASE_DATE=2004-02-13
+RELEASE_DATE=2005-04-22
 AC_SUBST(RELEASE_DATE)
 
 # FreeBSD needs these
@@ -42,9 +42,22 @@ dnl
 dnl Check for docbook-xsl
 dnl
 
-dnl Hardcoded for now...
-DOCBOOK_XSL=/usr/local/share/xsl/docbook
-AC_SUBST(DOCBOOK_XSL)
+
+default_docbook_xsl=none
+for d in \
+      /usr/local/share/xsl/docbook \
+      /usr/share/sgml/docbook/xsl-stylesheets*; do
+    if test -d ${d}; then
+        default_docbook_xsl=${d}
+    fi
+done
+AC_ARG_WITH(
+	docbook-xsl,
+	[  --with-docbook-xsl=DIR    Where docbook-xsl stylesheets live [$default_docbook_xsl]],
+	docbook_xsl_stylesheets=${withval},
+	docbook_xsl_stylesheets=${default_docbook_xsl})
+
+AC_SUBST(docbook_xsl_stylesheets)
 
 dnl
 dnl Check for xsltproc
@@ -71,7 +84,7 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [The gettext package name
 ALL_LINGUAS="sv"
 AM_GLIB_GNU_GETTEXT
 
-AC_OUTPUT(
+AC_CONFIG_FILES(
 setup.py
 Makefile
 db/Makefile
@@ -87,3 +100,5 @@ po/Makefile.in
 styles/param.xsl
 styles/Makefile
 )
+
+AC_OUTPUT

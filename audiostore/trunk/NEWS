@@ -1,6 +1,11 @@
-* Release 0.4.2
+* Release 0.4.3 - 2005-04-22
 
-  2004-02-13
+** Changes
+
+   - Fixed URL references to point to Berlios site.
+   - Minor fixes due to changes to underlying APIs.
+
+* Release 0.4.2 - 2004-02-13
 
 ** Bugfixes
 
@@ -17,9 +22,7 @@
     its content type, instead of no extension at all. 
 
 
-* Release 0.4.1
-
-  2004-02-11
+* Release 0.4.1 - 2004-02-11
 
 ** Changes
 
@@ -43,16 +46,14 @@
     understand this i18n mess.
     
 
-* Release 0.4.0 - Localization
-
-  2004-02-03
+* Release 0.4.0 - 2004-02-03
 
 ** Changes
 
   Added localization support, for twisted based pages using gettext,
   and for XSLT generated pages, using Norman Walsh's l10n package,
   part of the docbook-xsl package.
-
+  
 
 # Local Variables:
 # mode: outline

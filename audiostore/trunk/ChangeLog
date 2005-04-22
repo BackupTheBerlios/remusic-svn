@@ -1,3 +1,21 @@
+2005-04-22    <daniel.j.larsson@chello.se>
+
+	* configure.ac: Try find Norman Walsh's docbook stylesheets. Only
+	looking at two places for now though, far from fool proof.
+
+	* setup.py.in: Reorganized installation.
+
+	* remus/audiostore/audiostore.py (Interface.add): Use
+	self.db.literal to make string literals .
+
+	* db/Makefile.am: Fixed include.
+
+	* styles/param.xsl.in: Fixed project URL.
+
+	* styles/Makefile.am (%.xml): XSLT -> XSLTPROC.
+
+	* NEWS: 0.4.3 changes
+
 2004-02-13  Daniel Larsson  <daniel.larsson@servicefactory.se>
 
 	* Makefile.am: Build the db directory before doc, since db

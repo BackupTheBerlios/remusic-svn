@@ -5,13 +5,21 @@ audio files in various formats (MP3, Ogg, SID, ...).
 
 """
 
-import os
+import os, sys
 import distutils
 from distutils.core import setup
 from distutils.command import install
 from distutils.command import build
 from distutils.core import Command
 from distutils import log
+
+
+config_files_path = os.path.join("etc", "remus", "audiostore")
+
+# use /etc if `sys.prefix`/etc doesn't exist
+if not os.path.isdir(os.path.join(sys.prefix, "etc")):
+    # Hmm, is this portable?
+    config_files_path = os.path.join(os.path.sep, config_files_path)
 
 
 class audiostore_build (Command):
@@ -60,7 +68,7 @@ class audiostore_setup (Command):
     def run (self):
         # Populate mysql
         log.info("creating MySQL tables (unless they already exist)")
-        base = os.path.join(self.install_dir, "etc/remus/audiostore")
+        base = os.path.join(self.install_dir, 'share/@PACKAGE_NAME@')
         os.system("mysql < %s" % os.path.join(base, "audiostore.sql"))
 
     # run()
@@ -114,19 +122,19 @@ dist = setup(
     version="@PACKAGE_VERSION@",
     description="WebDAV server for storing audio files",
     author="Daniel Larsson",
-    author_email="Daniel.Larsson@servicefactory.se",
-    url="http://www.remus.org/audiostore",
+    author_email="Daniel.J.Larsson@chello.se",
+    url="http://remusic.berlios.de/",
     long_description=__doc__,
 
     packages = ['remus', 'remus.i18n', 'remus.audiostore', 'remus.webserver'],
     scripts = ['audiostore_resync'],
-    data_files = [('etc/remus/audiostore',
+    data_files = [('share/@PACKAGE_NAME@',
                    ('db/audiostore.sql',)),
-                  ('libdata/remus',
+                  ('/var/lib/remus',
                    ('www/music.rpy',
                     'www/playlists.rpy',
                     )),
-                  ('libdata/remus/styles',
+                  ('/var/lib/remus/styles',
                    ('styles/audiostore.css',
                     'styles/index.html.xsl',
                     'styles/list.m3u.xsl',
@@ -139,10 +147,10 @@ dist = setup(
                     'styles/en.xml',
                     'styles/sv.xml',
                     )),
-                  ('libdata/remus/manual',
+                  ('/var/lib/remus/manual',
                    files_in_dir('doc/manual/C/manual.html'),
                    'doc/xsl/html/docbook.css'),
-                  ('libdata/remus/manual/figures',
+                  ('/var/lib/remus/manual/figures',
                    files_in_dir('doc/manual/figures')),
                   ],
     classifiers = [
@@ -188,10 +196,3 @@ if status != 0:
     print "*** Can't seem to find xsltproc"
     print "Please install libxslt, remus audiostore requires it."
     print "See http://xmlsoft.org/XSLT/\n"
-
-print """*** IMPORTANT! ***
-
-remus audiostore needs to apply a patch to mmpython to work correctly.
-You'll find this patch in the file mmpython.patch, which you should find
-in this directory.
-"""

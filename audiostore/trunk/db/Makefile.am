@@ -2,7 +2,7 @@
 # Generate files from the DB XML source file
 #
 
-include /usr/local/share/sqlml/sqlml.make
+include ${datadir}/sqlml/sqlml.make
 
 DB		= audiostore
 DBXMLFILE	= ${DB}.xml
