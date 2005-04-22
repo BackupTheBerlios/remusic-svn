@@ -25,12 +25,14 @@ ensure a common look of remus pages.
 
 import os, sys
 import logging
+import locale
 
 from twisted.web.woven import page, widgets
 from twisted.web import microdom
 
 import remus.i18n
-import menu
+import remus.webserver
+import remus.webserver.menu
 
 logger = logging.getLogger("remus.webserver")
 
@@ -42,7 +44,7 @@ document = parse("<xml />")
 
 # Create logo
 _link = document.createElement("a")
-_link.attributes.update({'href': "http://www.remus.org/"})
+_link.attributes.update({'href': "http://remusic.berlios.de/"})
 _link.appendChild(document.createTextNode("&"))
 _span = document.createElement("span")
 _span.attributes.update({'style': 'color:red'})
@@ -132,7 +134,7 @@ class RemusPage(page.Page):
     
     templateFile = "RemusPage.html"
 
-    templateDirectory = "/usr/local/libdata/remus"
+    templateDirectory = remus.webserver.config.get('server', 'defaultroot')
 
     def getSubtemplate(self, request):
         if self.template:
@@ -154,13 +156,19 @@ class RemusPage(page.Page):
         subtemplate = self.getSubtemplate(request)
         template = template.replace("<child/>", subtemplate)
 
+        # Find out what locale the user has selected
+        import remus.i18n
+        sess = request.getSession(remus.i18n.ITranslator)
+        sesslocale = sess.locale()
+        locale.setlocale(locale.LC_ALL, sesslocale)
+
         import time
         self.generated = {
-            'time': time.strftime("%+"),
+            'time': time.strftime("%X %x"),
             'baseurl': None
             }
 
-        self.menu = menu.create_basemenu()
+        self.menu = remus.webserver.menu.create_basemenu()
         return template
 
     def wvfactory_Stylesheet(self, request, node, model):
@@ -174,7 +182,7 @@ class RemusPage(page.Page):
         return "/styles/toppages.css"
 
     def wvfactory_Menu(self, request, node, model):
-        return menu.Menu(model)
+        return remus.webserver.menu.Menu(model)
 
     def wmfactory_menu(self, request):
         return self.menu

@@ -2,8 +2,7 @@ prune .svn
 include ChangeLog
 include GPL
 include remus.conf.default
-include remus_server
-include remus_server.sh
+include remus.tac
 include www/index.rpy
 include www/lang.rpy
 include www/RemusPage.html

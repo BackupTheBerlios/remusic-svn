@@ -68,24 +68,23 @@ formatter:	std
 
 [handler_syslog]
 class:		handlers.SysLogHandler
-args:		('/var/run/log', handlers.SysLogHandler.LOG_USER)
 formatter:	std
 
 [formatters]
 keys:		std,webserver,audiostore,webdav,mysql
 
 [formatter_std]
-format:		[%(asctime)s] %(name)s: %(message)s
+format:		%(name)s: %(message)s
 
 [formatter_webserver]
-format:		[%(asctime)s] [31m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
+format:		[31m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
 
 [formatter_audiostore]
-format:		[%(asctime)s] [32m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
+format:		[32m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
 
 [formatter_webdav]
-format:		[%(asctime)s] [33m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
+format:		[33m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
 
 [formatter_mysql]
-format:		[%(asctime)s] [34m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
+format:		[34m[%(levelname)s] %(name)s (%(module)s[%(lineno)s])[m: %(message)s
 

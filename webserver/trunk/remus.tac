@@ -3,33 +3,21 @@
 
 # standard modules
 import os
+import sys
 import logging
 import logging.config
 import ConfigParser
 
 # twisted modules
-from twisted.internet import app
+from twisted.application import internet, service
 from twisted.web import static, server, script
 
-configfile = ("/usr/local/etc/remus/remus.conf",
-              "%s/.remus.conf" % os.environ["HOME"])
+from remus.webserver import config
 
-cp = ConfigParser.ConfigParser({
-    'passwd':            'remus',
-    'serverport':        '80',
-    'monitorport':       '9999',
-    'defaultroot':       '/usr/local/libdata/remus',
-    'audiostore-prefix': '/music',
-    })
-
-cp.read(configfile)
-
-serverport = int(cp.get('server', 'serverport'))
-docroot = cp.get('server', 'defaultroot')
-
-logging.config.fileConfig(configfile, {
-    'class':  "StreamHandler",
-    'format': '[%(asctime)s] %(name)s: %(message)s'})
+serverport = config.getint('server', 'serverport')
+uid = config.getint('server', 'uid')
+gid = config.getint('server', 'gid')
+docroot = config.get('server', 'defaultroot')
 
 logger = logging.getLogger("remus.webserver")
 
@@ -55,6 +43,8 @@ root = static.File(docroot)
 root.ignoreExt(".rpy")
 root.processors = {'.rpy': script.ResourceScript}
 
-application = app.Application('remus')
-application.listenTCP(serverport, server.Site(root))
-application.run()
+application = service.Application('remus', uid=uid, gid=gid)
+
+internet.TCPServer(serverport, server.Site(root)
+                   ).setServiceParent(
+    service.IServiceCollection(application))

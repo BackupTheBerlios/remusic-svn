@@ -25,7 +25,7 @@ except ImportErrot:
     from StringIO import StringIO
 
 # twisted modules
-import twisted.protocols.http
+import twisted.web.http
 import twisted.web.error
 import twisted.web.microdom
 import twisted.web.resource
@@ -97,11 +97,11 @@ class MOVE:
 	# test if dest exists and overwrite is false
 	if not isinstance(dst_rsc, twisted.web.error.NoResource) and \
                not self.__overwrite:
-            raise errors.DAV_Error, twisted.protocols.http.PRECONDITION_FAILED
+            raise errors.DAV_Error, twisted.web.http.PRECONDITION_FAILED
         
 	# test if src and dst are the same
 	if self.__src == self.__dst:
-            raise errors.DAV_Error, twisted.protocols.http.FORBIDDEN
+            raise errors.DAV_Error, twisted.web.http.FORBIDDEN
 
 	return self.__resource.moveone(self.__dst,self.__overwrite)
 
@@ -130,11 +130,11 @@ class MOVE:
 	if not isinstance(dst_rsc, twisted.web.error.NoResource) and \
                not self.__overwrite:
             logger.info("File found and no overwrite flag set")
-            raise errors.DAV_Error, twisted.protocols.http.PRECONDITION_FAILED
+            raise errors.DAV_Error, twisted.web.http.PRECONDITION_FAILED
         
 	# test if src and dst are the same
 	if self.__src == self.__dst:
-            raise errors.DAV_Error, twisted.protocols.http.FORBIDDEN
+            raise errors.DAV_Error, twisted.web.http.FORBIDDEN
 
 	result = self.__resource.movetree(
             self.__src,
@@ -181,7 +181,7 @@ class WebDAV(twisted.web.resource.Resource):
 
         mname = 'render' + request.method
         if not hasattr(self, mname):
-            request.setResponseCode(twisted.protocols.http.NOT_IMPLEMENTED)
+            request.setResponseCode(twisted.web.http.NOT_IMPLEMENTED)
             return
         method = getattr(self, mname)
         return method(request)
@@ -206,7 +206,7 @@ class WebDAV(twisted.web.resource.Resource):
             self.stat(request)
         except IOError:
             # logger.exception("Failed to stat %s", path)
-            request.setResponseCode(twisted.protocols.http.NOT_FOUND)
+            request.setResponseCode(twisted.web.http.NOT_FOUND)
             return
 
         #print "PROPFIND request: depth = %s" % depth
@@ -222,7 +222,7 @@ class WebDAV(twisted.web.resource.Resource):
             request.setResponseCode(errorcode)
             return
 
-        request.setResponseCode(twisted.protocols.http.MULTI_STATUS)
+        request.setResponseCode(twisted.web.http.MULTI_STATUS)
         return data
 
 
@@ -246,13 +246,13 @@ class WebDAV(twisted.web.resource.Resource):
                 return ''
 
         elif not self.isfile ():
-            request.setResponseCode(twisted.protocols.http.NOT_FOUND)
+            request.setResponseCode(twisted.web.http.NOT_FOUND)
             return ''
 
         try:
             file = self.open('rb', request)
         except IOError:
-            request.setResponseCode(twisted.protocols.http.NOT_FOUND)
+            request.setResponseCode(twisted.web.http.NOT_FOUND)
             return ''
 
         file_stat = self.stat(request)
@@ -285,7 +285,7 @@ class WebDAV(twisted.web.resource.Resource):
         # test if file already exists
         try:
             self.stat(path)
-            request.setResponseCode(twisted.protocols.http.NOT_ALLOWED)
+            request.setResponseCode(twisted.web.http.NOT_ALLOWED)
             return
         except:
             pass
@@ -295,17 +295,17 @@ class WebDAV(twisted.web.resource.Resource):
         try:
             self.stat(h)
         except:
-            request.setResponseCode(twisted.protocols.http.CONFLICT)
+            request.setResponseCode(twisted.web.http.CONFLICT)
             return
 
         try:
             self.mkdir(path)
         except:
-            request.setResponseCode(twisted.protocols.http.FORBIDDEN)
+            request.setResponseCode(twisted.web.http.FORBIDDEN)
 
 
     def renderDELETE(self, request):
-        request.setResponseCode(twisted.protocols.http.FORBIDDEN)
+        request.setResponseCode(twisted.web.http.FORBIDDEN)
 
 
     def renderPUT(self, request):
@@ -334,7 +334,7 @@ class WebDAV(twisted.web.resource.Resource):
                 request.setResponseCode(424)
         except:
             logger.exception("Error in PUT")
-            request.setResponseCode(twisted.protocols.http.LENGTH_REQUIRED)
+            request.setResponseCode(twisted.web.http.LENGTH_REQUIRED)
 
 
     def renderMOVE(self, request):
@@ -365,10 +365,10 @@ class WebDAV(twisted.web.resource.Resource):
 
 	# Overwrite?
 	overwrite = 1
-	result_code = twisted.protocols.http.NO_CONTENT
+	result_code = twisted.web.http.NO_CONTENT
 	if request.getAllHeaders().get("Overwrite", 'T'):
             overwrite = None
-            result_code = twisted.protocols.http.CREATED
+            result_code = twisted.web.http.CREATED
 
 	# instanciate ACTION class
     	cp = CLASS(self, request, source_uri, dest_uri, overwrite)
@@ -378,7 +378,7 @@ class WebDAV(twisted.web.resource.Resource):
 	if request.getAllHeaders().has_key("Depth"):
 	    d = request.getHeader('Depth')
 	    if d != "0" and d != "infinity": 
-    		request.setResponseCode(twisted.protocols.http.BAD_REQUEST)
+    		request.setResponseCode(twisted.web.http.BAD_REQUEST)
 		return
 	    if d == "0":	
 		res = cp.single_action()
@@ -404,7 +404,7 @@ class WebDAV(twisted.web.resource.Resource):
         print "MOVE/COPY response: %s" % res
 	if res:
             request.setHeader('content-type', 'text/xml; charset="utf-8"')
-            request.setResponseCode(twisted.protocols.http.MULTI_STATUS)
+            request.setResponseCode(twisted.web.http.MULTI_STATUS)
             request.write(res)
 	else:
             request.setResponseCode(result_code)
@@ -429,7 +429,7 @@ class WebDAV(twisted.web.resource.Resource):
                 found = 1
                 break
         if not found:
-            request.setResponseCode(twisted.protocols.http.NOT_FOUND)
+            request.setResponseCode(twisted.web.http.NOT_FOUND)
 
         return path
         
@@ -886,7 +886,7 @@ def gen_estring(ecode):
     """ generate an error string from the given code """
     ec = int(str(ecode))
     return "HTTP/1.1 %s %s" % (ec,
-                               twisted.protocols.http.RESPONSES.get(ec, ''))
+                               twisted.web.http.RESPONSES.get(ec, ''))
 
 
 from twisted.spread import pb
@@ -915,9 +915,9 @@ class FileStore(pb.Viewable):
                                                          repr(data[chunk:])))
 
             if self.is_update:
-                self.request.setResponseCode(twisted.protocols.http.NO_CONTENT)
+                self.request.setResponseCode(twisted.web.http.NO_CONTENT)
             else:
-                self.request.setResponseCode(twisted.protocols.http.CREATED)
+                self.request.setResponseCode(twisted.web.http.CREATED)
 
             self.request.unregisterProducer()
             self.request.finish()

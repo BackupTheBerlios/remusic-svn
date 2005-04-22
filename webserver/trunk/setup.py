@@ -13,8 +13,14 @@ from distutils.command import install
 from distutils import log
 
 
-import os
+import os, sys
+
 config_files_path = os.path.join("etc", "remus")
+
+# use /etc if `sys.prefix`/etc doesn't exist
+if not os.path.isdir(os.path.join(sys.prefix, "etc")):
+    # Hmm, is this portable?
+    config_files_path = os.path.join(os.path.sep, config_files_path)
 
 class gettext_install(Command):
     description = "Install gettext catalog files"
@@ -101,24 +107,24 @@ dist = setup(
     version="0.3.1",
     description="Webserver used in the REMUS project ",
     author="Daniel Larsson",
-    author_email="Daniel.Larsson@servicefactory.se",
-    url="http://www.remus.org/webserver",
+    author_email="Daniel.J.Larsson@chello.se",
+    url="http://remusic.berlios.de/webserver",
     long_description=__doc__,
 
     packages = ['remus', 'remus.i18n',
                 'remus.webserver',
                 'remus.webserver.handlers',
                 'remus.webserver.webdav'],
-    scripts = ['remus_server'],
-    data_files = [('libdata/remus',
-                   ('www/index.rpy',
+    data_files = [('/var/lib/remus',
+                   ('remus.tac',
+                    'www/index.rpy',
                     'www/lang.rpy',
                     'www/RemusPage.html')),
-                  ('libdata/remus/styles',
+                  ('/var/lib/remus/styles',
                    ('styles/remus.css',
                     'styles/toppages.css',
                     'styles/menu.css',)),
-                  ('libdata/remus/images',
+                  ('/var/lib/remus/images',
                    ('www/images/da.png',
                     'www/images/en.png',
                     'www/images/sv.png',
@@ -126,7 +132,7 @@ dist = setup(
                     'www/images/valid_css.png',
                     'www/images/valid_wai-aaa.gif',
                     'www/images/anybrowser.png')),
-                  ('libdata/remus/scripts',
+                  ('/var/lib/remus/scripts',
                    ('www/scripts/menu.js',)),
                   (config_files_path,
                    ('remus.conf.default',)),
@@ -143,4 +149,3 @@ dist = setup(
               'gettext_install': gettext_install},
     verbose=1
     )
-
