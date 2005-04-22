@@ -1,8 +1,5 @@
-
-XSLTPROC	= @XSLTPROC@
-DOCBOOK_XSL	= /usr/local/share/xsl/docbook
-
 all: titlepage.xsl
 
 titlepage.xsl: titlepage.xml
-	${XSLTPROC} -o $@ ${DOCBOOK_XSL}/template/titlepage.xsl titlepage.xml
+	${XSLTPROC} -o $@ ${docbook_xsl_stylesheets}/template/titlepage.xsl \
+		titlepage.xml

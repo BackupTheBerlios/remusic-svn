@@ -5,11 +5,11 @@
 <!ENTITY % _project.name "Remus">
 <!ENTITY project.name "%_project.name;">
 <!ENTITY project.nametag "<application>%_project.name;</application>">
-<!ENTITY project.website "<ulink url='http://%_project.name;.foobar.net'><application>%_project.name;</application> website</ulink>">
+<!ENTITY project.website "<ulink url='http://remusic.berlios.de'><application>%_project.name;</application> website</ulink>">
 <!ENTITY project.people "<authorgroup>
 <author>
   <firstname>Daniel</firstname><surname>Larsson</surname>
-  <email>Daniel.Larsson@servicefactory.se</email>
+  <email>Daniel.J.Larsson@chello.se</email>
 </author>
 </authorgroup>">
 
