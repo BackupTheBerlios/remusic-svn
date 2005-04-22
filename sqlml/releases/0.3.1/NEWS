@@ -1,0 +1,41 @@
+* Release 0.3.1 - 2005-04-22
+
+  Added sqlquery.py as test program (make check).
+
+* Release 0.3.0
+
+** Changes
+
+*** Indirect dependencies
+
+    Handle "transitive" dependencies.  Consider a database with these
+    tables:
+
+    Table a           Table b           Table c
+    -------           -------           -------
+    a: relation to b  b: relation to c  cdata
+    adata             bdata
+
+    If a query is constructed, which selects 'adata' and 'cdata', in
+    the previous version of sqlml, this would result in a cartesian
+    product of all rows in table a and b (i.e. it would result in (#
+    of rows in a) * (# of rows in b) rows, and this is rarely what was
+    intended.
+
+    In this release, table b will be included in the query, and
+    relational constraints added to avoid this cartesian explosion.
+
+*** Literal values handled differently
+
+    Previously some literal values in queries where returned
+    separately from the SQL string, so the database interface could
+    make any necessary formatting of these.  This formatting is now
+    done by the sqlquery module, in the MySQLdb case by using it's
+    formatting code.  The return value of Select.select is thus now
+    the SQL string itself, rather than a tuple of the string and tuple
+    of literals (which needed to be converted somehow).
+
+
+# Local Variables:
+# mode: outline
+# End:

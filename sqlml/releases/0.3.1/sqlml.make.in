@@ -1,0 +1,98 @@
+# -*- mode: makefile -*-
+#
+# Generate files from the DB XML source file
+# Copyright (C) 2004  Daniel Larsson
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+
+prefix		= @prefix@
+datadir		= @datadir@
+pkgdatadir	= ${datadir}/sqlml
+
+# Tools
+XSLTPROC	= @XSLTPROC@
+DOT		= @DOT@
+
+XSLTPROC_ARGS	=
+
+
+# Stylesheets
+PY_STYLESHEET	= ${pkgdatadir}/makepython.xsl
+SQL_STYLESHEET	= ${pkgdatadir}/makesql.xsl
+DOT_STYLESHEET	= ${pkgdatadir}/makedot.xsl
+DOCBOOK_STYLESHEET= ${pkgdatadir}/makedoc.xsl
+
+# dot graph settings
+SIZE		= 7,10
+
+# Graphviz supports a number of different formats, including but not
+# limited to: svg, ps, cmap
+GRAPHFORMAT	= png
+
+
+# Command macros.
+# In case the pattern rules aren't appropriate, use these.
+
+define COMPILE.dot
+	@echo "Generating graph in $1 format"
+	${DOT} -Gsize="${SIZE}" -T$1 -o $@
+endef
+
+define TRANSFORM.sqlml.py
+	@echo "Building python database classes"
+	${XSLTPROC} ${XSLTPROC_ARGS} ${PY_XSLTPROC_ARGS} \
+	    -o $@ ${PY_STYLESHEET}
+endef
+
+define TRANSFORM.sqlml.sql
+	@echo "Building SQL database file"
+	${XSLTPROC} ${XSLTPROC_ARGS} ${SQL_XSLTPROC_ARGS} \
+	    -o $@ ${pkgdatadir}/makesql.xsl
+endef
+
+define TRANSFORM.sqlml.dot
+	@echo "Building Graphviz dot graph"
+	${XSLTPROC} ${XSLTPROC_ARGS} ${DOT_XSLTPROC_ARGS} \
+	    -o $@ ${pkgdatadir}/makedot.xsl
+endef
+
+define TRANSFORM.sqlml.dbk
+	@echo "Building DocBook documentation"
+	${XSLTPROC} ${XSLTPROC_ARGS} ${DOCBOOK_XSLTPROC_ARGS} \
+	    -o $@ ${pkgdatadir}/makedoc.xsl
+endef
+
+define TRANSFORM.dot.${GRAPHFORMAT}
+	$(call COMPILE.dot,${GRAPHFORMAT})
+endef
+
+
+# Pattern rules for the various output formats
+
+%.py: %.xml ${PY_STYLESHEET}
+	${TRANSFORM.sqlml.py} $<
+
+%.sql: %.xml ${SQL_STYLESHEET}
+	${TRANSFORM.sqlml.sql} $<
+
+%.dot: %.xml ${DOT_STYLESHEET}
+	${TRANSFORM.sqlml.dot} $<
+
+%-doc.xml: %.xml ${DOCBOOK_STYLESHEET}
+	${TRANSFORM.sqlml.dbk} $<
+
+%.${GRAPHFORMAT}: %.dot
+	${TRANSFORM.dot.${GRAPHFORMAT}} $<

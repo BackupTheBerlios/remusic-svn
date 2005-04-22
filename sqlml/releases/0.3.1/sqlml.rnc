@@ -1,0 +1,79 @@
+#
+# RELAX NG Compact Schema for SQLML Syntax
+#
+
+namespace sql = "http://sqlml.sourceforge.net/xml/sql/1.0"
+namespace doc = "http://sqlml.sourceforge.net/xml/doc/1.0"
+
+start = doc
+
+xmllang = attribute xml:lang { text }
+xmlbase = attribute xml:base { text }
+
+doc = 
+  sqldb
+
+sqldb =
+    element sql:database { 
+        xmllang?, xmlbase?, document?, name, tables
+    }
+
+document =
+    (short-description.element | long-description.element)
+
+short-description.element = 
+    element doc:short {
+	doc-contents
+    }
+
+long-description.element =
+    element doc:description {
+	doc-contents
+    }
+
+doc-contents = 
+    ( text | element * - sql:* { doc-contents } )
+
+name = 
+    element sql:name { text }
+
+tables = 
+  table*
+
+table =
+    element sql:table {
+	name,
+	document?,
+	columns
+  }
+
+columns =
+    element sql:columns {
+	column*
+    }
+
+column =
+    element sql:column {
+	attribute name { text },
+	document?,
+	type
+    }
+
+type = 
+    element sql:type {
+	primarykey?,
+	(text | key)
+    }
+
+primarykey =
+    attribute primary-key { text }
+
+key =
+    element sql:key { table_attr, column_attr }
+
+table_attr =
+    attribute table { text }
+
+column_attr =
+    attribute column { text }
+

@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+
+<sql:database xmlns:sql="http://sqlml.sourceforge.net/xml/sql/1.0"
+              xmlns:doc="http://sqlml.sourceforge.net/xml/doc/1.0">
+
+  <sql:name>orderdb</sql:name>
+
+  <!-- *** Table: items *** -->
+  <sql:table>
+    <sql:name>items</sql:name>
+    
+    <doc:short>
+      Table of orderable items.
+    </doc:short>
+
+    <sql:columns>
+      <sql:column name="id">
+	<sql:type primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column name="name">
+	<doc:short>
+	  Name of the item
+	</doc:short>
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+      <sql:column name="price">
+	<sql:type>
+	  DECIMAL(6,2)
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <!-- *** Table: orders *** -->
+  <sql:table>
+
+    <sql:name>orders</sql:name>
+
+    <sql:columns>
+      <sql:column name="id">
+	<sql:type primary-key="auto">
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+      <sql:column name="person">
+	<sql:type>
+	  VARCHAR(60)
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+  </sql:table>
+
+  <!-- *** Table: itemorders *** -->
+  <sql:table>
+
+    <sql:name>itemorders</sql:name>
+
+    <doc:description>
+      <doc:column name="item_id"/> contains a key refering to a row in
+      the <doc:table name="orders"/> table.
+    </doc:description>
+
+    <sql:columns>
+      <sql:column name="order_id">
+	<doc:short>
+	  Reference to the order I am part of
+	</doc:short>
+	<sql:type>
+	  <!-- Relation to the orders table -->
+	  <sql:key table="orders" column="id"/>
+	</sql:type>
+      </sql:column>
+      <sql:column name="item_id">
+	<doc:short>
+	  Reference to the item being ordered.
+	</doc:short>
+	<sql:type>
+	  <!-- Relation to the items table -->
+	  <sql:key table="items" column="id"/>
+	</sql:type>
+      </sql:column>
+      <sql:column name="quantity">
+	<sql:type>
+	  INT UNSIGNED
+	</sql:type>
+      </sql:column>
+    </sql:columns>
+
+  </sql:table>
+
+</sql:database>
