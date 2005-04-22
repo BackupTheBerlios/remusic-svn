@@ -18,7 +18,7 @@ dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 dnl Process this file with autoconf to produce a configure script.
  
-AC_INIT(sqlml, 0.3.0)
+AC_INIT(sqlml, 0.3.1)
 AM_INIT_AUTOMAKE
 
 RELEASE_DATE=2004-02-11
