@@ -1,0 +1,60 @@
+* Release 0.4.3 - 2005-04-22
+
+** Changes
+
+   - Fixed URL references to point to Berlios site.
+   - Minor fixes due to changes to underlying APIs.
+
+* Release 0.4.2 - 2004-02-13
+
+** Bugfixes
+
+*** Localization
+
+    Localization was rather braindead in previous versions, since the
+    "current language" information was server wide, thus all clients
+    were affected by language switches (duh...).  Now this information
+    is kept in the session object, which is unique per browser session.
+
+*** Appropriate audio file extensions
+
+    Audio file URLs now have an appropriate "file" extension based on
+    its content type, instead of no extension at all. 
+
+
+* Release 0.4.1 - 2004-02-11
+
+** Changes
+
+   Database change, reinserting the songs needed.
+
+   Common menu on all pages.
+
+   Validation links on all pages.
+   
+
+** Bugfixes
+
+*** Improved browser support
+
+    IE6 is a bit more picky about XHTML files, doesn't support XML
+    header, etc.
+
+*** Character encoding problems
+
+    Fixed various character encoding problems, think I'm beginning to
+    understand this i18n mess.
+    
+
+* Release 0.4.0 - 2004-02-03
+
+** Changes
+
+  Added localization support, for twisted based pages using gettext,
+  and for XSLT generated pages, using Norman Walsh's l10n package,
+  part of the docbook-xsl package.
+  
+
+# Local Variables:
+# mode: outline
+# End:

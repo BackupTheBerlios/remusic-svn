@@ -1,0 +1,198 @@
+#!/usr/bin/env python
+
+"""audiostore is a WebDAV server on top of a MySQL database for storing
+audio files in various formats (MP3, Ogg, SID, ...).
+
+"""
+
+import os, sys
+import distutils
+from distutils.core import setup
+from distutils.command import install
+from distutils.command import build
+from distutils.core import Command
+from distutils import log
+
+
+config_files_path = os.path.join("etc", "remus", "audiostore")
+
+# use /etc if `sys.prefix`/etc doesn't exist
+if not os.path.isdir(os.path.join(sys.prefix, "etc")):
+    # Hmm, is this portable?
+    config_files_path = os.path.join(os.path.sep, config_files_path)
+
+
+class audiostore_build (Command):
+
+    description = "Builds additional files"
+
+    user_options = []
+
+    def initialize_options (self):
+        pass
+
+    def finalize_options (self):
+        pass
+        
+    def run (self):
+        
+        import os
+        cmd = "gmake all"
+        os.system(cmd)
+
+
+class audiostore_setup (Command):
+
+    # Brief (40-50 characters) description of the command
+    description = "Executes extra code after file installation is done"
+
+    # List of option tuples: long name, short name (None if no short
+    # name), and help string.
+    user_options = []
+
+
+    def initialize_options (self):
+        self.install_dir = None
+
+    # initialize_options()
+
+
+    def finalize_options (self):
+        self.set_undefined_options('install',
+                                   ('install_data', 'install_dir'),
+                                   )
+
+    # finalize_options()
+
+
+    def run (self):
+        # Populate mysql
+        log.info("creating MySQL tables (unless they already exist)")
+        base = os.path.join(self.install_dir, 'share/@PACKAGE_NAME@')
+        os.system("mysql < %s" % os.path.join(base, "audiostore.sql"))
+
+    # run()
+
+# class audiostore_setup
+
+class gettext_install(Command):
+    description = "Install gettext catalog files"
+
+    user_options = []
+    
+    def initialize_options(self):
+        self.install_dir = None
+        self.outfiles = []
+
+    def finalize_options (self):
+        self.set_undefined_options(
+            'install',
+            ('install_data', 'install_dir'),
+            )
+
+    def run(self):
+        import os
+        dir = os.path.join(self.install_dir, 'share/locale')
+        for file in os.listdir('po'):
+            if file[-3:] == '.mo':
+                lang = os.path.splitext(file)[0]
+                outfile = self.distribution.metadata.name + '.mo'
+                (out, _) = self.copy_file(
+                    os.path.join("po", file),
+                    os.path.join(dir, lang, "LC_MESSAGES", outfile))
+                self.outfiles.append(out)
+
+    def get_outputs (self):
+        return self.outfiles
+
+
+build.build.sub_commands.insert(0, ('audiostore_build', None))
+install.install.sub_commands.append(('audiostore_setup', None))
+install.install.sub_commands.append(('gettext_install', None))
+
+
+def files_in_dir(dir):
+    return [ os.path.join(dir, file)
+             for file in os.listdir(dir)
+             if os.path.isfile(os.path.join(dir, file)) ]
+
+
+dist = setup(
+    name="@PACKAGE_NAME@",
+    version="@PACKAGE_VERSION@",
+    description="WebDAV server for storing audio files",
+    author="Daniel Larsson",
+    author_email="Daniel.J.Larsson@chello.se",
+    url="http://remusic.berlios.de/",
+    long_description=__doc__,
+
+    packages = ['remus', 'remus.i18n', 'remus.audiostore', 'remus.webserver'],
+    scripts = ['audiostore_resync'],
+    data_files = [('share/@PACKAGE_NAME@',
+                   ('db/audiostore.sql',)),
+                  ('/var/lib/remus',
+                   ('www/music.rpy',
+                    'www/playlists.rpy',
+                    )),
+                  ('/var/lib/remus/styles',
+                   ('styles/audiostore.css',
+                    'styles/index.html.xsl',
+                    'styles/list.m3u.xsl',
+                    'styles/list.m3u.mime',
+                    'styles/remus.xsl',
+                    'styles/param.xsl',
+                    'styles/l10n.xml',
+                    'styles/l10n.dtd',
+                    'styles/l10n.xsl',
+                    'styles/en.xml',
+                    'styles/sv.xml',
+                    )),
+                  ('/var/lib/remus/manual',
+                   files_in_dir('doc/manual/C/manual.html'),
+                   'doc/xsl/html/docbook.css'),
+                  ('/var/lib/remus/manual/figures',
+                   files_in_dir('doc/manual/figures')),
+                  ],
+    classifiers = [
+        "Development Status :: 0 - Alpha",
+        "Environment :: Web Environment",
+        "Intended Audience :: End Users/Desktop",
+        "Intended Audience :: Developers",
+        "Programming Language :: Python",
+        "Topic :: Multimedia :: Audio",
+    ],
+    verbose=1,
+    cmdclass={'audiostore_setup': audiostore_setup,
+              'audiostore_build': audiostore_build,
+              'gettext_install': gettext_install},
+    )
+
+print "\n"
+# Check for some necessary python modules
+try:
+    import MySQLdb
+except ImportError:
+    print "*** Couldn't find MySQLdb python package!"
+    print "Please install it, remus audiostore requires it."
+    print "See http://sourceforge.net/projects/mysql-python\n"
+
+try:
+    import mmpython
+except ImportError:
+    print "*** Couldn't find mmpython python package!"
+    print "Please install it, remus audiostore requires it."
+    print "See http://sourceforge.net/projects/mmpython/\n"
+
+try:
+    import twisted
+except ImportError:
+    print "*** Couldn't find the twisted python package!"
+    print "Please install it, remus audiostore requires it."
+    print "See http://twistedmatrix.com/\n"
+
+import commands
+status, output = commands.getstatusoutput("which xsltproc")
+if status != 0:
+    print "*** Can't seem to find xsltproc"
+    print "Please install libxslt, remus audiostore requires it."
+    print "See http://xmlsoft.org/XSLT/\n"
