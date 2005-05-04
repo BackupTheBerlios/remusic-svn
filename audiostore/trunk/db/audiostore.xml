@@ -202,6 +202,15 @@
 	</sql:type>
       </sql:column>
 
+      <sql:column name="au_mb_id">
+	<doc:description>
+	  Musicbrainz id.
+	</doc:description>
+	<sql:type>
+	  CHAR(36)
+	</sql:type>
+      </sql:column>
+
       <sql:column name="au_title">
 	<sql:type>
 	  VARCHAR(60)

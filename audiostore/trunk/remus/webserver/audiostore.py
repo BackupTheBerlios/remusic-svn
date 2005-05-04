@@ -105,7 +105,7 @@ class ASWrapper(webdav.WebDAV):
         # Replace None with the string "<none>"
         rows = [ [ col or "<none>" for col in r ] for r in rows ]
         print rows
-        rows = [ filter(lambda c: isinstance(c, types.StringTypes), r)
+        rows = [ [ col for col in r if isinstance(col, types.StringTypes) ]
                  for r in rows ]
         rows = [ remus.audiostore.mk_filename("--".join(r)) for r in rows ]
 

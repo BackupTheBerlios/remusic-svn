@@ -28,8 +28,9 @@ Audiostore README
 
   # python setup.py install
 
-  Edit $prefix/etc/audiostore.conf if you want to make any local
-  adjustments.
+  Edit /etc/remus/remus.conf (or possibly
+  /usr/local/etc/remus/remus.conf, depending on your installation) if
+  you want to make any local adjustments.
 
   Eventually this will be configurable from the above file, but right
   now, to change which CSS file is used to display the HTML pages from
@@ -37,8 +38,8 @@ Audiostore README
   used to generate the HTML pages.  To change the look of these, fiddle
   with the following files directly:
 
-  $prefix/libdata/remus/styles/index.html.xsl
-  $prefix/libdata/remus/styles/audiostore.css
+  /var/lib/remus/styles/index.html.xsl
+  /var/lib/remus/styles/audiostore.css
 
   The format of the XML file which is processed by the above XSLT code
   isn't specified anywhere as of yet.  I'll write up a DTD or a schema
@@ -51,12 +52,15 @@ Audiostore README
 
 * Running the server
 
-  Due to some limitations in python's distutils, the daemon program is
-  located in $prefix/bin (and not in $prefix/libexec which I
-  would have preferred).  I'll fix this at some point.  Anyhow, to
-  start the server, run '$prefix/bin/remus_server'.  Unless you
-  change the port number from the default 80, you need to run this as
-  root (change this in $prefix/etc/audiostore.conf).
+  Start server in daemon mode:
+
+  # twistd -y /var/lib/remus.tac
+
+  Run twistd --help for more options (twistd comes with the twisted
+  framework, it's not part of remus).
+
+  Unless you change the port number from the default 80, you need to
+  run this as root (change port in /etc/remus.conf).
 
 
 * Populating the audiostore
@@ -74,6 +78,11 @@ Audiostore README
 
   When you've populated it, open your webbrowser, and type in
   http://url.to.server/music, and a list of all the mp3s should show up.
+
+  It should work to drag and drop files using a file browser
+  supporting the WebDAV protocol, but I had problems trying with
+  Nautilus, as it sent 'Content-Length: 0' http headers, which remus
+  doesn't support. Perhaps this is valid, I'll look into it.
 
 
 * Using the audiostore
@@ -105,6 +114,18 @@ Audiostore README
   player, however, is not to become yet another WinAMP / XMMS type
   application, but rather a simple player responding to remote control
   signals, making it a poor substitute for desktop use.
+
+  Regarding playlists, the store currently supports only two types of
+  playlists, the old trusty "m3u" format, and one internal XML based
+  format (for the curses player mentioned above).
+
+  Take a peek in /var/lib/remus/styles, if you want a different
+  playlist format generated.  You will need to write a XSLT
+  stylesheet, and a corresponding .mime file, to inform the server
+  what MIME type to use when sending that playlist format.  To get the
+  server to produce it, use URLs ending in "../list/myplaylist",
+  assuming you named the stylesheet "myplaylist.xsl" (and the mime
+  type file "myplaylist.mime").
 
 # Local Variables:
 # mode: outline

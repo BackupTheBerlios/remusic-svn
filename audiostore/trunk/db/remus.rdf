@@ -1,0 +1,78 @@
+<rdf:RDF xml:base="http://remusic.berlios.de/remus/1.0#"
+	 xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	 xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+	 xmlns:mm="http://musicbrainz.org/mm/mm-2.1#"
+	 xmlns:remus="http://remusic.berlios.de/remus/1.0#">
+
+  <!-- =============== Description ==================== -->
+  <owl:Ontology rdf:about="http://remusic.berlios.de/remus/1.0">
+    <dc:title>Remus Metadata Vocabulary</dc:title>
+    <dc:description>
+        The Remus Metadata Vocabulary described using W3C RDF Schema
+        and the Web Ontology Language. The vocabulary provides terms
+        for describing stored music files, and access information.
+    </dc:description>
+    <dc:date>2005-05-01 23:15</dc:date>
+
+    <rdfs:seeAlso rdf:resource="http://www.ldodds.com/projects/musicbrainz/schema/"/>
+    <rdfs:seeAlso rdf:resource="http://www.musicbrainz.org/MM/"/>
+
+    <owl:imports rdf:resource="http://www.w3.org/2000/01/rdf-schema"/>
+    <owl:imports rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <owl:imports rdf:resource="http://www.ldodds.com/projects/musicbrainz/schema/index.rdf"/>
+
+    <!-- should probably have some WOT signing stuff in here... -->
+  </owl:Ontology>
+
+
+  <!-- ===============  Properties ==================== -->
+  <rdf:Property rdf:about="#queryMatch">
+    <rdfs:label>match count</rdfs:label>
+    <rdfs:comment>Number of matches in musicbrainz query.</rdfs:comment>
+    <rdfs:domain rdf:resource="http://musicbrainz.org/mm/mm-2.1#Track"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#nonNegativeInteger"/>
+    <rdfs:isDefinedBy rdf:resource="http://remusic.berlios.de/remus/1.0"/>
+  </rdf:Property>
+
+  <rdf:Property rdf:about="#storedIn">
+    <rdfs:label>Stored in</rdfs:label>
+    <rdfs:comment>Path in local filesystem where music file is stored.</rdfs:comment>
+    <rdfs:domain rdf:resource="http://musicbrainz.org/mm/mm-2.1#Track"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    <rdfs:isDefinedBy rdf:resource="http://remusic.berlios.de/remus/1.0"/>
+  </rdf:Property>
+
+  <rdf:Property rdf:about="#downloaded">
+    <rdfs:label># of downloads</rdfs:label>
+    <rdfs:comment>Number of times this track has been downloaded.</rdfs:comment>
+    <rdfs:domain rdf:resource="http://musicbrainz.org/mm/mm-2.1#Track"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#nonNegativeInteger"/>
+    <rdfs:isDefinedBy rdf:resource="http://remusic.berlios.de/remus/1.0"/>
+  </rdf:Property>
+
+  <rdf:Property rdf:about="#urlMap">
+    <rdfs:label>URL component mapping</rdfs:label>
+    <rdfs:comment>URL path component associated with this RDF class.</rdfs:comment>
+    <rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    <rdfs:isDefinedBy rdf:resource="http://remusic.berlios.de/remus/1.0"/>
+  </rdf:Property>
+
+
+  <!-- ==============  Classes we map URLs to  ============= -->
+  <rdf:Description rdf:about="http://musicbrainz.org/mm/mm-2.1#Artist">
+    <remus:urlMap>artist</remus:urlMap>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://musicbrainz.org/mm/mm-2.1#Album">
+    <remus:urlMap>album</remus:urlMap>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://musicbrainz.org/mm/mm-2.1#Track">
+    <remus:urlMap>track</remus:urlMap>
+  </rdf:Description>
+
+</rdf:RDF>

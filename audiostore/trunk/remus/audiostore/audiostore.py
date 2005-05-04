@@ -75,8 +75,18 @@ class Interface:
             metafields = copy.deepcopy(self.default_fields)
             metafields["mimetype"] = mimetype
             metafields["filename"] = filename
-        
-            mime_map[mimetype].read(filename, metafields)
+
+            metainfo = mime_map[mimetype]
+
+            # Fill in metainfo from ID3 tags, etc
+            metainfo.read(filename, metafields)
+            
+            # Try get musicbrainz info
+            try:
+                trm = metainfo.get_trm(filename)
+            except:
+                pass
+            
 
             try:
                 cursor = self.db.cursor()
@@ -582,9 +592,10 @@ class MetaInfo_ogg:
         'DATE':       'year',
         'TRACKNUMBER':'tracknr',
         'GENRE':      'genre',
+        'COMMENT':    'comment',
         }
 
-    def generate_trm(self, filename):
+    def get_trm(self, filename):
         import ogg.vorbis
         ff = ogg.vorbis.VorbisFile(filename)
         return get_trm(ff)
@@ -597,7 +608,10 @@ class MetaInfo_ogg:
         vc = vf.comment()
 
         for key, value in vc.items():
-            metainfo[ogg_mapping[key]] = value
+            if self.ogg_mapping.has_key(key):
+                metainfo[self.ogg_mapping[key]] = value
+            else:
+                print "%s: %s (key not supported)" % (key, value)
 
         length = vf.time_total(0)
         metainfo["length"] = "00:%02d:%02d" % (length / 60, length % 60)
@@ -687,8 +701,8 @@ class MetaInfo_sid:
             file.tag.setTrackNum(metainfo["tracknr"])
         if metainfo.has_key("genre"):
             file.tag.setGenre("genre")
-
-        # Saving as 2.3 instead of 2.4, since id3v2 doesn't seem to
+ 
+       # Saving as 2.3 instead of 2.4, since id3v2 doesn't seem to
         # recognize 2.4 yet.
         file.tag.update(mmpython.audio.eyeD3.ID3_V2_3)
 
